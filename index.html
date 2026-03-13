@@ -149,18 +149,14 @@ html, body { width:100%; height:100%; overflow:hidden; font-family:'DM Sans',san
 </style>
 
 
-/* ── INT app dark background fix ── */
-#app-int {
-  --bg: #0D1B3E;
-  --bgMid: #162850;
-  --bgCard: #1A3060;
-  --border: #2A3F6A;
-  --text: #F1F5F9;
-  --tealDk: #0F766E;
-  --orange: #EA580C;
-}
-#app-int .slide { background: #0D1B3E; color: #F1F5F9; }
-#app-int .frame { background: #060e20; }
+/* ── INT app: all remaining var() references resolved above in scoped block ── */
+#app-int .slide { background: #0D1B3E !important; color: #F1F5F9 !important; }
+#app-int .frame { background: #060e20 !important; }
+#app-int .main  { background: #0D1B3E; }
+#app-int .corner { background: #0D1B3E; border-color: #2A3F6A; }
+#app-int .row-hdr { background: #0D1B3E; border-color: #2A3F6A; }
+#app-int .col-hdr { background: #0D1B3E; border-color: #2A3F6A; }
+#app-int .footer  { background: rgba(0,0,0,.3); border-color: #2A3F6A; }
 
 <!-- ── SI SESSION CSS ── -->
 <style>
@@ -377,17 +373,17 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
   aspect-ratio:16/9;
   width:min(100vw,calc(100vh * 16/9));
   height:min(100vh,calc(100vw * 9/16));
-  background:var(--bg);
+  background:#0D1B3E;
   display:grid;
   grid-template-rows:6.5% 1fr 8%;
   overflow:hidden;position:relative;
   font-size:calc(min(100vw,calc(100vh * 16/9)) * 0.013);
-  color:var(--text);
+  color:#F1F5F9;
 }
 
 /* ── TOPBAR ── */
 #app-int .topbar {
-  background:rgba(0,0,0,.25);border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,.25);border-bottom:1px solid #2A3F6A;
   display:flex;align-items:center;justify-content:space-between;padding:0 1.8%;
 }
 #app-int .tb-l {display:flex;align-items:center;gap:.55em}
@@ -421,8 +417,8 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int .col-hdr {
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:.5em 1em;gap:.2em;
-  border-bottom:1px solid var(--border);
-  border-left:1px solid var(--border);
+  border-bottom:1px solid #2A3F6A;
+  border-left:1px solid #2A3F6A;
 }
 #app-int .col-hdr-top {display:flex;align-items:center;gap:.35em}
 #app-int .col-hdr-icon {font-size:1.1em}
@@ -434,12 +430,12 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int .col-hdr.compete .col-hdr-label {color:var(--teal)}
 #app-int .col-hdr.partner .col-hdr-label {color:#60A5FA}
 #app-int .col-hdr.power   .col-hdr-label {color:var(--gold)}
-#app-int .corner {border-bottom:1px solid var(--border)}
+#app-int .corner {border-bottom:1px solid #2A3F6A}
 
 /* ── ROW HEADERS ── */
 #app-int .row-hdr {
   display:flex;align-items:center;justify-content:center;
-  border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  border-right:1px solid #2A3F6A;border-bottom:1px solid #2A3F6A;
   padding:.4em .2em;
   position:relative;
 }
@@ -450,21 +446,21 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 }
 #app-int .row-hdr.data   .row-hdr-txt {color:var(--teal)}
 #app-int .row-hdr.intel  .row-hdr-txt {color:var(--purple)}
-#app-int .row-hdr.activ  .row-hdr-txt {color:var(--orange)}
+#app-int .row-hdr.activ  .row-hdr-txt {color:#EA580C}
 #app-int .row-hdr::before {
   content:'';position:absolute;left:0;top:8%;bottom:8%;width:3px;border-radius:0 2px 2px 0;
 }
 #app-int .row-hdr.data::before {background:var(--teal)}
 #app-int .row-hdr.intel::before {background:var(--purple)}
-#app-int .row-hdr.activ::before {background:var(--orange)}
+#app-int .row-hdr.activ::before {background:#EA580C}
 
 /* ── CELL ── */
 #app-int .cell {
-  border-left:1px solid var(--border);border-bottom:1px solid var(--border);
+  border-left:1px solid #2A3F6A;border-bottom:1px solid #2A3F6A;
   padding:.5em .55em;
   display:flex;flex-direction:column;gap:.3em;
   overflow:hidden;min-height:0;
-  background:var(--bgCard);
+  background:#1A3060;
   transition:background .12s;
   position:relative;
 }
@@ -503,7 +499,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 
 /* ── FOOTER ── */
 #app-int .footer {
-  background:rgba(0,0,0,.3);border-top:1px solid var(--border);
+  background:rgba(0,0,0,.3);border-top:1px solid #2A3F6A;
   display:flex;align-items:center;padding:0 1.8%;gap:.6em;overflow:hidden;
 }
 #app-int .footer-tagline {flex:1;font-size:.62em;color:rgba(255,255,255,.45);line-height:1.4;font-style:italic}
@@ -515,17 +511,17 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int .nbtn {
   font-family:'DM Sans',sans-serif;font-size:.68em;font-weight:500;
   padding:.32em .8em;border-radius:.4em;
-  border:1px solid var(--border);background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);
+  border:1px solid #2A3F6A;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);
   cursor:pointer;transition:all .12s;white-space:nowrap;
 }
 #app-int .nbtn:hover {background:rgba(255,255,255,.12);color:#fff}
 #app-int .nbtn.pri {background:var(--teal);color:#fff;border-color:var(--teal)}
-#app-int .nbtn.pri:hover {background:var(--tealDk)}
+#app-int .nbtn.pri:hover {background:#0F766E}
 
 /* ── SIDE PANEL (capability detail / reassign) ── */
 #app-int .side-panel {
   position:absolute;right:0;top:0;bottom:0;width:22em;
-  background:var(--navyMid);border-left:1px solid var(--border);
+  background:#162850;border-left:1px solid #2A3F6A;
   display:flex;flex-direction:column;gap:.6em;padding:1em;
   z-index:50;transform:translateX(100%);transition:transform .2s;
   font-size:1em;
@@ -536,7 +532,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int .sp-name {font-family:'DM Serif Display',serif;font-size:1.25em;color:#fff;line-height:1.2}
 #app-int .sp-label {font-size:.6em;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.3em}
 #app-int .sp-partner-inp {
-  background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:.4em;
+  background:rgba(255,255,255,.08);border:1px solid #2A3F6A;border-radius:.4em;
   padding:.4em .6em;font-family:'DM Sans',sans-serif;font-size:.75em;color:#fff;
   width:100%;outline:none;
 }
@@ -545,7 +541,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int .sp-posture-grid {display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4em}
 #app-int .sp-pos-btn {
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2em;
-  padding:.5em .3em;border-radius:.45em;border:1.5px solid var(--border);
+  padding:.5em .3em;border-radius:.45em;border:1.5px solid #2A3F6A;
   cursor:pointer;transition:all .12s;font-size:.68em;font-weight:600;
   background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);text-align:center;
 }
@@ -556,7 +552,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int .sp-pos-btn.sel.unplaced {background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);color:#fff}
 #app-int .sp-area-grid {display:grid;grid-template-columns:1fr 1fr 1fr;gap:.35em}
 #app-int .sp-area-btn {
-  padding:.35em .3em;border-radius:.4em;border:1px solid var(--border);
+  padding:.35em .3em;border-radius:.4em;border:1px solid #2A3F6A;
   cursor:pointer;font-size:.65em;font-weight:500;text-align:center;
   background:rgba(255,255,255,.04);color:rgba(255,255,255,.45);transition:all .12s;
 }
@@ -564,13 +560,13 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int .sp-area-btn.sel {border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;font-weight:600}
 #app-int .sp-new-toggle {
   display:flex;align-items:center;gap:.5em;cursor:pointer;padding:.35em .5em;
-  border-radius:.4em;border:1px solid var(--border);background:rgba(255,255,255,.04);
+  border-radius:.4em;border:1px solid #2A3F6A;background:rgba(255,255,255,.04);
   font-size:.72em;color:rgba(255,255,255,.5);transition:all .12s;
 }
 #app-int .sp-new-toggle:hover {background:rgba(255,255,255,.1);color:#fff}
 #app-int .sp-new-toggle.on {border-color:var(--gold);background:rgba(217,119,6,.15);color:var(--gold)}
 #app-int .sp-notes {
-  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:.4em;
+  background:rgba(255,255,255,.05);border:1px solid #2A3F6A;border-radius:.4em;
   padding:.4em .6em;font-family:'DM Sans',sans-serif;font-size:.72em;color:#fff;
   width:100%;outline:none;resize:none;line-height:1.4;
 }
@@ -583,9 +579,9 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int .sp-del-btn:hover {background:rgba(229,57,53,.2);color:#FCA5A5}
 
 /* ── ADD CAPABILITY ── */
-#app-int .add-cap-area {margin-top:auto;padding-top:.5em;border-top:1px solid var(--border)}
+#app-int .add-cap-area {margin-top:auto;padding-top:.5em;border-top:1px solid #2A3F6A}
 #app-int .add-cap-inp {
-  background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:.4em;
+  background:rgba(255,255,255,.06);border:1px solid #2A3F6A;border-radius:.4em;
   padding:.35em .55em;font-family:'DM Sans',sans-serif;font-size:.72em;color:#fff;
   width:100%;outline:none;margin-bottom:.35em;
 }
@@ -595,7 +591,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
   font-family:'DM Sans',sans-serif;font-size:.68em;font-weight:600;padding:.35em .7em;border-radius:.4em;
   border:none;background:var(--teal);color:#fff;cursor:pointer;width:100%;transition:all .12s;
 }
-#app-int .add-cap-btn:hover {background:var(--tealDk)}
+#app-int .add-cap-btn:hover {background:#0F766E}
 
 </style>
 
@@ -2773,4 +2769,4 @@ render();
 </script>
 
 </body>
-</html> 
+</html>
