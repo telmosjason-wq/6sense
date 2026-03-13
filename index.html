@@ -31,10 +31,11 @@ html, body { width:100%; height:100%; overflow:hidden; font-family:'DM Sans',san
 /* ── APP CONTAINERS ── */
 .app-screen {
   width:100vw; height:100vh;
-  display:none;
-  position:absolute; top:0; left:0;
+  display:none !important;
+  position:fixed; top:0; left:0; z-index:1;
+  overflow:hidden;
 }
-.app-screen.active { display:block; }
+.app-screen.active { display:block !important; z-index:10; }
 
 /* ── HOME SCREEN ── */
 #app-home {
@@ -149,6 +150,7 @@ html, body { width:100%; height:100%; overflow:hidden; font-family:'DM Sans',san
 </style>
 
 
+<style>
 /* ── INT app: all remaining var() references resolved above in scoped block ── */
 #app-int .slide { background: #0D1B3E !important; color: #F1F5F9 !important; }
 #app-int .frame { background: #060e20 !important; }
@@ -157,6 +159,7 @@ html, body { width:100%; height:100%; overflow:hidden; font-family:'DM Sans',san
 #app-int .row-hdr { background: #0D1B3E; border-color: #2A3F6A; }
 #app-int .col-hdr { background: #0D1B3E; border-color: #2A3F6A; }
 #app-int .footer  { background: rgba(0,0,0,.3); border-color: #2A3F6A; }
+</style>
 
 <!-- ── SI SESSION CSS ── -->
 <style>
@@ -594,11 +597,14 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int .add-cap-btn:hover {background:#0F766E}
 
 </style>
+<style>
 
 <!-- ── DATA LAYER SESSION CSS ── -->
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;background:#0f172a}
+
+#app-dl {
+  --bg: #F1F5F9;
+  --white: #FFFFFF;
+}
 #app-dl .frame {width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
 #app-dl .slide {
   aspect-ratio:16/9;
@@ -606,85 +612,93 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
   height:min(100vh,calc(100vw * 9/16));
   background:var(--bg);
   display:grid;
-  grid-template-rows:6.5% 14% 1fr 9%;
+  grid-template-rows:6.5% 13% 1fr 8%;
   overflow:hidden;position:relative;
   font-size:calc(min(100vw,calc(100vh * 16/9)) * 0.0125);
+  color:var(--text);
 }
 /* TOPBAR */
-#app-dl .topbar {background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 1.8%}
-#app-dl .tb-l {display:flex;align-items:center;gap:.55em}
-#app-dl .tb-logo {font-family:'DM Serif Display',serif;font-size:1.3em;color:#fff}
-#app-dl .tb-logo span {color:#5EEAD4}
-#app-dl .tb-sep {color:rgba(255,255,255,.2)}
-#app-dl .tb-ctx {font-size:.8em;color:rgba(255,255,255,.45)}
-#app-dl .tb-r {display:flex;align-items:center;gap:.65em}
-#app-dl .tb-btn {font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;padding:.28em .8em;border-radius:.4em;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.65);cursor:pointer;transition:all .12s}
-#app-dl .tb-btn:hover {background:rgba(255,255,255,.1);color:#fff}
-#app-dl .tb-btn.exp {background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
-#app-dl .tb-btn.exp:hover {background:#92400e}
+#app-dl .topbar{background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 1.8%}
+#app-dl .tb-l{display:flex;align-items:center;gap:.55em}
+#app-dl .tb-logo{font-family:'DM Serif Display',serif;font-size:1.3em;color:#fff}
+#app-dl .tb-logo span{color:#5EEAD4}
+#app-dl .tb-sep{color:rgba(255,255,255,.2)}
+#app-dl .tb-ctx{font-size:.8em;color:rgba(255,255,255,.45)}
+#app-dl .tb-r{display:flex;align-items:center;gap:.65em}
+#app-dl .tb-btn{font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;padding:.28em .8em;border-radius:.4em;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.65);cursor:pointer;transition:all .12s}
+#app-dl .tb-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+#app-dl .tb-btn.exp{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+#app-dl .tb-btn.exp:hover{background:#92400e}
 /* TOPIC HEADER */
-#app-dl .th {background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2%}
-#app-dl .th-ey {font-size:.58em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-#app-dl .th-nm {font-family:'DM Serif Display',serif;font-size:1.8em;color:var(--navy);line-height:1.05}
-#app-dl .th-sub {font-size:.65em;color:var(--muted);font-style:italic;margin-top:.1em;max-width:55em}
-#app-dl .th-r {flex-shrink:0;display:flex;align-items:center;gap:.8em}
-#app-dl .th-badge {font-size:.58em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.32em .85em;border-radius:2em;color:#fff}
-#app-dl .th-timer {font-size:.7em;color:var(--muted);font-weight:600}
-/* MAIN: 3 columns */
-#app-dl .main {display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2%;padding:1.2% 1.8%;overflow:hidden;min-height:0}
-/* COLUMN */
-#app-dl .col {display:flex;flex-direction:column;gap:.6em;overflow:hidden;min-height:0}
-#app-dl .col-hdr {font-size:.58em;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.35em .6em;border-radius:.45em;flex-shrink:0;display:flex;align-items:center;gap:.4em}
-#app-dl .col-hdr .ch-icon {font-size:1em}
-/* EFFORT CARDS */
-#app-dl .effort-area {flex:1;min-height:0;display:flex;flex-direction:column;gap:.35em;overflow:hidden}
-#app-dl .effort-card {
-  background:var(--white);border:1px solid var(--border);border-radius:.55em;
-  padding:.5em .6em;display:flex;flex-direction:column;gap:.25em;flex-shrink:0;
-}
-#app-dl .effort-card.adding {border-color:var(--teal);background:#f0fdfa}
-#app-dl .effort-label {font-size:.56em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
-#app-dl .effort-inp {
+#app-dl .th{background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2%}
+#app-dl .th-ey{font-size:.58em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+#app-dl .th-nm{font-family:'DM Serif Display',serif;font-size:1.8em;color:var(--navy);line-height:1.05}
+#app-dl .th-sub{font-size:.65em;color:var(--muted);font-style:italic;margin-top:.1em;max-width:55em}
+#app-dl .th-r{flex-shrink:0;display:flex;align-items:center;gap:.8em}
+#app-dl .th-badge{font-size:.58em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.32em .85em;border-radius:2em;color:#fff}
+#app-dl .th-timer{font-size:.7em;color:var(--muted);font-weight:600;background:var(--bg);padding:.25em .6em;border-radius:.4em;border:1px solid var(--border)}
+/* MAIN: 3 equal cols */
+#app-dl .main{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1%;padding:1% 1.8%;overflow:hidden;min-height:0}
+/* COL */
+#app-dl .col{display:flex;flex-direction:column;gap:.5em;overflow:hidden;min-height:0}
+#app-dl .col-hdr{font-size:.56em;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.32em .6em;border-radius:.4em;flex-shrink:0;display:flex;align-items:center;gap:.4em}
+/* PROMPT BLOCKS */
+#app-dl .prompt-block{background:var(--white);border:1px solid var(--border);border-radius:.6em;display:flex;flex-direction:column;overflow:hidden;flex:1;min-height:0}
+#app-dl .prompt-hdr{padding:.4em .6em;flex-shrink:0;border-bottom:1px solid var(--border)}
+#app-dl .prompt-hdr-title{font-size:.6em;font-weight:700;color:var(--white)}
+#app-dl .prompt-questions{padding:.35em .55em;display:flex;flex-direction:column;gap:.2em;flex-shrink:0;border-bottom:1px solid var(--border)}
+#app-dl .prompt-q{font-size:.6em;color:var(--muted);line-height:1.35;padding:.15em 0;padding-left:.55em;border-left:2px solid var(--border)}
+#app-dl .prompt-capture{padding:.35em .55em;flex:1;min-height:0;display:flex;flex-direction:column;gap:.2em}
+#app-dl .capture-lbl{font-size:.52em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+#app-dl .capture-inp{
   border:none;outline:none;background:transparent;
-  font-family:'DM Sans',sans-serif;font-size:.75em;font-weight:600;color:var(--navy);
-  width:100%;resize:none;line-height:1.3;
+  font-family:'DM Sans',sans-serif;font-size:.68em;color:var(--text);
+  width:100%;resize:none;line-height:1.4;flex:1;min-height:0;
 }
-#app-dl .effort-inp::placeholder {color:#CBD5E1;font-weight:400}
-#app-dl .effort-sub-inp {
+#app-dl .capture-inp::placeholder{color:#CBD5E1}
+#app-dl .capture-inp:focus{background:rgba(13,148,136,.04)}
+/* RIGHT COLUMN CARDS */
+#app-dl .r-card{background:var(--white);border:1px solid var(--border);border-radius:.6em;padding:.5em .6em;display:flex;flex-direction:column;gap:.25em}
+#app-dl .r-card.openq{flex:0 0 auto}
+#app-dl .r-card.tensions{flex:1;min-height:0}
+#app-dl .r-card.parking{flex:1;min-height:0;overflow:hidden}
+#app-dl .r-card-hdr{font-size:.56em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;flex-shrink:0}
+#app-dl .r-inp{
   border:none;outline:none;background:transparent;
-  font-family:'DM Sans',sans-serif;font-size:.65em;color:var(--muted);
+  font-family:'DM Sans',sans-serif;font-size:.7em;color:var(--text);
+  width:100%;resize:none;line-height:1.45;
+}
+#app-dl .r-inp::placeholder{color:#CBD5E1}
+#app-dl .r-inp.big{flex:1;min-height:0}
+#app-dl .park-items{display:flex;flex-direction:column;gap:.22em;flex:1;min-height:0;overflow:hidden}
+#app-dl .park-item{display:flex;gap:.3em;align-items:flex-start}
+#app-dl .park-bullet{font-size:.65em;color:var(--red);margin-top:.1em;flex-shrink:0}
+#app-dl .park-inp{
+  border:none;outline:none;background:transparent;
+  font-family:'DM Sans',sans-serif;font-size:.65em;color:var(--text);
   width:100%;resize:none;line-height:1.35;
 }
-#app-dl .effort-sub-inp::placeholder {color:#E2E8F0}
-#app-dl .add-btn {
-  font-family:'DM Sans',sans-serif;font-size:.6em;font-weight:500;
-  padding:.25em .6em;border-radius:.35em;
-  border:1px dashed var(--border);background:transparent;color:var(--muted);
-  cursor:pointer;transition:all .12s;text-align:left;flex-shrink:0;
-}
-#app-dl .add-btn:hover {border-color:var(--teal);color:var(--teal);background:var(--tealLt)}
-#app-dl .remove-btn {font-size:.55em;color:var(--red);cursor:pointer;opacity:.5;flex-shrink:0;align-self:flex-start;padding:.1em .3em;border:none;background:none;border-radius:.25em}
-#app-dl .remove-btn:hover {opacity:1;background:var(--redLt)}
-#app-dl .card-row {display:flex;justify-content:space-between;align-items:flex-start;gap:.3em}
-/* PARKING LOT (col 3 bottom section) */
-#app-dl .park-area {flex:1;min-height:0;display:flex;flex-direction:column;gap:.3em;overflow:hidden}
-/* FOOTER */
-#app-dl .footer {background:var(--white);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 1.8%;gap:.7em;overflow:hidden}
-#app-dl .topic-tabs {display:flex;gap:.4em;flex:1}
-#app-dl .tab {
-  font-family:'DM Sans',sans-serif;font-size:.68em;font-weight:500;
-  padding:.32em .8em;border-radius:.4em;
-  border:1.5px solid var(--border);background:var(--white);color:var(--muted);
-  cursor:pointer;transition:all .12s;white-space:nowrap;
-}
-#app-dl .tab:hover {background:var(--bg)}
-#app-dl .tab.active {border-color:var(--navy);background:var(--navy);color:#fff}
-#app-dl .tab.done-tab {border-color:var(--teal);color:var(--teal)}
-#app-dl .foot-btns {display:flex;gap:.45em;flex-shrink:0}
-#app-dl .nbtn {font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;padding:.38em .9em;border-radius:.45em;border:1.5px solid var(--border);background:var(--white);color:var(--slate);cursor:pointer;transition:all .12s;white-space:nowrap}
-#app-dl .nbtn:hover {background:var(--bg)}
-#app-dl .nbtn.pri {background:var(--navy);color:#fff;border-color:var(--navy)}
-#app-dl .nbtn.pri:hover {background:#1a3060}
+#app-dl .park-inp::placeholder{color:#CBD5E1}
+#app-dl .add-park-btn{font-family:'DM Sans',sans-serif;font-size:.58em;color:var(--teal);cursor:pointer;background:none;border:none;padding:.1em 0;align-self:flex-start;transition:opacity .12s}
+#app-dl .add-park-btn:hover{opacity:.7}
+/* PRINCIPLE BAR */
+#app-dl .principle-bar{background:var(--goldLt);border:1px solid #FDE68A;border-radius:.5em;padding:.35em .55em;flex-shrink:0}
+#app-dl .principle-lbl{font-size:.5em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:.15em}
+#app-dl .principle-txt{font-size:.6em;color:var(--goldDk);line-height:1.4;font-style:italic}
+/* FOOTER TABS */
+#app-dl .footer{background:var(--white);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 1.8%;gap:.6em;overflow:hidden}
+#app-dl .topic-tabs{display:flex;gap:.4em;flex:1}
+#app-dl .tab{font-family:'DM Sans',sans-serif;font-size:.68em;font-weight:500;padding:.3em .75em;border-radius:.4em;border:1.5px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap}
+#app-dl .tab:hover{background:var(--bg)}
+#app-dl .tab.active{border-color:var(--navy);background:var(--navy);color:#fff}
+#app-dl .tab.has-data{border-color:var(--teal);color:var(--teal)}
+#app-dl .tab.active.has-data{background:var(--teal);border-color:var(--teal);color:#fff}
+#app-dl .foot-r{display:flex;gap:.45em;flex-shrink:0}
+#app-dl .nbtn{font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;padding:.38em .9em;border-radius:.45em;border:1.5px solid var(--border);background:var(--white);color:var(--slate);cursor:pointer;transition:all .12s;white-space:nowrap}
+#app-dl .nbtn:hover{background:var(--bg)}
+#app-dl .nbtn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
+#app-dl .nbtn.pri:hover{background:#1a3060}
+#app-dl .nbtn:disabled{opacity:.3;cursor:default;pointer-events:none}
 
 </style>
 
@@ -804,7 +818,6 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int2 .sum-table tr:nth-child(even):not(.sec) td{background:var(--bg)}
 
 </style>
-
 </head>
 <body>
 
@@ -868,7 +881,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 </div>
 
 <!-- ══ SI SESSION ══ -->
-<div id="app-si" class="app-screen">
+<div id="app-si" class="app-screen" style="display:none">
   <!-- back to home button injected via JS -->
   <div class="frame">
 <div class="slide" id="slide">
@@ -961,7 +974,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 </div>
 
 <!-- ══ INTEGRATION SESSION ══ -->
-<div id="app-int" class="app-screen">
+<div id="app-int" class="app-screen" style="display:none">
   <div class="frame">
 <div class="slide" id="slide">
 
@@ -1005,52 +1018,9 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 
 </div>
 
-<!-- ══ DATA LAYER SESSION ══ -->
-<div id="app-dl" class="app-screen">
-  <div class="frame">
-<div class="slide" id="slide">
-
-  <div class="topbar">
-    <div class="tb-l">
-      <div class="tb-logo">Data Layer <span>Session</span></div>
-      <span class="tb-sep">·</span>
-      <span class="tb-ctx" id="tb-ctx">Topic 1 of 3</span>
-    </div>
-    <div class="tb-r">
-      <button class="tb-btn" onclick="DL.resetAll()">Reset</button>
-      <button class="tb-btn exp" onclick="DL.exportPPT()">⬇ Export PPT</button>
-    </div>
-  </div>
-
-  <div class="th">
-    <div>
-      <div class="th-ey" id="th-ey">Topic 1 of 3  ·  35 minutes</div>
-      <div class="th-nm" id="th-nm">—</div>
-      <div class="th-sub" id="th-sub"></div>
-    </div>
-    <div class="th-r">
-      <div class="th-badge" id="th-badge" style="background:var(--teal)"></div>
-    </div>
-  </div>
-
-  <div class="main" id="main-content"></div>
-
-  <div class="footer">
-    <div class="topic-tabs" id="topic-tabs"></div>
-    <div class="foot-btns">
-      <button class="nbtn" id="btn-back" onclick="DL.navTopic(-1)">← Back</button>
-      <button class="nbtn pri" id="btn-next" onclick="DL.navTopic(1)">Next →</button>
-    </div>
-  </div>
-
-</div>
-</div>
-
-
-</div>
 
 <!-- ══ INT2 SESSION (H/M/L per persona) ══ -->
-<div id="app-int2" class="app-screen">
+<div id="app-int2" class="app-screen" style="display:none">
   <div class="frame">
 <div class="slide" id="i2-slide">
   <div class="topbar">
@@ -1062,13 +1032,13 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
     <div class="tb-r">
       <span class="tb-pct" id="i2-tb-pct">0%</span>
       <button class="tb-btn" onclick="INT2.resetAll()">Reset</button>
-      <button class="tb-btn exp" onclick="INT2.exportPPT()">⬇ Export PPT</button>
+      <button class="tb-btn exp" onclick="INT2.exportPPT()">&#11015; Export PPT</button>
     </div>
   </div>
   <div class="sh">
     <div>
       <div class="sh-ey" id="i2-sh-ey">Integration 1 of 11</div>
-      <div class="sh-nm" id="i2-sh-nm">—</div>
+      <div class="sh-nm" id="i2-sh-nm">&#8212;</div>
       <div class="sh-jt" id="i2-sh-jt"></div>
     </div>
     <div class="sh-r">
@@ -1083,7 +1053,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
     <div class="left">
       <div class="intg-card">
         <div class="intg-lbl" id="i2-intg-lbl">Integration 1 of 11</div>
-        <div class="intg-nm" id="i2-intg-nm">—</div>
+        <div class="intg-nm" id="i2-intg-nm">&#8212;</div>
         <div class="intg-desc" id="i2-intg-desc"></div>
       </div>
       <div class="prompt-box" id="i2-prompt-box" style="display:none">
@@ -1094,8 +1064,8 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
         <div class="overall-lbl">Overall priority</div>
         <div class="overall-opts" id="i2-overall-opts"></div>
         <div class="notes-row">
-          <span class="notes-icon">✏</span>
-          <textarea class="notes-inp" id="i2-notes-inp" rows="2" placeholder="Notes…" oninput="INT2.saveNote(this.value)"></textarea>
+          <span class="notes-icon">&#9998;</span>
+          <textarea class="notes-inp" id="i2-notes-inp" rows="2" placeholder="Notes..." oninput="INT2.saveNote(this.value)"></textarea>
         </div>
       </div>
     </div>
@@ -1107,19 +1077,57 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
   <div class="footer">
     <div class="crumb-track" id="i2-crumb-track"></div>
     <div class="foot-btns">
-      <button class="nbtn" id="i2-btn-back" onclick="INT2.nav(-1)">← Back</button>
-      <button class="nbtn pri" id="i2-btn-next" onclick="INT2.nav(1)">Next →</button>
+      <button class="nbtn" id="i2-btn-back" onclick="INT2.nav(-1)">&#8592; Back</button>
+      <button class="nbtn pri" id="i2-btn-next" onclick="INT2.nav(1)">Next &#8594;</button>
     </div>
   </div>
   <div class="done" id="i2-done">
-    <div class="done-icon">★</div>
+    <div class="done-icon">&#9733;</div>
     <div class="done-title">Session Complete</div>
     <div class="done-sub" id="i2-done-sub"></div>
     <div class="done-btns">
-      <button class="nbtn" onclick="INT2.goTo(INT2.STEPS.length-1)">← Back</button>
-      <button class="nbtn pri" onclick="INT2.exportPPT()">⬇ Export PPT</button>
+      <button class="nbtn" onclick="INT2.goTo(INT2.STEPS.length-1)">&#8592; Back</button>
+      <button class="nbtn pri" onclick="INT2.exportPPT()">&#11015; Export PPT</button>
     </div>
     <div class="sum-wrap"><table class="sum-table" id="i2-sum-table"></table></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ══ DATA LAYER SESSION ══ -->
+<div id="app-dl" class="app-screen" style="display:none">
+  <div class="frame">
+<div class="slide" id="dl-slide">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-logo">Data Layer <span>Session</span></div>
+      <span class="tb-sep">·</span>
+      <span class="tb-ctx" id="dl-tb-ctx">Topic 1 of 3</span>
+    </div>
+    <div class="tb-r">
+      <button class="tb-btn" onclick="DL.resetAll()">Reset</button>
+      <button class="tb-btn exp" onclick="DL.exportPPT()">⬇ Export PPT</button>
+    </div>
+  </div>
+  <div class="th">
+    <div>
+      <div class="th-ey" id="dl-th-ey">Topic 1 of 3</div>
+      <div class="th-nm" id="dl-th-nm">—</div>
+      <div class="th-sub" id="dl-th-sub"></div>
+    </div>
+    <div class="th-r">
+      <div class="th-badge" id="dl-th-badge" style="background:var(--teal)"></div>
+      <div class="th-timer" id="dl-th-timer">35 min</div>
+    </div>
+  </div>
+  <div class="main" id="dl-main"></div>
+  <div class="footer">
+    <div class="topic-tabs" id="dl-tabs"></div>
+    <div class="foot-r">
+      <button class="nbtn" id="dl-btn-back" onclick="DL.navTopic(-1)">← Back</button>
+      <button class="nbtn pri" id="dl-btn-next" onclick="DL.navTopic(1)">Next →</button>
+    </div>
   </div>
 </div>
 </div>
@@ -1128,8 +1136,15 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 <!-- ── NAVIGATION ── -->
 <script>
 function showApp(id) {
-  document.querySelectorAll('.app-screen').forEach(el => el.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  // Hide all screens explicitly via both class and inline style
+  document.querySelectorAll('.app-screen').forEach(el => {
+    el.classList.remove('active');
+    el.style.display = 'none';
+  });
+  // Show target screen
+  var target = document.getElementById(id);
+  target.classList.add('active');
+  target.style.display = (id === 'app-home') ? 'flex' : 'block';
   
   // Initialize app when first shown
   if (id === 'app-si' && !window._si_init) {
@@ -2444,196 +2459,312 @@ render();
 <!-- ── DATA LAYER SESSION JS ── -->
 <script>
 window.DL = (function() {
-// ── DATA ─────────────────────────────────────────────────────────────────────
+
 const TOPICS = [
   {
-    id:'t1',
-    name:'Customer View of Data',
-    sub:'"Their data first, enriched with ours" — what does the data layer need to change to make the customer\'s CRM data the authoritative record?',
-    badge:'Their Data First',
-    badgeColor:'0D9488',
-    time:'35 min',
-    designPrinciple:'The customer\'s view of the world must persist across all distribution channels: UI · Chrome Extension · RevvyAI · APIs · MCP',
-    promptLabel:'Framing question',
-    prompt:'Today: CRM data flows in, gets matched to 6sense MCD, and we show our view. Goal: show their data first — their accounts, their contacts — with 6sense intelligence layered on top. This is an architectural change, not a UI patch.',
+    id:'t1', name:'Customer View of Data', badge:'Their Data First',
+    badgeColor:'0D9488', time:'35 min',
+    sub:'What does the data layer need to change to make the customer\'s CRM data the authoritative record?',
+    principle:'The customer\'s view of the world must persist across all distribution channels: UI · Chrome Extension · RevvyAI · APIs · MCP',
+    prompts:[
+      {
+        title:'Prompt 1: The Architecture Gap',
+        titleColor:'0D9488',
+        questions:[
+          'What does the data layer need to change to make the customer\'s CRM data the authoritative record?',
+          'Where does the current matching architecture break this principle, and at what layer?',
+          'What are the downstream implications for identity resolution, scoring, and the trust layer?',
+        ],
+        capturePlaceholder:'What did groups surface? Name specific architecture gaps or changes…',
+      },
+      {
+        title:'Prompt 2: Cross-Channel Consistency',
+        titleColor:'1D4ED8',
+        questions:[
+          'Where do we have the biggest gap today — which channel is hardest to fix and why?',
+          'What shared data services would need to exist to make this consistent everywhere?',
+        ],
+        capturePlaceholder:'Which channels came up most? What shared services were proposed?',
+      },
+      {
+        title:'Prompt 3: Effort Sizing',
+        titleColor:'7C3AED',
+        questions:[
+          'If you had to group the work into 3–4 distinct areas, what would they be?',
+          'Which effort is the prerequisite — what has to happen first?',
+          'What is the biggest unresolved question your group has about this work?',
+        ],
+        capturePlaceholder:'Name the work areas the room identified (e.g. "Matching layer refactor", "Cross-channel consistency service")…',
+      },
+    ],
+    plenary:[
+      '"What was the sharpest disagreement inside your group?"',
+      '"Which channel did multiple groups flag as hardest to fix — and why?"',
+      '"Did any group identify a work effort that changes the sequence — something that has to go first?"',
+      '"What are we assuming is true about the current data layer that might not be?"',
+    ],
   },
   {
-    id:'t2',
-    name:'Single Accounts & Contacts View',
+    id:'t2', name:'Single Accounts & Contacts View', badge:'Unified Record',
+    badgeColor:'1D4ED8', time:'35 min',
     sub:'A unified account and contact record that persists across every persona — marketer, seller, RevOps, CS — regardless of surface.',
-    badge:'Unified Record',
-    badgeColor:'1D4ED8',
-    time:'35 min',
-    designPrinciple:'Persona-specific views may require persona-specific data shapes. Unification is not free — real tradeoffs between consistency, performance, and flexibility.',
-    promptLabel:'Framing question',
-    prompt:'What does a single canonical account/contact record look like? What fields must be universal vs. legitimately persona-specific? What would break if we unified the underlying record tomorrow?',
+    principle:'Persona-specific views may require persona-specific data shapes. Unification is not free — real tradeoffs between consistency, performance, and flexibility.',
+    prompts:[
+      {
+        title:'Prompt 1: The Data Model Question',
+        titleColor:'0D9488',
+        questions:[
+          'What does a single canonical account/contact record actually look like?',
+          'What fields, signals, and intelligence attributes must be universal across all personas?',
+          'What is legitimately persona-specific — and how do we surface that without forking the underlying record?',
+        ],
+        capturePlaceholder:'What fields did groups agree must be universal? What persona-specific needs came up?',
+      },
+      {
+        title:'Prompt 2: API & Surface Implications',
+        titleColor:'1D4ED8',
+        questions:[
+          'If the canonical record is the source of truth, what does that mean for how our APIs are structured today?',
+          'Which surfaces (SI, ABM, Chrome Extension, RevvyAI) have the biggest gap from this model?',
+          'What would break if we unified the underlying record tomorrow? What\'s the migration path?',
+        ],
+        capturePlaceholder:'Which surfaces came up as biggest gaps? What would break first?',
+      },
+      {
+        title:'Prompt 3: Effort Sizing',
+        titleColor:'7C3AED',
+        questions:[
+          'Group the work into 3–4 distinct effort areas. Name them.',
+          'What\'s the data model prerequisite — what has to be true before anything else can change?',
+          'Where is the biggest risk: data model design, API refactoring, or surface-level consistency?',
+        ],
+        capturePlaceholder:'Name the work areas (e.g. "Data model refactor", "API versioning", "Surface migration plan")…',
+      },
+    ],
+    plenary:[
+      '"What was the hardest thing to agree on inside your group?"',
+      '"Which persona creates the most complexity for unification — and why?"',
+      '"Did any group find a place where unification and performance are genuinely in tension?"',
+      '"If we could only do one thing first, what would it be and why?"',
+    ],
   },
   {
-    id:'t3',
-    name:'BYOD — Bring Your Own Data',
-    sub:'Connector infrastructure for 1P, 2P, and 3P data to flow in, be unified through the identity graph, and be governed through the trust layer.',
-    badge:'1P / 2P / 3P',
-    badgeColor:'7C3AED',
-    time:'25 min',
-    designPrinciple:'We are not building data-as-a-service. BYOD is a distribution and trust strategy. Every data source must flow through the trust layer — no raw data bypasses governance.',
-    promptLabel:'Framing question',
-    prompt:'Enterprise customers won\'t consolidate to one data source. They bring ZoomInfo, Cognism, Lusha, warehouses — alongside 6sense. We become the intelligence layer all data feeds into. What connector architecture and governance controls does that require?',
+    id:'t3', name:'BYOD — Bring Your Own Data', badge:'1P / 2P / 3P',
+    badgeColor:'7C3AED', time:'25 min',
+    sub:'Connector infrastructure for 1P, 2P, and 3P data to flow in, be unified through the identity graph, and governed through the trust layer.',
+    principle:'We are not building data-as-a-service. BYOD is a distribution and trust strategy. Every data source must flow through the trust layer — no raw data bypasses governance.',
+    prompts:[
+      {
+        title:'Prompt 1: Connector Architecture',
+        titleColor:'0D9488',
+        questions:[
+          'What connector infrastructure do we need to reliably ingest 1P (CRM, MAP), 2P (warehouse), and 3P (ZoomInfo, Cognism, Lusha, Bombora) data?',
+          'What governance and identity resolution work sits between ingestion and our intelligence layer?',
+        ],
+        capturePlaceholder:'What connector architecture gaps came up? What governance requirements were surfaced?',
+      },
+      {
+        title:'Prompt 2: Trust Layer Requirements',
+        titleColor:'1D4ED8',
+        questions:[
+          'What does the trust layer need to do differently when the data source is external (3P) vs. internal (1P)?',
+          'What\'s the governance model for when 3P data conflicts with the customer\'s 1P data?',
+        ],
+        capturePlaceholder:'What conflicts or governance edge cases did groups raise? What does "trust" mean for 3P data?',
+      },
+      {
+        title:'Prompt 3: Effort Sizing',
+        titleColor:'7C3AED',
+        questions:[
+          'Name 2–3 distinct effort areas for BYOD support.',
+          'What\'s the minimum viable connector infrastructure to prove the concept with one enterprise customer?',
+          'What\'s the highest-risk assumption about how this works?',
+        ],
+        capturePlaceholder:'Name the work areas. What\'s the MVP? What assumption is most at risk?',
+      },
+    ],
+    plenary:[
+      '"Where is the governance model most uncertain when external data conflicts with customer data?"',
+      '"What\'s the connector architecture gap that blocks enterprise-scale BYOD today?"',
+      '"What\'s the MVP — the smallest thing we could build to test this with one customer?"',
+    ],
   },
 ];
 
-let currentTopic = 0;
+let curTopic = 0;
 
-// State per topic: effort groupings (3), open question, parking lot items
+// State per topic: 3 prompt captures, openQ, tensions, parking items
 let S = {};
-
 function initState(){
-  S={};
-  TOPICS.forEach(t=>{
-    S[t.id]={
-      efforts:[
-        {title:'',detail:''},
-        {title:'',detail:''},
-        {title:'',detail:''},
-      ],
-      openQ:'',
-      parking:[{text:''},{text:''}],
+  S = {};
+  TOPICS.forEach(t => {
+    S[t.id] = {
+      captures: ['','',''],
+      openQ: '',
+      tensions: '',
+      parking: ['','',''],
     };
   });
 }
 
-function curTopic(){ return TOPICS[currentTopic]; }
-function curS(){ return S[curTopic().id]; }
+function navTopic(dir){ curTopic = Math.max(0, Math.min(TOPICS.length-1, curTopic+dir)); render(); }
+function navToTopic(i){ curTopic = i; render(); }
+function resetAll(){ if(!confirm('Reset all captured data?')) return; initState(); render(); }
 
-function navTopic(dir){ currentTopic=Math.max(0,Math.min(TOPICS.length-1,currentTopic+dir)); render(); }
-function resetAll(){ if(!confirm('Reset all data?')) return; initState(); render(); }
+function hasData(tid){
+  const s = S[tid];
+  return s.captures.some(c=>c) || s.openQ || s.tensions || s.parking.some(p=>p);
+}
 
-// ── RENDER ────────────────────────────────────────────────────────────────────
+function updateCapture(i, val){ S[TOPICS[curTopic].id].captures[i] = val; updateTabs(); }
+function updateOpenQ(val)      { S[TOPICS[curTopic].id].openQ = val;        updateTabs(); }
+function updateTensions(val)   { S[TOPICS[curTopic].id].tensions = val;     updateTabs(); }
+function updateParking(i, val) { S[TOPICS[curTopic].id].parking[i] = val;   updateTabs(); }
+function addParking(){
+  S[TOPICS[curTopic].id].parking.push('');
+  renderMain();
+}
+
+function updateTabs(){
+  TOPICS.forEach((t,i) => {
+    const tab = document.getElementById('dl-tab-'+i);
+    if(!tab) return;
+    const active = i===curTopic;
+    const data = hasData(t.id);
+    tab.className = 'tab' + (active?' active':'') + (data&&!active?' has-data':'') + (active&&data?' active has-data':'');
+  });
+}
+
 function render(){
-  const t=curTopic();
-  document.getElementById('tb-ctx').textContent=`Topic ${currentTopic+1} of ${TOPICS.length}  ·  ${t.time}`;
-  document.getElementById('th-ey').textContent=`Topic ${currentTopic+1} of ${TOPICS.length}  ·  ${t.time}`;
-  document.getElementById('th-nm').textContent=t.name;
-  document.getElementById('th-sub').textContent=t.sub;
-  const badge=document.getElementById('th-badge');
-  badge.textContent=t.badge;
-  badge.style.background='#'+t.badgeColor;
-
+  const t = TOPICS[curTopic];
+  document.getElementById('dl-tb-ctx').textContent = `Topic ${curTopic+1} of ${TOPICS.length}  ·  ${t.time}`;
+  document.getElementById('dl-th-ey').textContent  = `Topic ${curTopic+1} of ${TOPICS.length}  ·  ${t.time}`;
+  document.getElementById('dl-th-nm').textContent  = t.name;
+  document.getElementById('dl-th-sub').textContent = t.sub;
+  document.getElementById('dl-th-timer').textContent = t.time;
+  const badge = document.getElementById('dl-th-badge');
+  badge.textContent = t.badge;
+  badge.style.background = '#' + t.badgeColor;
   renderMain();
   renderTabs();
-  document.getElementById('btn-back').disabled=currentTopic===0;
-  document.getElementById('btn-next').textContent=currentTopic===TOPICS.length-1?'Done ✓':'Next →';
+  document.getElementById('dl-btn-back').disabled = curTopic===0;
+  document.getElementById('dl-btn-next').textContent = curTopic===TOPICS.length-1 ? 'Done ✓' : 'Next topic →';
 }
 
 function renderMain(){
-  const t=curTopic(); const s=curS();
+  const t = TOPICS[curTopic];
+  const s = S[t.id];
+  const hdrColors = ['0D9488','1D4ED8','7C3AED'];
+  const hdrBgs    = ['E0F2FE','EDE9FE','F0FDF4'];
+  const hdrTxt    = ['0F766E','4338CA','166534'];
 
-  const effortCards=s.efforts.map((e,i)=>`
-    <div class="effort-card" id="ec-${t.id}-${i}">
-      <div class="card-row">
-        <div class="effort-label">Effort area ${i+1}</div>
-        <button class="remove-btn" onclick="DL.clearEffort(${i})" title="Clear">✕</button>
+  // Left: 3 prompt blocks stacked
+  const promptsHtml = t.prompts.map((p,i) => `
+    <div class="prompt-block" style="flex:1;min-height:0">
+      <div class="prompt-hdr" style="background:#${p.titleColor}">
+        <div class="prompt-hdr-title">${p.title}</div>
       </div>
-      <textarea class="effort-inp" rows="1" placeholder="Name this effort area…"
-        oninput="DL.updateEffort(${i},'title',this.value)">${e.title}</textarea>
-      <textarea class="effort-sub-inp" rows="2" placeholder="What does this include? What has to happen first?"
-        oninput="DL.updateEffort(${i},'detail',this.value)">${e.detail}</textarea>
+      <div class="prompt-questions">
+        ${p.questions.map(q=>`<div class="prompt-q">${q}</div>`).join('')}
+      </div>
+      <div class="prompt-capture">
+        <div class="capture-lbl">Room\'s response</div>
+        <textarea class="capture-inp" rows="3" placeholder="${p.capturePlaceholder}"
+          oninput="DL.updateCapture(${i},this.value)">${s.captures[i]||''}</textarea>
+      </div>
     </div>`).join('');
 
-  const parkCards=s.parking.map((p,i)=>`
-    <div class="effort-card" style="flex-shrink:0">
-      <div class="card-row">
-        <div class="effort-label">Item ${i+1}</div>
-        <button class="remove-btn" onclick="DL.clearParking(${i})" title="Clear">✕</button>
-      </div>
-      <textarea class="effort-sub-inp" rows="2" placeholder="Capture item, who raised it, route to…"
-        oninput="DL.updateParking(${i},this.value)">${p.text}</textarea>
+  // Middle: plenary prompts + open question
+  const plenaryHtml = t.plenary.map(q=>`<div class="prompt-q" style="margin-bottom:.2em">${q}</div>`).join('');
+
+  // Right: open Q + tensions + parking
+  const parkingHtml = s.parking.map((p,i) => `
+    <div class="park-item">
+      <span class="park-bullet">●</span>
+      <textarea class="park-inp" rows="1" placeholder="Item, who raised it, route to…"
+        oninput="DL.updateParking(${i},this.value)">${p}</textarea>
     </div>`).join('');
 
-  document.getElementById('main-content').innerHTML=`
-    <!-- COL 1: Effort groupings -->
+  document.getElementById('dl-main').innerHTML = `
+    <!-- COL 1: Small group prompts + capture -->
     <div class="col">
-      <div class="col-hdr" style="background:var(--tealLt);color:var(--teal)">
-        <span class="ch-icon">⬡</span> Effort Groupings
+      <div class="col-hdr" style="background:#CCFBF1;color:#0F766E">
+        ◎ Small Group Prompts &amp; Capture
       </div>
-      <div class="effort-area" id="efforts-area">
-        ${effortCards}
-        <button class="add-btn" onclick="DL.addEffort()">+ Add effort area</button>
-      </div>
+      ${promptsHtml}
     </div>
 
-    <!-- COL 2: Open question + design principle -->
+    <!-- COL 2: Plenary synthesis prompts + open question -->
     <div class="col">
       <div class="col-hdr" style="background:#EDE9FE;color:#4C1D95">
-        <span class="ch-icon">?</span> Open Question for Planning
+        ⟳ Plenary Synthesis Prompts
       </div>
-      <div class="effort-card" style="flex:1">
-        <div class="effort-label">#1 question before roadmap planning</div>
-        <textarea class="effort-inp" rows="4" style="font-size:.72em;font-weight:400;color:var(--slate)"
-          placeholder="What is the single most important question this group must answer before planning can start?"
-          oninput="DL.updateOpenQ(this.value)">${s.openQ}</textarea>
+      <div class="r-card" style="flex-shrink:0;background:#F5F3FF;border-color:#DDD6FE">
+        <div class="r-card-hdr" style="color:#4C1D95;font-size:.52em;letter-spacing:.06em">USE THESE TO DIRECT THE ROOM</div>
+        ${plenaryHtml}
       </div>
-      <div class="effort-card" style="background:#FEF9EC;border-color:#FCD34D;flex-shrink:0">
-        <div class="effort-label" style="color:#D97706">Design principle</div>
-        <div style="font-size:.68em;color:#78350F;line-height:1.45">${t.designPrinciple}</div>
+      <div class="principle-bar">
+        <div class="principle-lbl">Design principle</div>
+        <div class="principle-txt">${t.principle}</div>
       </div>
-      <div class="effort-card" style="background:#F0F9FF;border-color:#BAE6FD;flex-shrink:0">
-        <div class="effort-label" style="color:#0369A1">${t.promptLabel}</div>
-        <div style="font-size:.65em;color:#0C4A6E;line-height:1.45">${t.prompt}</div>
+      <div class="r-card" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:.3em">
+        <div class="r-card-hdr" style="color:var(--navy);font-size:.56em;font-weight:700;letter-spacing:.07em;text-transform:uppercase">#1 Open Question for Planning</div>
+        <div style="font-size:.58em;color:var(--muted);font-style:italic;margin-bottom:.2em">The single most important question the room must answer before roadmap planning starts</div>
+        <textarea class="r-inp big" rows="4" style="flex:1"
+          placeholder="e.g. How do we sequence the architecture refactor without breaking existing customer data?"
+          oninput="DL.updateOpenQ(this.value)">${s.openQ||''}</textarea>
       </div>
     </div>
 
-    <!-- COL 3: Parking lot -->
+    <!-- COL 3: Key tensions + parking lot -->
     <div class="col">
       <div class="col-hdr" style="background:#FFE4E6;color:#9F1239">
-        <span class="ch-icon">P</span> Parking Lot
+        ⚡ Tensions &amp; Parking Lot
       </div>
-      <div class="park-area">
-        ${parkCards}
-        <button class="add-btn" onclick="DL.addParking()">+ Add item</button>
+      <div class="r-card" style="flex:0 0 auto;display:flex;flex-direction:column;gap:.3em">
+        <div class="r-card-hdr" style="color:var(--red);font-size:.56em;font-weight:700;letter-spacing:.07em;text-transform:uppercase">Key Tensions (name, don\'t resolve)</div>
+        <div style="font-size:.58em;color:var(--muted);font-style:italic;margin-bottom:.2em">Genuine disagreements or unresolved tradeoffs the room surfaced</div>
+        <textarea class="r-inp" rows="3"
+          placeholder="e.g. Unification vs. performance · Consistency vs. flexibility · Build vs. partner…"
+          oninput="DL.updateTensions(this.value)">${s.tensions||''}</textarea>
+      </div>
+      <div class="r-card" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:.3em;overflow:hidden">
+        <div class="r-card-hdr" style="color:#9F1239;font-size:.56em;font-weight:700;letter-spacing:.07em;text-transform:uppercase">Parking Lot</div>
+        <div class="park-items">${parkingHtml}</div>
+        <button class="add-park-btn" onclick="DL.addParking()">+ Add item</button>
       </div>
     </div>
   `;
 }
 
 function renderTabs(){
-  document.getElementById('topic-tabs').innerHTML=TOPICS.map((t,i)=>{
-    const s=S[t.id];
-    const hasContent=s.efforts.some(e=>e.title)||s.openQ||s.parking.some(p=>p.text);
-    const cls=i===currentTopic?'active':hasContent?'done-tab':'';
-    return `<div class="tab ${cls}" onclick="DL.navToTopic(${i})">${i+1}. ${t.name}</div>`;
+  document.getElementById('dl-tabs').innerHTML = TOPICS.map((t,i) => {
+    const active = i===curTopic;
+    const data = hasData(t.id);
+    const cls = 'tab' + (active?' active':'') + (!active&&data?' has-data':'');
+    return `<div id="dl-tab-${i}" class="${cls}" onclick="DL.navToTopic(${i})">${i+1}. ${t.name}</div>`;
   }).join('');
 }
 
-function navToTopic(i){ currentTopic=i; render(); }
-
-// ── MUTATIONS ─────────────────────────────────────────────────────────────────
-function updateEffort(i,field,val){ curS().efforts[i][field]=val; }
-function clearEffort(i){ curS().efforts[i]={title:'',detail:''}; renderMain(); }
-function addEffort(){ curS().efforts.push({title:'',detail:''}); renderMain(); }
-function updateOpenQ(val){ curS().openQ=val; }
-function updateParking(i,val){ curS().parking[i].text=val; }
-function clearParking(i){ curS().parking[i].text=''; renderMain(); }
-function addParking(){ curS().parking.push({text:''}); renderMain(); }
-
-// ── PPT EXPORT ────────────────────────────────────────────────────────────────
+// ── EXPORT ────────────────────────────────────────────────────────────────────
 async function exportPPT(){
-  const btn=document.querySelector('.tb-btn.exp');
-  const orig=btn.innerHTML; btn.innerHTML='⏳ Building…';
+  const btn = document.querySelector('#app-dl .tb-btn.exp');
+  const orig = btn.innerHTML; btn.innerHTML = '⏳ Building…';
   try{
-    const pres=new PptxGenJS(); pres.layout='LAYOUT_16x9';
+    const pres = new PptxGenJS(); pres.layout = 'LAYOUT_16x9';
     const N='0D1B3E',T='0D9488',TLT='CCFBF1',W='FFFFFF',BG='F1F5F9',MU='64748B',SL='334155';
     const GOLD='D97706',GOLD_LT='FEF9EC',GOLD_DK='78350F';
     const TB_H=0.36,PH_H=0.72,MAIN_Y=TB_H+PH_H,PAD=0.15;
     const INNER_Y=MAIN_Y+PAD,BOTTOM=5.58;
     const ms=()=>({type:'outer',blur:4,offset:2,angle:135,color:'000000',opacity:0.07});
+    const pColors={'0D9488':T,'1D4ED8':'1D4ED8','7C3AED':'7C3AED'};
 
-    // Title slide
+    // Title
     {const sl=pres.addSlide();sl.background={color:N};
       sl.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:.1,h:5.625,fill:{color:T}});
-      sl.addText('Data Layer Working Session',{x:.4,y:1.0,w:8,h:.85,fontSize:28,fontFace:'Georgia',bold:true,color:W});
-      sl.addText('Session Outputs · Vira Rajagopalan',{x:.4,y:1.85,w:8,h:.5,fontSize:17,fontFace:'Georgia',color:'AABDD6'});
-      sl.addText(`3 topics · Effort groupings · Open questions · Parking lot`,{x:.4,y:2.6,w:8,h:.38,fontSize:10,fontFace:'Trebuchet MS',color:'5EEAD4'});
-      sl.addText('Design principle: "The customer\'s view of the world must persist across all distribution channels."',{x:.4,y:3.2,w:9,h:.4,fontSize:9,fontFace:'Trebuchet MS',italic:true,color:'AABDD6'});
+      sl.addText('Data Layer Working Session',{x:.4,y:1.0,w:8,h:.8,fontSize:28,fontFace:'Georgia',bold:true,color:W});
+      sl.addText('Session Outputs · Vira Rajagopalan',{x:.4,y:1.8,w:8,h:.5,fontSize:17,fontFace:'Georgia',color:'AABDD6'});
+      sl.addText('3 topics · Small group captures · Open questions · Key tensions · Parking lot',{x:.4,y:2.55,w:8,h:.38,fontSize:10,fontFace:'Trebuchet MS',color:'5EEAD4'});
     }
 
     // One slide per topic
@@ -2650,85 +2781,93 @@ async function exportPPT(){
         {text:`  ·  Topic ${ti+1} of ${TOPICS.length}  ·  ${t.time}`,options:{color:'9CB3CC'}},
       ],{x:PAD,y:0,w:8.5,h:TB_H,fontSize:9.5,fontFace:'Trebuchet MS',valign:'middle',margin:0});
 
-      // Section header
+      // Header
       sl.addShape(pres.shapes.RECTANGLE,{x:0,y:TB_H,w:10,h:PH_H,fill:{color:W}});
-      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:TB_H+PH_H-0.006,w:10,h:0.006,fill:{color:'E2E8F0'}});
-      sl.addText(`TOPIC ${ti+1} OF ${TOPICS.length}  ·  ${t.time.toUpperCase()}`,{x:PAD,y:TB_H+0.05,w:6,h:0.14,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:1,margin:0});
-      sl.addText(t.name,{x:PAD,y:TB_H+0.18,w:7.5,h:0.34,fontSize:19,fontFace:'Georgia',bold:true,color:N,margin:0});
-      const subTxt=t.sub.length>105?t.sub.slice(0,103)+'…':t.sub;
-      sl.addText(subTxt,{x:PAD,y:TB_H+0.51,w:7.5,h:0.18,fontSize:7,fontFace:'Trebuchet MS',italic:true,color:MU,margin:0});
-      sl.addShape(pres.shapes.RECTANGLE,{x:8.0,y:TB_H+0.2,w:1.82,h:0.26,fill:{color:tc}});
-      sl.addText(t.badge,{x:8.0,y:TB_H+0.2,w:1.82,h:0.26,fontSize:7.5,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:TB_H+PH_H-0.006,w:10,h:.006,fill:{color:'E2E8F0'}});
+      sl.addText(`TOPIC ${ti+1} OF ${TOPICS.length}  ·  ${t.time.toUpperCase()}`,{x:PAD,y:TB_H+.05,w:7,h:.14,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:1,margin:0});
+      sl.addText(t.name,{x:PAD,y:TB_H+.18,w:7.5,h:.34,fontSize:19,fontFace:'Georgia',bold:true,color:N,margin:0});
+      sl.addText(t.sub.length>105?t.sub.slice(0,103)+'…':t.sub,{x:PAD,y:TB_H+.51,w:7.5,h:.18,fontSize:7,fontFace:'Trebuchet MS',italic:true,color:MU,margin:0});
+      sl.addShape(pres.shapes.RECTANGLE,{x:8.0,y:TB_H+.2,w:1.82,h:.26,fill:{color:tc}});
+      sl.addText(t.badge,{x:8.0,y:TB_H+.2,w:1.82,h:.26,fontSize:7.5,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
 
       sl.addShape(pres.shapes.RECTANGLE,{x:0,y:MAIN_Y,w:10,h:5.625-MAIN_Y,fill:{color:BG}});
 
-      // Three columns
-      const colW=(10-PAD*2-2*PAD*0.5)/3;
-      const col2X=PAD+colW+PAD*0.5;
-      const col3X=col2X+colW+PAD*0.5;
-      const colY=INNER_Y;
-      const hdrH=0.28,hdrGap=0.08;
-      const contentY=colY+hdrH+hdrGap;
-      const contentH=BOTTOM-contentY;
+      const pColors = ['0D9488','1D4ED8','7C3AED'];
+      const colW=(10-PAD*2-2*PAD*.45)/3;
+      const c2X=PAD+colW+PAD*.45;
+      const c3X=c2X+colW+PAD*.45;
+      const hH=.26, contentY=INNER_Y+hH+.06;
+      const promptH=(BOTTOM-contentY-.06)/3;
 
-      // ── COL 1: Effort Groupings
-      sl.addShape(pres.shapes.RECTANGLE,{x:PAD,y:colY,w:colW,h:hdrH,fill:{color:'CCFBF1'}});
-      sl.addText('⬡  Effort Groupings',{x:PAD,y:colY,w:colW,h:hdrH,fontSize:7.5,fontFace:'Trebuchet MS',bold:true,color:'0F766E',align:'center',valign:'middle',margin:0});
-      const validEfforts=s.efforts.filter(e=>e.title);
-      const eH=validEfforts.length>0?Math.min(1.1,(contentH-0.1)/Math.max(validEfforts.length,1)):contentH;
-      let ey=contentY;
-      if(validEfforts.length===0){
-        sl.addText('No effort groupings captured yet',{x:PAD+0.08,y:ey+0.2,w:colW-0.16,h:0.4,fontSize:8,fontFace:'Trebuchet MS',italic:true,color:'CBD5E1',align:'center'});
-      } else {
-        validEfforts.forEach((e,i)=>{
-          sl.addShape(pres.shapes.RECTANGLE,{x:PAD+0.04,y:ey,w:colW-0.08,h:eH-0.06,fill:{color:W},shadow:ms()});
-          sl.addShape(pres.shapes.RECTANGLE,{x:PAD+0.04,y:ey,w:0.055,h:eH-0.06,fill:{color:T}});
-          sl.addText(`${i+1}`,{x:PAD+0.12,y:ey+0.04,w:0.25,h:0.18,fontSize:7,fontFace:'Trebuchet MS',bold:true,color:T,margin:0});
-          sl.addText(e.title,{x:PAD+0.12,y:ey+0.06,w:colW-0.24,h:0.3,fontSize:9,fontFace:'Georgia',bold:true,color:N,lineSpacingMultiple:1.1,margin:0});
-          if(e.detail){
-            const dTxt=e.detail.length>120?e.detail.slice(0,118)+'…':e.detail;
-            sl.addText(dTxt,{x:PAD+0.12,y:ey+0.38,w:colW-0.22,h:eH-0.5,fontSize:7,fontFace:'Trebuchet MS',color:SL,lineSpacingMultiple:1.35,margin:0});
-          }
-          ey+=eH;
+      // Col 1: prompts + captures
+      sl.addShape(pres.shapes.RECTANGLE,{x:PAD,y:INNER_Y,w:colW,h:hH,fill:{color:'CCFBF1'}});
+      sl.addText('Small Group Prompts & Capture',{x:PAD,y:INNER_Y,w:colW,h:hH,fontSize:7,fontFace:'Trebuchet MS',bold:true,color:'0F766E',align:'center',valign:'middle',margin:0});
+
+      t.prompts.forEach((p,pi)=>{
+        const py = contentY + pi*promptH;
+        sl.addShape(pres.shapes.RECTANGLE,{x:PAD,y:py,w:colW,h:promptH-.04,fill:{color:W},shadow:ms()});
+        sl.addShape(pres.shapes.RECTANGLE,{x:PAD,y:py,w:colW,h:.22,fill:{color:pColors[pi]}});
+        sl.addText(p.title,{x:PAD+.06,y:py+.02,w:colW-.1,h:.18,fontSize:6.5,fontFace:'Trebuchet MS',bold:true,color:W,margin:0});
+        // questions
+        p.questions.forEach((q,qi)=>{
+          const qy=py+.25+qi*.14;
+          sl.addShape(pres.shapes.RECTANGLE,{x:PAD+.06,y:qy+.02,w:.03,h:.1,fill:{color:pColors[pi]}});
+          const qt=q.length>80?q.slice(0,78)+'…':q;
+          sl.addText(qt,{x:PAD+.12,y:qy,w:colW-.2,h:.14,fontSize:5.5,fontFace:'Trebuchet MS',color:SL,lineSpacingMultiple:1.2,margin:0});
         });
-      }
+        // capture
+        const captureY=py+.25+p.questions.length*.14+.05;
+        if(s.captures[pi]){
+          sl.addShape(pres.shapes.RECTANGLE,{x:PAD+.04,y:captureY,w:colW-.08,h:promptH-.25-p.questions.length*.14,fill:{color:'F0FDF4'}});
+          sl.addShape(pres.shapes.RECTANGLE,{x:PAD+.04,y:captureY,w:.04,h:promptH-.25-p.questions.length*.14,fill:{color:pColors[pi]}});
+          sl.addText(s.captures[pi],{x:PAD+.1,y:captureY+.04,w:colW-.18,h:promptH-.3-p.questions.length*.14,fontSize:6.5,fontFace:'Trebuchet MS',color:SL,lineSpacingMultiple:1.3,margin:0});
+        } else {
+          sl.addText('— not captured',{x:PAD+.08,y:captureY+.06,w:colW-.16,h:.2,fontSize:6,fontFace:'Trebuchet MS',italic:true,color:'CBD5E1',margin:0});
+        }
+      });
 
-      // ── COL 2: Open question + design principle
-      sl.addShape(pres.shapes.RECTANGLE,{x:col2X,y:colY,w:colW,h:hdrH,fill:{color:'EDE9FE'}});
-      sl.addText('?  Open Question for Planning',{x:col2X,y:colY,w:colW,h:hdrH,fontSize:7.5,fontFace:'Trebuchet MS',bold:true,color:'4C1D95',align:'center',valign:'middle',margin:0});
-      // open Q box
-      const oqH=1.2;
-      sl.addShape(pres.shapes.RECTANGLE,{x:col2X,y:contentY,w:colW,h:oqH,fill:{color:W},shadow:ms()});
-      sl.addText('#1 question before roadmap planning',{x:col2X+0.1,y:contentY+0.08,w:colW-0.2,h:0.14,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,margin:0});
+      // Col 2: open question + principle
+      sl.addShape(pres.shapes.RECTANGLE,{x:c2X,y:INNER_Y,w:colW,h:hH,fill:{color:'EDE9FE'}});
+      sl.addText('Open Question for Planning',{x:c2X,y:INNER_Y,w:colW,h:hH,fontSize:7,fontFace:'Trebuchet MS',bold:true,color:'4C1D95',align:'center',valign:'middle',margin:0});
+      const oqH=1.8;
+      sl.addShape(pres.shapes.RECTANGLE,{x:c2X,y:contentY,w:colW,h:oqH,fill:{color:W},shadow:ms()});
+      sl.addText('#1 QUESTION BEFORE ROADMAP PLANNING',{x:c2X+.08,y:contentY+.08,w:colW-.16,h:.16,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:.4,margin:0});
       if(s.openQ){
-        sl.addText(s.openQ,{x:col2X+0.1,y:contentY+0.25,w:colW-0.2,h:oqH-0.32,fontSize:8.5,fontFace:'Georgia',color:N,lineSpacingMultiple:1.3,margin:0});
+        sl.addText(s.openQ,{x:c2X+.08,y:contentY+.26,w:colW-.16,h:oqH-.32,fontSize:8.5,fontFace:'Georgia',color:N,lineSpacingMultiple:1.35,margin:0});
       } else {
-        sl.addText('Not yet captured',{x:col2X+0.1,y:contentY+0.35,w:colW-0.2,h:0.35,fontSize:8,fontFace:'Trebuchet MS',italic:true,color:'CBD5E1'});
+        sl.addText('Not yet captured',{x:c2X+.08,y:contentY+.5,w:colW-.16,h:.3,fontSize:8,fontFace:'Trebuchet MS',italic:true,color:'CBD5E1'});
       }
-      // design principle
-      const dpY=contentY+oqH+0.08;
-      const dpH=0.78;
-      sl.addShape(pres.shapes.RECTANGLE,{x:col2X,y:dpY,w:colW,h:dpH,fill:{color:GOLD_LT}});
-      sl.addShape(pres.shapes.RECTANGLE,{x:col2X,y:dpY,w:0.05,h:dpH,fill:{color:GOLD}});
-      sl.addText('DESIGN PRINCIPLE',{x:col2X+0.1,y:dpY+0.07,w:colW-0.12,h:0.14,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:GOLD,charSpacing:0.5,margin:0});
-      const dpTxt=t.designPrinciple.length>160?t.designPrinciple.slice(0,158)+'…':t.designPrinciple;
-      sl.addText(dpTxt,{x:col2X+0.1,y:dpY+0.22,w:colW-0.12,h:dpH-0.28,fontSize:7,fontFace:'Trebuchet MS',color:GOLD_DK,lineSpacingMultiple:1.3,margin:0});
+      const dpY=contentY+oqH+.06;
+      const dpH=.75;
+      sl.addShape(pres.shapes.RECTANGLE,{x:c2X,y:dpY,w:colW,h:dpH,fill:{color:GOLD_LT}});
+      sl.addShape(pres.shapes.RECTANGLE,{x:c2X,y:dpY,w:.05,h:dpH,fill:{color:GOLD}});
+      sl.addText('DESIGN PRINCIPLE',{x:c2X+.1,y:dpY+.07,w:colW-.12,h:.14,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:GOLD,charSpacing:.5,margin:0});
+      const dpTxt=t.principle.length>160?t.principle.slice(0,158)+'…':t.principle;
+      sl.addText(dpTxt,{x:c2X+.1,y:dpY+.22,w:colW-.12,h:dpH-.27,fontSize:7,fontFace:'Trebuchet MS',italic:true,color:GOLD_DK,lineSpacingMultiple:1.3,margin:0});
 
-      // ── COL 3: Parking lot
-      sl.addShape(pres.shapes.RECTANGLE,{x:col3X,y:colY,w:colW,h:hdrH,fill:{color:'FFE4E6'}});
-      sl.addText('P  Parking Lot',{x:col3X,y:colY,w:colW,h:hdrH,fontSize:7.5,fontFace:'Trebuchet MS',bold:true,color:'9F1239',align:'center',valign:'middle',margin:0});
-      const validPark=s.parking.filter(p=>p.text);
-      const pH2=validPark.length>0?Math.min(1.2,(contentH-0.1)/Math.max(validPark.length,1)):contentH;
-      let py=contentY;
-      if(validPark.length===0){
-        sl.addText('No parking lot items captured yet',{x:col3X+0.08,y:py+0.2,w:colW-0.16,h:0.4,fontSize:8,fontFace:'Trebuchet MS',italic:true,color:'CBD5E1',align:'center'});
+      // Col 3: tensions + parking
+      sl.addShape(pres.shapes.RECTANGLE,{x:c3X,y:INNER_Y,w:colW,h:hH,fill:{color:'FFE4E6'}});
+      sl.addText('Tensions & Parking Lot',{x:c3X,y:INNER_Y,w:colW,h:hH,fontSize:7,fontFace:'Trebuchet MS',bold:true,color:'9F1239',align:'center',valign:'middle',margin:0});
+      const tensH=1.2;
+      sl.addShape(pres.shapes.RECTANGLE,{x:c3X,y:contentY,w:colW,h:tensH,fill:{color:W},shadow:ms()});
+      sl.addText('KEY TENSIONS (NAMED, NOT RESOLVED)',{x:c3X+.08,y:contentY+.07,w:colW-.16,h:.14,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:'9F1239',charSpacing:.3,margin:0});
+      if(s.tensions){
+        sl.addText(s.tensions,{x:c3X+.08,y:contentY+.23,w:colW-.16,h:tensH-.28,fontSize:8,fontFace:'Trebuchet MS',color:SL,lineSpacingMultiple:1.35,margin:0});
       } else {
-        validPark.forEach((p,i)=>{
-          sl.addShape(pres.shapes.RECTANGLE,{x:col3X+0.04,y:py,w:colW-0.08,h:pH2-0.06,fill:{color:W},shadow:ms()});
-          sl.addShape(pres.shapes.RECTANGLE,{x:col3X+0.04,y:py,w:0.055,h:pH2-0.06,fill:{color:'E11D48'}});
-          const pTxt=p.text.length>140?p.text.slice(0,138)+'…':p.text;
-          sl.addText(pTxt,{x:col3X+0.14,y:py+0.08,w:colW-0.24,h:pH2-0.18,fontSize:7.5,fontFace:'Trebuchet MS',color:SL,lineSpacingMultiple:1.35,margin:0});
-          py+=pH2;
+        sl.addText('Not yet captured',{x:c3X+.08,y:contentY+.45,w:colW-.16,h:.25,fontSize:7.5,fontFace:'Trebuchet MS',italic:true,color:'CBD5E1'});
+      }
+      const pkY=contentY+tensH+.06;
+      const pkH=BOTTOM-pkY;
+      sl.addShape(pres.shapes.RECTANGLE,{x:c3X,y:pkY,w:colW,h:pkH,fill:{color:W},shadow:ms()});
+      sl.addText('PARKING LOT',{x:c3X+.08,y:pkY+.07,w:colW-.16,h:.14,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:'9F1239',charSpacing:.3,margin:0});
+      const validPark=s.parking.filter(p=>p);
+      if(!validPark.length){
+        sl.addText('No items captured',{x:c3X+.08,y:pkY+.3,w:colW-.16,h:.25,fontSize:7.5,fontFace:'Trebuchet MS',italic:true,color:'CBD5E1'});
+      } else {
+        validPark.forEach((p,pi)=>{
+          const iy=pkY+.25+pi*.45;
+          sl.addShape(pres.shapes.OVAL,{x:c3X+.1,y:iy+.06,w:.1,h:.1,fill:{color:'E11D48'}});
+          sl.addText(p,{x:c3X+.24,y:iy,w:colW-.32,h:.42,fontSize:7,fontFace:'Trebuchet MS',color:SL,lineSpacingMultiple:1.3,margin:0});
         });
       }
     });
@@ -2739,33 +2878,12 @@ async function exportPPT(){
 }
 
 initState();
-render();
-
-
-  // Public API
-  return {
-    exportPPT: typeof exportPPT !== "undefined" ? exportPPT : undefined,
-    curTopic: typeof curTopic !== "undefined" ? curTopic : undefined,
-    TOPICS: typeof TOPICS !== "undefined" ? TOPICS : undefined,
-    render: typeof render !== "undefined" ? render : undefined,
-    curS: typeof curS !== "undefined" ? curS : undefined,
-    updateParking: typeof updateParking !== "undefined" ? updateParking : undefined,
-    currentTopic: typeof currentTopic !== "undefined" ? currentTopic : undefined,
-    navTopic: typeof navTopic !== "undefined" ? navTopic : undefined,
-    updateEffort: typeof updateEffort !== "undefined" ? updateEffort : undefined,
-    navToTopic: typeof navToTopic !== "undefined" ? navToTopic : undefined,
-    updateOpenQ: typeof updateOpenQ !== "undefined" ? updateOpenQ : undefined,
-    addEffort: typeof addEffort !== "undefined" ? addEffort : undefined,
-    renderMain: typeof renderMain !== "undefined" ? renderMain : undefined,
-    clearEffort: typeof clearEffort !== "undefined" ? clearEffort : undefined,
-    clearParking: typeof clearParking !== "undefined" ? clearParking : undefined,
-    S: typeof S !== "undefined" ? S : undefined,
-    addParking: typeof addParking !== "undefined" ? addParking : undefined,
-    resetAll: typeof resetAll !== "undefined" ? resetAll : undefined,
-    renderTabs: typeof renderTabs !== "undefined" ? renderTabs : undefined,
-    initState: typeof initState !== "undefined" ? initState : undefined
-  };
+return { TOPICS, S, curTopic,
+  initState, render, navTopic, navToTopic, resetAll,
+  updateCapture, updateOpenQ, updateTensions, updateParking, addParking,
+  updateTabs, renderMain, renderTabs, hasData, exportPPT };
 })();
+
 </script>
 
 </body>
