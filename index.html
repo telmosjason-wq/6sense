@@ -1106,6 +1106,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
       <span class="tb-ctx" id="dl-tb-ctx">Topic 1 of 3</span>
     </div>
     <div class="tb-r">
+      <button class="tb-btn" onclick="BYOD.open()" style="background:#7C3AED;border-color:#7C3AED;color:#fff;font-weight:600;">✦ BYOD Prototype</button>
       <button class="tb-btn" onclick="DL.resetAll()">Reset</button>
       <button class="tb-btn exp" onclick="DL.exportPPT()">⬇ Export PPT</button>
     </div>
@@ -1224,10 +1225,16 @@ const TOTAL = STEPS.length;
 let step = 0;
 let S = {};
 
+const DEFAULTS = {"crm": {"mktg": "H", "sell": "H", "revops": "H", "cs": "H", "overall": "must"}, "cdw": {"mktg": "M", "sell": "L", "revops": "H", "cs": "M", "overall": "fund"}, "cdp": {"mktg": "H", "sell": "L", "revops": "M", "cs": "L", "overall": "fund"}, "sep": {"mktg": "M", "sell": "H", "revops": "M", "cs": "L", "overall": "fund"}, "cx": {"mktg": "L", "sell": "L", "revops": "M", "cs": "H", "overall": "eval"}, "dq": {"mktg": "M", "sell": "L", "revops": "H", "cs": "M", "overall": "fund"}, "pu": {"mktg": "L", "sell": "L", "revops": "M", "cs": "H", "overall": "eval"}, "cms": {"mktg": "M", "sell": "L", "revops": "L", "cs": "L", "overall": "eval"}, "msr": {"mktg": "H", "sell": "M", "revops": "H", "cs": "L", "overall": "fund"}, "rpt": {"mktg": "M", "sell": "L", "revops": "H", "cs": "L", "overall": "eval"}, "agy": {"mktg": "M", "sell": "L", "revops": "L", "cs": "L", "overall": "depri"}};
 function initState(){
   S={};
   INTEGRATIONS.forEach(intg=>{
-    S[intg.id]={ personas:Object.fromEntries(PERSONAS.map(p=>[p.id,null])), overall:null, notes:'' };
+    const d = DEFAULTS[intg.id] || {};
+    S[intg.id]={ 
+      personas:Object.fromEntries(PERSONAS.map(p=>[p.id, d[p.id]||null])),
+      overall: d.overall||null, 
+      notes:'' 
+    };
   });
 }
 function curIntg(){ return INTEGRATIONS[step]; }
@@ -2882,6 +2889,593 @@ return { TOPICS, S, curTopic,
   initState, render, navTopic, navToTopic, resetAll,
   updateCapture, updateOpenQ, updateTensions, updateParking, addParking,
   updateTabs, renderMain, renderTabs, hasData, exportPPT };
+})();
+
+</script>
+
+<!-- ══ BYOD PROTOTYPE MODAL ══ -->
+<div id="byod-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;">
+<div id="byod-shell" style="width:96vw;max-width:1400px;height:92vh;background:#F8FAFC;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.35);">
+
+  <!-- HEADER -->
+  <div style="background:#fff;border-bottom:1px solid #E2E8F0;padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,#0D9488,#0891b2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;">6</div>
+      <span style="font-weight:600;color:#0F172A;font-size:15px;">Sales Intelligence</span>
+      <span style="color:#CBD5E1;font-size:13px;">›</span>
+      <span style="color:#64748B;font-size:13px;">Account Intelligence View</span>
+      <span style="background:#EDE9FE;color:#7C3AED;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:.04em;">BYOD PROTOTYPE</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="BYOD.openAddCol()" style="display:flex;align-items:center;gap:6px;background:#0D9488;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+        <span style="font-size:16px;">+</span> Add Data Column
+      </button>
+      <button onclick="BYOD.close()" style="background:none;border:1px solid #E2E8F0;border-radius:6px;padding:6px 12px;color:#64748B;cursor:pointer;font-size:13px;font-family:inherit;">✕ Close</button>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div style="background:#fff;border-bottom:1px solid #E2E8F0;padding:8px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:6px;background:#F1F5F9;border-radius:6px;padding:5px 10px;flex:1;max-width:280px;">
+      <span style="color:#94A3B8;font-size:13px;">🔍</span>
+      <input id="byod-search" oninput="BYOD.filterAccounts(this.value)" placeholder="Search accounts…" style="border:none;background:transparent;font-size:13px;color:#334155;outline:none;width:100%;font-family:inherit;">
+    </div>
+    <select onchange="BYOD.filterStage(this.value)" style="border:1px solid #E2E8F0;border-radius:6px;padding:5px 10px;font-size:13px;color:#334155;background:#fff;font-family:inherit;cursor:pointer;">
+      <option value="">All Buying Stages</option>
+      <option value="Decision">Decision</option>
+      <option value="Consideration">Consideration</option>
+      <option value="Awareness">Awareness</option>
+      <option value="Target">Target</option>
+    </select>
+    <select onchange="BYOD.filterType(this.value)" style="border:1px solid #E2E8F0;border-radius:6px;padding:5px 10px;font-size:13px;color:#334155;background:#fff;font-family:inherit;cursor:pointer;">
+      <option value="">All Account Types</option>
+      <option value="Customer">Customer</option>
+      <option value="Former Customer">Former Customer</option>
+      <option value="Prospect">Prospect</option>
+    </select>
+    <div style="margin-left:auto;font-size:12px;color:#94A3B8;" id="byod-count">Showing 12 accounts</div>
+  </div>
+
+  <!-- TABLE AREA -->
+  <div style="flex:1;overflow:auto;min-height:0;">
+    <table id="byod-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead id="byod-thead" style="position:sticky;top:0;z-index:10;"></thead>
+      <tbody id="byod-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER STATUS BAR -->
+  <div style="background:#fff;border-top:1px solid #E2E8F0;padding:8px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;font-size:12px;color:#94A3B8;">
+    <span style="display:flex;align-items:center;gap:5px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzBEOTQ4OCIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+NjwvdGV4dD48L3N2Zz4=" style="width:16px;height:16px;object-fit:contain;border-radius:3px;"> 6sense</span>
+    <span style="display:flex;align-items:center;gap:5px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTI2LjYyIDE0LjQ5MmMyLjA2OC0yLjE0MiA0Ljk1LTMuNDk3IDguMTI2LTMuNDk3IDQuMjM1IDAgNy45MDUgMi4zNjQgOS44NzUgNS44NiAxLjctLjc2MyAzLjU5NS0xLjE4MiA1LjYtMS4xODIgNy42MzQgMCAxMy44IDYuMjMgMTMuOCAxMy45MTNTNTcuODIgNDMuNSA1MC4yIDQzLjVhMTMuODQgMTMuODQgMCAwIDEtMi43MDktLjI3MWMtMS43MjQgMy4wNzgtNS4wMjMgNS4xNy04LjgxNiA1LjE3LTEuNTc2IDAtMy4wNzgtLjM3LTQuNDA4LTEtMS43NDggNC4xMTItNS44MzYgNy4wMTgtMTAuNTkgNy4wMTgtNC45NSAwLTkuMTg1LTMuMTI3LTEwLjgtNy41MzVhMTAuODUgMTAuODUgMCAwIDEtMi4xOTIuMjIyQzQuNzc3IDQ3LjA5NSAwIDQyLjI3IDAgMzYuMjg1YTEwLjgyIDEwLjgyIDAgMCAxIDUuMzQ0LTkuMzU3Yy0uNjY1LTEuNTAyLTEuMDM0LTMuMTc3LTEuMDM0LTQuOTVDNC4yODUgMTUuMTU3IDkuODc1IDkuNTkgMTYuNzIgOS41OWExMi40MSAxMi40MSAwIDAgMSA5Ljg5OSA0LjkiIGZpbGw9IiMwMGExZTAiLz48L3N2Zz4=" style="width:16px;height:16px;object-fit:contain;border-radius:3px;"> Salesforce</span>
+    <span style="display:flex;align-items:center;gap:5px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzNCMUQ2RSIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjQzA4NEZDIj5HPC90ZXh0Pjwvc3ZnPg==" style="width:16px;height:16px;object-fit:contain;border-radius:3px;"> Gong</span>
+    <span style="display:flex;align-items:center;gap:5px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzAwOTBDNSIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+R1M8L3RleHQ+PC9zdmc+" style="width:16px;height:16px;object-fit:contain;border-radius:3px;"> Gainsight</span>
+    <span id="byod-custom-legend"></span>
+    <span style="margin-left:auto;color:#0D9488;font-weight:500;">Click any cell to edit · Drag column headers to reorder · + Add Data Column to bring your own data</span>
+  </div>
+</div>
+
+<!-- ADD COLUMN MODAL -->
+<div id="byod-addcol" style="display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.4);align-items:center;justify-content:center;">
+<div style="background:#fff;border-radius:12px;width:520px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+  <div style="padding:20px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:11px;font-weight:600;color:#0D9488;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">Data Marketplace</div>
+      <div style="font-size:18px;font-weight:600;color:#0F172A;">Add New Signal</div>
+    </div>
+    <button onclick="BYOD.closeAddCol()" style="background:none;border:none;color:#94A3B8;cursor:pointer;font-size:18px;padding:4px;">✕</button>
+  </div>
+  <!-- Source tabs -->
+  <div style="display:flex;border-bottom:1px solid #E2E8F0;padding:0 24px;">
+    <div class="byod-src-tab active" onclick="BYOD.switchSrcTab('favorites')" style="padding:10px 16px;font-size:13px;font-weight:500;color:#0D9488;border-bottom:2px solid #0D9488;cursor:pointer;display:flex;align-items:center;gap:6px;">☆ Favorites</div>
+    <div class="byod-src-tab" onclick="BYOD.switchSrcTab('discover')" style="padding:10px 16px;font-size:13px;font-weight:500;color:#94A3B8;border-bottom:2px solid transparent;cursor:pointer;display:flex;align-items:center;gap:6px;">⊞ Discover</div>
+    <div class="byod-src-tab" onclick="BYOD.switchSrcTab('integrations')" style="padding:10px 16px;font-size:13px;font-weight:500;color:#94A3B8;border-bottom:2px solid transparent;cursor:pointer;display:flex;align-items:center;gap:6px;">⟲ Integrations</div>
+    <div class="byod-src-tab" onclick="BYOD.switchSrcTab('revvyai')" style="padding:10px 16px;font-size:13px;font-weight:500;color:#94A3B8;border-bottom:2px solid transparent;cursor:pointer;display:flex;align-items:center;gap:6px;">✦ RevvyAI</div>
+  </div>
+  <!-- Source content -->
+  <div id="byod-src-content" style="flex:1;overflow-y:auto;padding:16px 24px;"></div>
+  <!-- Action bar -->
+  <div id="byod-src-action" style="padding:16px 24px;border-top:1px solid #E2E8F0;display:none;">
+    <button id="byod-add-col-btn" onclick="BYOD.confirmAddCol()" style="width:100%;background:#0D9488;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Add Column</button>
+  </div>
+</div>
+</div>
+
+<!-- CELL EDIT POPOVER -->
+<div id="byod-cell-edit" style="display:none;position:fixed;z-index:1200;background:#fff;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:12px;min-width:200px;max-width:280px;">
+  <div id="byod-cell-label" style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase;"></div>
+  <textarea id="byod-cell-input" rows="2" style="width:100%;border:1px solid #E2E8F0;border-radius:6px;padding:7px 9px;font-size:13px;font-family:inherit;color:#0F172A;resize:none;outline:none;box-sizing:border-box;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+  <div style="display:flex;gap:6px;margin-top:8px;">
+    <button onclick="BYOD.saveCell()" style="flex:1;background:#0D9488;color:#fff;border:none;border-radius:5px;padding:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Save</button>
+    <button onclick="BYOD.cancelCell()" style="flex:1;background:#F1F5F9;color:#64748B;border:none;border-radius:5px;padding:6px;font-size:12px;cursor:pointer;font-family:inherit;">Cancel</button>
+  </div>
+</div>
+
+</div>
+
+
+<script>
+window.BYOD = (function() {
+
+const ACCOUNTS = [
+  { id:'a1',  name:'SurveyMonkey',  logo:'https://logo.clearbit.com/surveymonkey.com',  type:'Prospect',        arr:'$500M' },
+  { id:'a2',  name:'MongoDB',       logo:'https://logo.clearbit.com/mongodb.com',        type:'Former Customer', arr:'$1B+' },
+  { id:'a3',  name:'Starburst',     logo:'https://logo.clearbit.com/starburst.io',       type:'Prospect',        arr:'$100M' },
+  { id:'a4',  name:'Kaseya',        logo:'https://logo.clearbit.com/kaseya.com',         type:'Prospect',        arr:'$500M' },
+  { id:'a5',  name:'SentinelOne',   logo:'https://logo.clearbit.com/sentinelone.com',    type:'Prospect',        arr:'$500M' },
+  { id:'a6',  name:'Geotab',        logo:'https://logo.clearbit.com/geotab.com',         type:'Former Customer', arr:'$500M' },
+  { id:'a7',  name:'Freshworks',    logo:'https://logo.clearbit.com/freshworks.com',     type:'Former Customer', arr:'$500M' },
+  { id:'a8',  name:'Indeed',        logo:'https://logo.clearbit.com/indeed.com',         type:'Prospect',        arr:'$1B+' },
+  { id:'a9',  name:'Seismic',       logo:'https://logo.clearbit.com/seismic.com',        type:'Customer',        arr:'$250M' },
+  { id:'a10', name:'Amplitude',     logo:'https://logo.clearbit.com/amplitude.com',      type:'Prospect',        arr:'$250M' },
+  { id:'a11', name:'Brex',          logo:'https://logo.clearbit.com/brex.com',           type:'Prospect',        arr:'$500M' },
+  { id:'a12', name:'Okta',          logo:'https://logo.clearbit.com/okta.com',           type:'Customer',        arr:'$1B+' },
+];
+
+// Native 6sense columns (fixed)
+const NATIVE_COLS = [
+  { id:'techno',   label:'Technographics',   source:'6sense', color:'#0D9488', badge:'6S',
+    data:{ a1:'Qualtrics, Medallia, Zendesk', a2:'MongoDB Atlas, AWS, Snowflake', a3:'Starburst Galaxy, AWS, dbt', a4:'Kaseya VSA, ConnectWise', a5:'CrowdStrike, AWS, Okta', a6:'Geotab GO, Salesforce', a7:'Freshdesk, Freshsales, AWS', a8:'Indeed ATS, Workday', a9:'Seismic Platform, Salesforce', a10:'Amplitude Analytics, Segment', a11:'Brex Card, Ramp, NetSuite', a12:'Okta SSO, Workday, ServiceNow' }},
+  { id:'intent',   label:'Intent Keywords',   source:'6sense', color:'#0D9488', badge:'6S',
+    data:{ a1:'survey software, customer feedback, NPS', a2:'NoSQL database, cloud migration, developer tools', a3:'data lakehouse, query engine, BI acceleration', a4:'IT management, MSP software, endpoint security', a5:'endpoint detection, XDR platform, zero trust', a6:'fleet management, GPS tracking, telematics', a7:'customer support software, CRM, helpdesk', a8:'job posting, talent acquisition, ATS', a9:'sales enablement, content management, revenue', a10:'product analytics, behavioral data, A/B testing', a11:'corporate card, expense management, spend control', a12:'identity management, SSO, MFA' }},
+  { id:'stage',    label:'Buying Stage',      source:'6sense', color:'#0D9488', badge:'6S',
+    data:{ a1:'Consideration', a2:'Decision', a3:'Awareness', a4:'Consideration', a5:'Decision', a6:'Target', a7:'Consideration', a8:'Awareness', a9:'Target', a10:'Decision', a11:'Consideration', a12:'Target' }},
+  { id:'comprisk', label:'Competitive Risk',  source:'6sense', color:'#0D9488', badge:'6S',
+    data:{ a1:'Medium — ZoomInfo in stack', a2:'Low', a3:'High — Demandbase researched', a4:'Medium — Apollo signals', a5:'Low', a6:'Medium — ZoomInfo contract renewal', a7:'High — Demandbase & ZoomInfo', a8:'Low', a9:'Low', a10:'Medium — Demandbase demo scheduled', a11:'Low', a12:'Low' }},
+];
+
+// Integration columns
+const INTEGRATION_COLS = [
+  { id:'sfdc',     label:'CRM Owner',         source:'Salesforce', color:'#1D4ED8', badge:'SF', icon:'🔵',
+    data:{ a1:'Jamie Torres', a2:'Priya Nair', a3:'—', a4:'Alex Kim', a5:'Sarah Chen', a6:'Mike Roberts', a7:'Dan Walsh', a8:'—', a9:'Leila Patel', a10:'Chris Wong', a11:'—', a12:'Maria Santos' }},
+  { id:'gong',     label:'Competitor Mentioned', source:'Gong', color:'#059669', badge:'G', icon:'🟢',
+    data:{ a1:'Yes — ZoomInfo, Demandbase', a2:'No', a3:'Yes — 6sense (inbound)', a4:'Yes — Apollo', a5:'No', a6:'Yes — ZoomInfo', a7:'Yes — Demandbase x2', a8:'No', a9:'No', a10:'Yes — Demandbase', a11:'No', a12:'No' }},
+  { id:'gainsight',label:'Health Score',       source:'Gainsight', color:'#7C3AED', badge:'GS', icon:'🟣',
+    data:{ a1:'—', a2:'68 / Red', a3:'—', a4:'—', a5:'—', a6:'72 / Yellow', a7:'61 / Red', a8:'—', a9:'91 / Green', a10:'—', a11:'—', a12:'88 / Green' }},
+];
+
+// State
+let customCols = [];
+let cellData = {}; // overrides: { colId_accountId: value }
+let selectedSource = null;
+let selectedSrcItem = null;
+let currentCell = null; // { colId, accountId, el }
+let filterText = '';
+let filterStage = '';
+let filterType = '';
+let dragColId = null;
+let colOrder = null; // will be set on init
+
+function getAllCols() {
+  return [...NATIVE_COLS, ...INTEGRATION_COLS, ...customCols];
+}
+function getColOrder() {
+  if (!colOrder) colOrder = getAllCols().map(c=>c.id);
+  // Sync new cols
+  getAllCols().forEach(c => { if (!colOrder.includes(c.id)) colOrder.push(c.id); });
+  return colOrder;
+}
+function getOrderedCols() {
+  const order = getColOrder();
+  const all = getAllCols();
+  return order.map(id => all.find(c=>c.id===id)).filter(Boolean);
+}
+function getCellValue(colId, accountId) {
+  const key = colId + '_' + accountId;
+  if (key in cellData) return cellData[key];
+  const col = getAllCols().find(c=>c.id===colId);
+  if (!col) return '—';
+  return col.data[accountId] || '—';
+}
+
+function getFilteredAccounts() {
+  return ACCOUNTS.filter(a => {
+    if (filterText && !a.name.toLowerCase().includes(filterText.toLowerCase())) return false;
+    if (filterType && a.type !== filterType) return false;
+    if (filterStage) {
+      const stage = getCellValue('stage', a.id);
+      if (!stage.includes(filterStage)) return false;
+    }
+    return true;
+  });
+}
+
+function open() {
+  const modal = document.getElementById('byod-modal');
+  modal.style.display = 'flex';
+  renderTable();
+  updateLegend();
+}
+function close() {
+  document.getElementById('byod-modal').style.display = 'none';
+  document.getElementById('byod-addcol').style.display = 'none';
+  cancelCell();
+}
+
+function stageColor(stage) {
+  const map = { Decision:'#059669', Consideration:'#D97706', Awareness:'#1D4ED8', Target:'#94A3B8' };
+  for (const [k,v] of Object.entries(map)) { if (stage && stage.includes(k)) return v; }
+  return '#94A3B8';
+}
+function riskColor(risk) {
+  if (!risk) return '#94A3B8';
+  if (risk.startsWith('High')) return '#E11D48';
+  if (risk.startsWith('Medium')) return '#D97706';
+  return '#059669';
+}
+function gongColor(val) {
+  if (!val || val==='—') return '#94A3B8';
+  if (val.startsWith('Yes')) return '#E11D48';
+  return '#059669';
+}
+function healthColor(val) {
+  if (!val || val==='—') return '#94A3B8';
+  if (val.includes('Red')) return '#E11D48';
+  if (val.includes('Yellow')) return '#D97706';
+  if (val.includes('Green')) return '#059669';
+  return '#64748B';
+}
+
+function cellStyle(col, val) {
+  if (col.id==='stage') return `color:${stageColor(val)};font-weight:600;`;
+  if (col.id==='comprisk') return `color:${riskColor(val)};`;
+  if (col.id==='gong') return `color:${gongColor(val)};font-weight:${val&&val.startsWith('Yes')?'600':'400'};`;
+  if (col.id==='gainsight') return `color:${healthColor(val)};font-weight:600;`;
+  return '';
+}
+
+function renderTable() {
+  const cols = getOrderedCols();
+  const accounts = getFilteredAccounts();
+  document.getElementById('byod-count').textContent = `Showing ${accounts.length} accounts`;
+
+  // HEADER
+  const thead = document.getElementById('byod-thead');
+  const thRow = document.createElement('tr');
+  
+  // Account column (fixed)
+  const thAcc = document.createElement('th');
+  thAcc.style.cssText = 'background:#F8FAFC;padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:#64748B;letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid #E2E8F0;white-space:nowrap;min-width:180px;position:sticky;left:0;z-index:5;';
+  thAcc.innerHTML = '<div style="display:flex;align-items:center;gap:6px;"><img src="https://logo.clearbit.com/salesforce.com" style="width:14px;height:14px;border-radius:2px;opacity:.7" onerror="this.style.display=\'none\'"> Company</div>';
+  thRow.appendChild(thAcc);
+
+  cols.forEach(col => {
+    const th = document.createElement('th');
+    th.draggable = true;
+    th.dataset.colid = col.id;
+    const srcColors = { '6sense':'#0D9488','Salesforce':'#1D4ED8','Gong':'#059669','Gainsight':'#7C3AED' };
+    const bc = srcColors[col.source] || col.color || '#7C3AED';
+    th.style.cssText = `background:#F8FAFC;padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:#64748B;letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid #E2E8F0;white-space:nowrap;min-width:160px;cursor:grab;user-select:none;border-top:3px solid ${bc};`;
+    const isNative = NATIVE_COLS.find(c=>c.id===col.id);
+    const isCustom = customCols.find(c=>c.id===col.id);
+    const removeBtn = !isNative ? `<span onclick="BYOD.removeCol('${col.id}')" style="margin-left:6px;color:#CBD5E1;cursor:pointer;font-size:14px;font-weight:400;" title="Remove column">✕</span>` : '';
+
+    const SRC_LOGOS = {
+      '6sense': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzBEOTQ4OCIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+NjwvdGV4dD48L3N2Zz4=',
+      'Salesforce': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTI2LjYyIDE0LjQ5MmMyLjA2OC0yLjE0MiA0Ljk1LTMuNDk3IDguMTI2LTMuNDk3IDQuMjM1IDAgNy45MDUgMi4zNjQgOS44NzUgNS44NiAxLjctLjc2MyAzLjU5NS0xLjE4MiA1LjYtMS4xODIgNy42MzQgMCAxMy44IDYuMjMgMTMuOCAxMy45MTNTNTcuODIgNDMuNSA1MC4yIDQzLjVhMTMuODQgMTMuODQgMCAwIDEtMi43MDktLjI3MWMtMS43MjQgMy4wNzgtNS4wMjMgNS4xNy04LjgxNiA1LjE3LTEuNTc2IDAtMy4wNzgtLjM3LTQuNDA4LTEtMS43NDggNC4xMTItNS44MzYgNy4wMTgtMTAuNTkgNy4wMTgtNC45NSAwLTkuMTg1LTMuMTI3LTEwLjgtNy41MzVhMTAuODUgMTAuODUgMCAwIDEtMi4xOTIuMjIyQzQuNzc3IDQ3LjA5NSAwIDQyLjI3IDAgMzYuMjg1YTEwLjgyIDEwLjgyIDAgMCAxIDUuMzQ0LTkuMzU3Yy0uNjY1LTEuNTAyLTEuMDM0LTMuMTc3LTEuMDM0LTQuOTVDNC4yODUgMTUuMTU3IDkuODc1IDkuNTkgMTYuNzIgOS41OWExMi40MSAxMi40MSAwIDAgMSA5Ljg5OSA0LjkiIGZpbGw9IiMwMGExZTAiLz48L3N2Zz4=',
+      'Gong': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzNCMUQ2RSIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjQzA4NEZDIj5HPC90ZXh0Pjwvc3ZnPg==',
+      'Gainsight': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzAwOTBDNSIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+R1M8L3RleHQ+PC9zdmc+',
+      'HubSpot': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDEzLjEwNyAxMy4wOTkiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj48cGF0aCBkPSJNMTIuMDI3IDYuMjIyYTMuMzMgMy4zMyAwIDAgMC0xLjIwOS0xLjIwMWMtLjM4Mi0uMjIyLS43NzctLjM2My0xLjIyMy0uNDI0VjNhMS4xNyAxLjE3IDAgMCAwIC43MjItMS4wOTcgMS4yIDEuMiAwIDAgMC0xLjItMS4yMDYgMS4yMSAxLjIxIDAgMCAwLTEuMjEgMS4yMDZjMCAuNDkuMjYuOTA4LjcwNyAxLjA5N3YxLjU4OGEzLjQ5IDMuNDkgMCAwIDAtMS4wNjQuMzM0TDMuMjc1IDEuNjg1Yy4wMy0uMTEzLjA1Ni0uMjMuMDU2LS4zNTMgMC0uNzM4LS41OTgtMS4zMzYtMS4zMzYtMS4zMzZTLjY2LjU5NC42NiAxLjMzMnMuNTk4IDEuMzM2IDEuMzM2IDEuMzM2Yy4yNTIgMCAuNDg1LS4wNzQuNjg2LS4xOTVsLjI4LjIxMkw2Ljc5NyA1LjQ1Yy0uMjAzLjE4Ni0uMzkyLjM5OC0uNTQzLjYzNi0uMzA2LjQ4NS0uNDkzIDEuMDE4LS40OTMgMS42di4xMmEzLjM1IDMuMzUgMCAwIDAgLjIxIDEuMTU2Yy4xMTYuMzE2LjI4Ni42MDQuNDk3Ljg2NGwtMS4yNzQgMS4yNzdjLS4zNzctLjE0LS44LS4wNDctMS4wODUuMjM4LS4xOTQuMTkzLS4zMDMuNDU2LS4zMDIuNzNzLjEwOC41MzUuMzAzLjczLjQ1Ni4zMDMuNzMuMzAzLjUzNy0uMTA4LjczLS4zMDMuMzAzLS40NTYuMzAyLS43M2ExLjAzIDEuMDMgMCAwIDAtLjA0OC0uMzFsMS4zMTYtMS4zMTZjLjE4LjEyNS4zNzUuMjMuNTg1LjMyYTMuNDIgMy40MiAwIDAgMCAxLjM2OS4yODhoLjA5Yy41NTIgMCAxLjA3My0uMTMgMS41NjItLjM5NWEzLjIzIDMuMjMgMCAwIDAgMS4yMjQtMS4xNTNjLjMwNy0uNDkuNDc1LTEuMDMzLjQ3NS0xLjYzdi0uMDNjMC0uNTg3LS4xMzYtMS4xMjgtLjQyLTEuNjI0ek0xMC40MiA4Ljk4NGMtLjM1Ny4zOTctLjc2OC42NDItMS4yMzIuNjQySDkuMWMtLjI2NSAwLS41MjUtLjA3My0uNzc4LS4yMDdhMS44IDEuOCAwIDAgMS0uNjgyLS42MjFjLS4xODQtLjI2LS4yODQtLjU0NC0uMjg0LS44NDV2LS4wOWMwLS4yOTYuMDU3LS41NzcuMi0uODQyLjE1My0uMy4zNi0uNTE1LjYzNS0uNjk0cy41NTgtLjI2NS44OC0uMjY1aC4wM2MuMjkgMCAuNTY3LjA1Ny44MjcuMTlhMS43NSAxLjc1IDAgMCAxIC42NS41OTEgMS44OCAxLjg4IDAgMCAxIC4yOTEuODNsLjAwNy4xODdjMCAuNDA3LS4xNTYuNzg0LS40NjcgMS4xMjZ6IiBmaWxsPSIjZjg3NjFmIi8+PC9zdmc+',
+      'Marketo': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgZmlsbD0iIzVjNGM5ZiI+PHBhdGggZD0iTTU5LjQgNTAuOTcyVjguODkyTDQzLjA1NSAwdjY0ek0yMi4yNzYgNS41NjNsMTMuMTcgMy45djQwLjU2bC0xMy4xNyA1Ljc1M3ptLTcuNjA4IDguMjc0TDQuNjM2IDEyLjIybC0uMDQ4IDM2LjMyNyAxMC4wOC0yLjY2M3oiLz48L3N2Zz4=',
+      'LinkedIn': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBkPSJNMjkuNjMuMDAxSDIuMzYyQzEuMDYuMDAxIDAgMS4wMzQgMCAyLjMwNlYyOS42OUMwIDMwLjk2NSAxLjA2IDMyIDIuMzYyIDMyaDI3LjI3QzMwLjkzNyAzMiAzMiAzMC45NjUgMzIgMjkuNjlWMi4zMDZDMzIgMS4wMzQgMzAuOTM3LjAwMSAyOS42My4wMDF6IiBmaWxsPSIjMDE3N2I1Ii8+PHBhdGggZD0iTTQuNzQ1IDExLjk5N0g5LjV2MTUuMjdINC43NDV6bTIuMzc0LTcuNmMxLjUxNyAwIDIuNzUgMS4yMzMgMi43NSAyLjc1UzguNjM2IDkuOSA3LjEyIDkuOWEyLjc2IDIuNzYgMCAwIDEtMi43NTQtMi43NTMgMi43NSAyLjc1IDAgMCAxIDIuNzUzLTIuNzVtNS4zNSA3LjZoNC41NTJ2Mi4wODdoLjA2M2MuNjM0LTEuMiAyLjE4Mi0yLjQ2NiA0LjUtMi40NjYgNC44MDYgMCA1LjY5MyAzLjE2MyA1LjY5MyA3LjI3NHY4LjM3NmgtNC43NDNWMTkuODRjMC0xLjc3LS4wMzItNC4wNS0yLjQ2Ni00LjA1LTIuNDcgMC0yLjg1IDEuOTMtMi44NSAzLjkydjcuNTU0aC00Ljc0MnYtMTUuMjd6IiBmaWxsPSIjZmZmIi8+PC9zdmc+',
+      'Bombora': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iI0ZGNkIwMCIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+QjwvdGV4dD48L3N2Zz4=',
+      'G2': 'data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+RzI8L3RpdGxlPjxwYXRoIGQ9Ik0xMiAwYTEyIDEyIDAgMSAwIDAgMjQgMTIgMTIgMCAwIDAgMC0yNFptLjEyMiA1LjE0M2MuNDUgMCAuOS4wNDQgMS4zNDIuMTMybC0xLjM0MiAyLjgwNkM5Ljk2MiA4LjA4IDguMjAzIDkuODQgOC4yMDMgMTJzMS43NiAzLjkyIDMuOTIgMy45MmMuOTM3IDAgMS44NDQtLjMzOCAyLjU1My0uOTUxbDEuNDgzIDIuNTcyQTYuODU2IDYuODU2IDAgMCAxIDUuMjY2IDEyYTYuODU2IDYuODU2IDAgMCAxIDYuODU2LTYuODU2Wm0zLjQ5OC40OWExLjI2MiAxLjI2MiAwIDAgMSAuMDI2IDBjLjQyNyAwIC43OTIuMTEzIDEuMTAxLjM0LjMxLjIyOS40NjYuNTQ2LjQ2Ni45NDYgMCAuNjM5LS4zNiAxLjAzLTEuMDM1IDEuMzc2bC0uMzc3LjE5MWMtLjQwMy4yMDQtLjYwMi4zODUtLjY1Ny43MDZoMi4wNXYuODVoLTMuMTAxdi0uMTQ0YzAtLjUyNi4xMDMtLjk2LjMxNC0xLjMwNi4yMTEtLjM0NS41NzYtLjY1IDEuMTAyLS45MTdsLjI0Mi0uMTE3Yy40MjctLjIxNi41MzgtLjQwMS41MzgtLjYyNSAwLS4yNjYtLjIyOC0uNDU4LS42LS40NTgtLjQ0IDAtLjc3My4yMjgtMS4wMDQuNjk0bC0uNTkyLS41OTVjLjEzLS4yNzkuMzM4LS41MDIuNjE5LS42NzVhMS43IDEuNyAwIDAgMSAuOTA4LS4yNjZabS0yLjA5NCA1LjM4OGgzLjM5NGwxLjY5NyAyLjkzNy0xLjY5NyAyLjk0LTEuNjk3LTIuOTRIMTEuODNsMS42OTYtMi45MzdaIi8+PC9zdmc+',
+      'UserGems': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzdDM0FFRCIvPjxwb2x5Z29uIHBvaW50cz0iMTYsNCAyOCwxMiAyOCwyMCAxNiwyOCA0LDIwIDQsMTIiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjQiIGZpbGw9IndoaXRlIi8+PC9zdmc+',
+      'CommonRoom': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iI0VDNDg5OSIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+Q1I8L3RleHQ+PC9zdmc+',
+      'RevvyAI': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjN0MzQUVEIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMEQ5NDg4Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0idXJsKCNnKSIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+4pymPC90ZXh0Pjwvc3ZnPg==',
+      'Clearbit': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzFEQTFGMiIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+Q0I8L3RleHQ+PC9zdmc+',
+    };
+    const srcLogoUri = SRC_LOGOS[col.source] || SRC_LOGOS['RevvyAI'];
+    const srcIcon = `<img src="${srcLogoUri}" style="width:14px;height:14px;object-fit:contain;border-radius:3px;vertical-align:middle;" onerror="this.style.display='none'">`;
+    th.innerHTML = `<div style="display:flex;align-items:center;gap:5px;">${srcIcon} ${col.label}${removeBtn}</div><div style="font-size:10px;font-weight:400;color:#94A3B8;margin-top:2px;">${col.source}${isCustom&&isCustom.prompt?` · AI` :''}</div>`;
+    th.addEventListener('dragstart', e => { dragColId = col.id; e.dataTransfer.effectAllowed='move'; th.style.opacity='.4'; });
+    th.addEventListener('dragend', e => { th.style.opacity='1'; dragColId=null; });
+    th.addEventListener('dragover', e => { e.preventDefault(); th.style.background='#E0F2FE'; });
+    th.addEventListener('dragleave', e => { th.style.background='#F8FAFC'; });
+    th.addEventListener('drop', e => { 
+      e.preventDefault(); th.style.background='#F8FAFC';
+      if (dragColId && dragColId !== col.id) {
+        const order = getColOrder();
+        const fromIdx = order.indexOf(dragColId);
+        const toIdx = order.indexOf(col.id);
+        if (fromIdx>-1 && toIdx>-1) { order.splice(fromIdx,1); order.splice(toIdx,0,dragColId); }
+        renderTable();
+      }
+    });
+    thRow.appendChild(th);
+  });
+
+  // "+" add column button as header
+  const thAdd = document.createElement('th');
+  thAdd.style.cssText = 'background:#F0FDF4;padding:10px 16px;text-align:center;font-size:12px;font-weight:600;color:#059669;border-bottom:2px solid #E2E8F0;white-space:nowrap;min-width:120px;cursor:pointer;border-top:3px solid #E2E8F0;';
+  thAdd.innerHTML = '<div onclick="BYOD.openAddCol()" style="display:flex;align-items:center;justify-content:center;gap:4px;">＋ Add Column</div>';
+  thRow.appendChild(thAdd);
+
+  thead.innerHTML = '';
+  thead.appendChild(thRow);
+
+  // BODY
+  const tbody = document.getElementById('byod-tbody');
+  tbody.innerHTML = '';
+  accounts.forEach((acc, ri) => {
+    const tr = document.createElement('tr');
+    tr.style.cssText = `background:${ri%2===0?'#fff':'#FAFAFA'};transition:background .1s;`;
+    tr.onmouseenter = () => tr.style.background = '#F0F9FF';
+    tr.onmouseleave = () => tr.style.background = ri%2===0?'#fff':'#FAFAFA';
+
+    // Account cell
+    const tdAcc = document.createElement('td');
+    tdAcc.style.cssText = `padding:10px 16px;border-bottom:1px solid #F1F5F9;position:sticky;left:0;z-index:2;background:${ri%2===0?'#fff':'#FAFAFA'};`;
+    tdAcc.innerHTML = `<div style="display:flex;align-items:center;gap:10px;">
+      <img src="${acc.logo}" style="width:28px;height:28px;border-radius:6px;object-fit:contain;border:1px solid #F1F5F9;" onerror="this.style.display='none'">
+      <div><div style="font-weight:600;color:#0F172A;font-size:13px;">${acc.name}</div>
+      <div style="font-size:11px;color:#94A3B8;">${acc.type} · ${acc.arr}</div></div></div>`;
+    tr.appendChild(tdAcc);
+
+    cols.forEach(col => {
+      const td = document.createElement('td');
+      const val = getCellValue(col.id, acc.id);
+      td.style.cssText = `padding:10px 14px;border-bottom:1px solid #F1F5F9;font-size:13px;color:#334155;max-width:220px;${cellStyle(col,val)}`;
+      td.title = 'Click to edit';
+      const displayVal = val && val !== '—' ? val : '<span style="color:#E2E8F0">—</span>';
+      td.innerHTML = `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${displayVal}</div>`;
+      td.style.cursor = 'pointer';
+      td.onclick = () => openCellEdit(col, acc, td);
+      tr.appendChild(td);
+    });
+
+    // Empty add-col cell
+    const tdAdd = document.createElement('td');
+    tdAdd.style.cssText = 'padding:10px 16px;border-bottom:1px solid #F1F5F9;background:rgba(240,253,244,.4);';
+    tr.appendChild(tdAdd);
+
+    tbody.appendChild(tr);
+  });
+}
+
+// ── CELL EDITING ──
+function openCellEdit(col, acc, tdEl) {
+  currentCell = { colId: col.id, accountId: acc.id, el: tdEl };
+  const edit = document.getElementById('byod-cell-edit');
+  const rect = tdEl.getBoundingClientRect();
+  document.getElementById('byod-cell-label').textContent = `${col.label} · ${acc.name}`;
+  const inp = document.getElementById('byod-cell-input');
+  const val = getCellValue(col.id, acc.id);
+  inp.value = val === '—' ? '' : val;
+  edit.style.display = 'block';
+  const top = Math.min(rect.bottom + 4, window.innerHeight - 180);
+  const left = Math.min(rect.left, window.innerWidth - 300);
+  edit.style.top = top + 'px';
+  edit.style.left = left + 'px';
+  setTimeout(() => inp.focus(), 50);
+}
+function saveCell() {
+  if (!currentCell) return;
+  const val = document.getElementById('byod-cell-input').value.trim() || '—';
+  cellData[currentCell.colId + '_' + currentCell.accountId] = val;
+  cancelCell();
+  renderTable();
+}
+function cancelCell() {
+  document.getElementById('byod-cell-edit').style.display = 'none';
+  currentCell = null;
+}
+
+// ── FILTERS ──
+function filterAccounts(val) { filterText = val; renderTable(); }
+function filterStageF(val) { filterStage = val; renderTable(); }
+function filterTypeF(val) { filterType = val; renderTable(); }
+
+// ── ADD COLUMN ──
+const SOURCES = {
+  favorites: [
+    { id:'linkedin', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBkPSJNMjkuNjMuMDAxSDIuMzYyQzEuMDYuMDAxIDAgMS4wMzQgMCAyLjMwNlYyOS42OUMwIDMwLjk2NSAxLjA2IDMyIDIuMzYyIDMyaDI3LjI3QzMwLjkzNyAzMiAzMiAzMC45NjUgMzIgMjkuNjlWMi4zMDZDMzIgMS4wMzQgMzAuOTM3LjAwMSAyOS42My4wMDF6IiBmaWxsPSIjMDE3N2I1Ii8+PHBhdGggZD0iTTQuNzQ1IDExLjk5N0g5LjV2MTUuMjdINC43NDV6bTIuMzc0LTcuNmMxLjUxNyAwIDIuNzUgMS4yMzMgMi43NSAyLjc1UzguNjM2IDkuOSA3LjEyIDkuOWEyLjc2IDIuNzYgMCAwIDEtMi43NTQtMi43NTMgMi43NSAyLjc1IDAgMCAxIDIuNzUzLTIuNzVtNS4zNSA3LjZoNC41NTJ2Mi4wODdoLjA2M2MuNjM0LTEuMiAyLjE4Mi0yLjQ2NiA0LjUtMi40NjYgNC44MDYgMCA1LjY5MyAzLjE2MyA1LjY5MyA3LjI3NHY4LjM3NmgtNC43NDNWMTkuODRjMC0xLjc3LS4wMzItNC4wNS0yLjQ2Ni00LjA1LTIuNDcgMC0yLjg1IDEuOTMtMi44NSAzLjkydjcuNTU0aC00Ljc0MnYtMTUuMjd6IiBmaWxsPSIjZmZmIi8+PC9zdmc+', label:'LinkedIn Insights', desc:'Hiring signals, org changes, employee growth', icon:'in', iconBg:'#0A66C2' },
+    { id:'gong2', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzNCMUQ2RSIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjQzA4NEZDIj5HPC90ZXh0Pjwvc3ZnPg==', label:'Gong — Talk Time', desc:'How much time reps spend on each account', icon:'G', iconBg:'#7C3AED' },
+    { id:'clearbit', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzFEQTFGMiIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+Q0I8L3RleHQ+PC9zdmc+', label:'Clearbit Enrichment', desc:'Firmographics, technographics, traffic data', icon:'C', iconBg:'#0EA5E9' },
+  ],
+  discover: [
+    { id:'bombora', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iI0ZGNkIwMCIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+QjwvdGV4dD48L3N2Zz4=', label:'Bombora Intent', desc:'Surge scores and topic-level intent data', icon:'B', iconBg:'#6366F1' },
+    { id:'g2', logoUri:'data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+RzI8L3RpdGxlPjxwYXRoIGQ9Ik0xMiAwYTEyIDEyIDAgMSAwIDAgMjQgMTIgMTIgMCAwIDAgMC0yNFptLjEyMiA1LjE0M2MuNDUgMCAuOS4wNDQgMS4zNDIuMTMybC0xLjM0MiAyLjgwNkM5Ljk2MiA4LjA4IDguMjAzIDkuODQgOC4yMDMgMTJzMS43NiAzLjkyIDMuOTIgMy45MmMuOTM3IDAgMS44NDQtLjMzOCAyLjU1My0uOTUxbDEuNDgzIDIuNTcyQTYuODU2IDYuODU2IDAgMCAxIDUuMjY2IDEyYTYuODU2IDYuODU2IDAgMCAxIDYuODU2LTYuODU2Wm0zLjQ5OC40OWExLjI2MiAxLjI2MiAwIDAgMSAuMDI2IDBjLjQyNyAwIC43OTIuMTEzIDEuMTAxLjM0LjMxLjIyOS40NjYuNTQ2LjQ2Ni45NDYgMCAuNjM5LS4zNiAxLjAzLTEuMDM1IDEuMzc2bC0uMzc3LjE5MWMtLjQwMy4yMDQtLjYwMi4zODUtLjY1Ny43MDZoMi4wNXYuODVoLTMuMTAxdi0uMTQ0YzAtLjUyNi4xMDMtLjk2LjMxNC0xLjMwNi4yMTEtLjM0NS41NzYtLjY1IDEuMTAyLS45MTdsLjI0Mi0uMTE3Yy40MjctLjIxNi41MzgtLjQwMS41MzgtLjYyNSAwLS4yNjYtLjIyOC0uNDU4LS42LS40NTgtLjQ0IDAtLjc3My4yMjgtMS4wMDQuNjk0bC0uNTkyLS41OTVjLjEzLS4yNzkuMzM4LS41MDIuNjE5LS42NzVhMS43IDEuNyAwIDAgMSAuOTA4LS4yNjZabS0yLjA5NCA1LjM4OGgzLjM5NGwxLjY5NyAyLjkzNy0xLjY5NyAyLjk0LTEuNjk3LTIuOTRIMTEuODNsMS42OTYtMi45MzdaIi8+PC9zdmc+', label:'G2 Buyer Intent', desc:'G2 profile visits and comparison activity', icon:'G2', iconBg:'#FF492C' },
+    { id:'usergems', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzdDM0FFRCIvPjxwb2x5Z29uIHBvaW50cz0iMTYsNCAyOCwxMiAyOCwyMCAxNiwyOCA0LDIwIDQsMTIiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjQiIGZpbGw9IndoaXRlIi8+PC9zdmc+', label:'UserGems Job Changes', desc:'Champion and contact job change tracking', icon:'U', iconBg:'#8B5CF6' },
+    { id:'commonroom', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iI0VDNDg5OSIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSJ3aGl0ZSI+Q1I8L3RleHQ+PC9zdmc+', label:'CommonRoom Signals', desc:'Community, social, and product signals', icon:'CR', iconBg:'#EC4899' },
+  ],
+  integrations: [
+    { id:'sfdc2', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTI2LjYyIDE0LjQ5MmMyLjA2OC0yLjE0MiA0Ljk1LTMuNDk3IDguMTI2LTMuNDk3IDQuMjM1IDAgNy45MDUgMi4zNjQgOS44NzUgNS44NiAxLjctLjc2MyAzLjU5NS0xLjE4MiA1LjYtMS4xODIgNy42MzQgMCAxMy44IDYuMjMgMTMuOCAxMy45MTNTNTcuODIgNDMuNSA1MC4yIDQzLjVhMTMuODQgMTMuODQgMCAwIDEtMi43MDktLjI3MWMtMS43MjQgMy4wNzgtNS4wMjMgNS4xNy04LjgxNiA1LjE3LTEuNTc2IDAtMy4wNzgtLjM3LTQuNDA4LTEtMS43NDggNC4xMTItNS44MzYgNy4wMTgtMTAuNTkgNy4wMTgtNC45NSAwLTkuMTg1LTMuMTI3LTEwLjgtNy41MzVhMTAuODUgMTAuODUgMCAwIDEtMi4xOTIuMjIyQzQuNzc3IDQ3LjA5NSAwIDQyLjI3IDAgMzYuMjg1YTEwLjgyIDEwLjgyIDAgMCAxIDUuMzQ0LTkuMzU3Yy0uNjY1LTEuNTAyLTEuMDM0LTMuMTc3LTEuMDM0LTQuOTVDNC4yODUgMTUuMTU3IDkuODc1IDkuNTkgMTYuNzIgOS41OWExMi40MSAxMi40MSAwIDAgMSA5Ljg5OSA0LjkiIGZpbGw9IiMwMGExZTAiLz48L3N2Zz4=', label:'Salesforce — Custom Field', desc:'Map any Salesforce field to this column', icon:'SF', iconBg:'#1D4ED8', logo:'https://logo.clearbit.com/salesforce.com' },
+    { id:'hubspot', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDEzLjEwNyAxMy4wOTkiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj48cGF0aCBkPSJNMTIuMDI3IDYuMjIyYTMuMzMgMy4zMyAwIDAgMC0xLjIwOS0xLjIwMWMtLjM4Mi0uMjIyLS43NzctLjM2My0xLjIyMy0uNDI0VjNhMS4xNyAxLjE3IDAgMCAwIC43MjItMS4wOTcgMS4yIDEuMiAwIDAgMC0xLjItMS4yMDYgMS4yMSAxLjIxIDAgMCAwLTEuMjEgMS4yMDZjMCAuNDkuMjYuOTA4LjcwNyAxLjA5N3YxLjU4OGEzLjQ5IDMuNDkgMCAwIDAtMS4wNjQuMzM0TDMuMjc1IDEuNjg1Yy4wMy0uMTEzLjA1Ni0uMjMuMDU2LS4zNTMgMC0uNzM4LS41OTgtMS4zMzYtMS4zMzYtMS4zMzZTLjY2LjU5NC42NiAxLjMzMnMuNTk4IDEuMzM2IDEuMzM2IDEuMzM2Yy4yNTIgMCAuNDg1LS4wNzQuNjg2LS4xOTVsLjI4LjIxMkw2Ljc5NyA1LjQ1Yy0uMjAzLjE4Ni0uMzkyLjM5OC0uNTQzLjYzNi0uMzA2LjQ4NS0uNDkzIDEuMDE4LS40OTMgMS42di4xMmEzLjM1IDMuMzUgMCAwIDAgLjIxIDEuMTU2Yy4xMTYuMzE2LjI4Ni42MDQuNDk3Ljg2NGwtMS4yNzQgMS4yNzdjLS4zNzctLjE0LS44LS4wNDctMS4wODUuMjM4LS4xOTQuMTkzLS4zMDMuNDU2LS4zMDIuNzNzLjEwOC41MzUuMzAzLjczLjQ1Ni4zMDMuNzMuMzAzLjUzNy0uMTA4LjczLS4zMDMuMzAzLS40NTYuMzAyLS43M2ExLjAzIDEuMDMgMCAwIDAtLjA0OC0uMzFsMS4zMTYtMS4zMTZjLjE4LjEyNS4zNzUuMjMuNTg1LjMyYTMuNDIgMy40MiAwIDAgMCAxLjM2OS4yODhoLjA5Yy41NTIgMCAxLjA3My0uMTMgMS41NjItLjM5NWEzLjIzIDMuMjMgMCAwIDAgMS4yMjQtMS4xNTNjLjMwNy0uNDkuNDc1LTEuMDMzLjQ3NS0xLjYzdi0uMDNjMC0uNTg3LS4xMzYtMS4xMjgtLjQyLTEuNjI0ek0xMC40MiA4Ljk4NGMtLjM1Ny4zOTctLjc2OC42NDItMS4yMzIuNjQySDkuMWMtLjI2NSAwLS41MjUtLjA3My0uNzc4LS4yMDdhMS44IDEuOCAwIDAgMS0uNjgyLS42MjFjLS4xODQtLjI2LS4yODQtLjU0NC0uMjg0LS44NDV2LS4wOWMwLS4yOTYuMDU3LS41NzcuMi0uODQyLjE1My0uMy4zNi0uNTE1LjYzNS0uNjk0cy41NTgtLjI2NS44OC0uMjY1aC4wM2MuMjkgMCAuNTY3LjA1Ny44MjcuMTlhMS43NSAxLjc1IDAgMCAxIC42NS41OTEgMS44OCAxLjg4IDAgMCAxIC4yOTEuODNsLjAwNy4xODdjMCAuNDA3LS4xNTYuNzg0LS40NjcgMS4xMjZ6IiBmaWxsPSIjZjg3NjFmIi8+PC9zdmc+', label:'HubSpot — Deal Stage', desc:'Current deal stage from HubSpot CRM', icon:'HS', iconBg:'#FF7A59', logo:'https://logo.clearbit.com/hubspot.com' },
+    { id:'gong3', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzNCMUQ2RSIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjQzA4NEZDIj5HPC90ZXh0Pjwvc3ZnPg==', label:'Gong — Next Step', desc:'Most recent next step captured in Gong calls', icon:'G', iconBg:'#7C3AED', logo:'https://logo.clearbit.com/gong.io' },
+    { id:'marketo', logoUri:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgZmlsbD0iIzVjNGM5ZiI+PHBhdGggZD0iTTU5LjQgNTAuOTcyVjguODkyTDQzLjA1NSAwdjY0ek0yMi4yNzYgNS41NjNsMTMuMTcgMy45djQwLjU2bC0xMy4xNyA1Ljc1M3ptLTcuNjA4IDguMjc0TDQuNjM2IDEyLjIybC0uMDQ4IDM2LjMyNyAxMC4wOC0yLjY2M3oiLz48L3N2Zz4=', label:'Marketo — Lead Score', desc:'Current Marketo lead score for key contacts', icon:'M', iconBg:'#5C4DE5', logo:'https://logo.clearbit.com/marketo.com' },
+  ],
+  revvyai: null // special
+};
+
+let pendingColConfig = {};
+
+function openAddCol() {
+  pendingColConfig = {};
+  selectedSource = 'favorites';
+  selectedSrcItem = null;
+  document.getElementById('byod-addcol').style.display = 'flex';
+  renderSrcTab('favorites');
+  highlightTab('favorites');
+  document.getElementById('byod-src-action').style.display = 'none';
+}
+function closeAddCol() {
+  document.getElementById('byod-addcol').style.display = 'none';
+}
+function switchSrcTab(tab) {
+  selectedSource = tab;
+  selectedSrcItem = null;
+  renderSrcTab(tab);
+  highlightTab(tab);
+  document.getElementById('byod-src-action').style.display = 'none';
+}
+function highlightTab(active) {
+  document.querySelectorAll('.byod-src-tab').forEach((el,i) => {
+    const tabs = ['favorites','discover','integrations','revvyai'];
+    const isActive = tabs[i]===active;
+    el.style.color = isActive ? '#0D9488' : '#94A3B8';
+    el.style.borderBottom = isActive ? '2px solid #0D9488' : '2px solid transparent';
+  });
+}
+function renderSrcTab(tab) {
+  const content = document.getElementById('byod-src-content');
+  if (tab === 'revvyai') {
+    content.innerHTML = `
+      <div style="text-align:center;padding:12px 0 20px;">
+        <div style="width:48px;height:48px;background:linear-gradient(135deg,#7C3AED,#0D9488);border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:20px;">✦</div>
+        <div style="font-weight:700;font-size:16px;color:#0F172A;margin-bottom:6px;">RevvyAI Custom Column</div>
+        <div style="font-size:13px;color:#64748B;line-height:1.5;max-width:360px;margin:0 auto;">Write a prompt and RevvyAI will generate a value for each account using 6sense intelligence + your connected data sources.</div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:600;color:#64748B;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:6px;">Column Name</label>
+        <input id="revvy-col-name" placeholder="e.g. Expansion Likelihood, ICP Fit Score…" style="width:100%;border:1px solid #E2E8F0;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;color:#0F172A;" oninput="BYOD.updateRevvyPreview()">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:600;color:#64748B;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:6px;">Prompt</label>
+        <textarea id="revvy-prompt" rows="4" placeholder="e.g. Based on this account's buying stage, intent keywords, and Gong conversation history, what is their likelihood of expansion in the next 90 days? Respond with: High / Medium / Low and a one-sentence reason." style="width:100%;border:1px solid #E2E8F0;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:none;box-sizing:border-box;color:#0F172A;line-height:1.45;" oninput="BYOD.updateRevvyPreview()"></textarea>
+      </div>
+      <div id="revvy-preview" style="display:none;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:12px;margin-bottom:4px;">
+        <div style="font-size:11px;font-weight:600;color:#7C3AED;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">✦ Sample Output Preview</div>
+        <div id="revvy-preview-content" style="font-size:13px;color:#334155;line-height:1.5;"></div>
+      </div>
+      <div style="margin-top:16px;">
+        <button onclick="BYOD.addRevvyCol()" style="width:100%;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">✦ Generate Column with RevvyAI</button>
+      </div>`;
+    document.getElementById('byod-src-action').style.display = 'none';
+    return;
+  }
+  const items = SOURCES[tab] || [];
+  content.innerHTML = items.map(item => {
+      const logoImg = item.logoUri 
+        ? `<img src="${item.logoUri}" style="width:26px;height:26px;object-fit:contain;" onerror="this.style.display='none'">`
+        : `<span style="color:#fff;font-size:12px;font-weight:700;">${item.icon}</span>`;
+      return `<div class="byod-src-item" id="src-item-${item.id}" onclick="BYOD.selectSrcItem('${item.id}','${tab}')"
+        style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;cursor:pointer;transition:background .1s;border-bottom:1px solid #F1F5F9;">
+        <div style="width:36px;height:36px;background:${item.iconBg};border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${logoImg}</div>
+        <div><div style="font-weight:600;font-size:13px;color:#0F172A;">${item.label}</div>
+        <div style="font-size:12px;color:#64748B;margin-top:2px;">${item.desc}</div></div>
+        <div id="src-check-${item.id}" style="margin-left:auto;width:20px;height:20px;background:#0D9488;border-radius:50%;color:#fff;font-size:11px;display:none;align-items:center;justify-content:center;flex-shrink:0;">✓</div>
+      </div>`;
+    }).join('');
+}
+
+function selectSrcItem(itemId, tab) {
+  selectedSrcItem = itemId;
+  document.querySelectorAll('.byod-src-item').forEach(el => el.style.background='');
+  const selected = document.getElementById('src-item-'+itemId);
+  if (selected) selected.style.background='#F0FDF4';
+  document.getElementById('byod-src-action').style.display = 'block';
+  document.getElementById('byod-add-col-btn').textContent = 'Add Column →';
+}
+
+function updateRevvyPreview() {
+  const name = document.getElementById('revvy-col-name')?.value || '';
+  const prompt = document.getElementById('revvy-prompt')?.value || '';
+  const preview = document.getElementById('revvy-preview');
+  const previewContent = document.getElementById('revvy-preview-content');
+  if (prompt.length > 20) {
+    preview.style.display = 'block';
+    previewContent.innerHTML = ACCOUNTS.slice(0,3).map(a => 
+      `<div style="margin-bottom:6px;"><span style="font-weight:600;">${a.name}:</span> ${generateFakeAIResponse(a, prompt)}</div>`
+    ).join('');
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function generateFakeAIResponse(acc, prompt) {
+  const stage = getCellValue('stage', acc.id);
+  const responses = {
+    a1: 'Medium — Active consideration stage with 3 intent signals. Champion identified but no budget confirmation.',
+    a2: 'High — Former customer in Decision stage. Expansion opportunity detected in APAC region.',
+    a3: 'Low — Early Awareness stage, no buying committee signals yet.',
+    a4: 'Medium — Consideration stage with 2 competitor mentions in Gong calls.',
+    a5: 'High — Decision stage, strong intent signals, no competitor risk.',
+    a6: 'Medium — Former customer, re-engagement signals emerging.',
+    a7: 'Low — High competitor risk (Demandbase), health score declining.',
+    a8: 'Low — Awareness only, no budget signals detected.',
+    a9: 'High — Existing customer, green health score, expansion ready.',
+    a10: 'High — Decision stage, Demandbase demo may accelerate urgency.',
+    a11: 'Medium — Consideration stage, no CRM owner assigned yet.',
+    a12: 'Low — Existing customer, stable, not in active buy cycle.',
+  };
+  return responses[acc.id] || `${stage} — AI analysis pending…`;
+}
+
+function confirmAddCol() {
+  if (!selectedSrcItem) return;
+  const allSrcs = [...SOURCES.favorites, ...SOURCES.discover, ...SOURCES.integrations];
+  const item = allSrcs.find(s=>s.id===selectedSrcItem);
+  if (!item) return;
+  const newId = 'custom_' + Date.now();
+  const srcMap = { sfdc2:'Salesforce', hubspot:'HubSpot', gong3:'Gong', marketo:'Marketo' };
+  const src = srcMap[item.id] || item.label;
+  const sampleData = {};
+  ACCOUNTS.forEach(a => { sampleData[a.id] = generateSampleData(item.id, a); });
+  customCols.push({ id:newId, label:item.label, source:src, color:'#7C3AED', badge:'C', data:sampleData });
+  closeAddCol();
+  renderTable();
+  updateLegend();
+}
+
+function generateSampleData(srcId, acc) {
+  const maps = {
+    linkedin: { a1:'↑ 12% hiring (Engineering)', a2:'↑ 8% (Sales)', a3:'→ Stable', a4:'↓ 4%', a5:'↑ 22% (Eng)', a6:'→', a7:'↓ 11%', a8:'↑ 5%', a9:'→', a10:'↑ 18%', a11:'↑ 30%', a12:'→' },
+    gong2:    { a1:'4.2 hrs', a2:'8.1 hrs', a3:'1.0 hrs', a4:'3.3 hrs', a5:'6.7 hrs', a6:'5.1 hrs', a7:'2.8 hrs', a8:'0.5 hrs', a9:'7.4 hrs', a10:'5.9 hrs', a11:'2.1 hrs', a12:'9.3 hrs' },
+    clearbit: { a1:'1200 emp · SaaS', a2:'6400 emp · Database', a3:'280 emp · Data', a4:'900 emp · IT Mgmt', a5:'1800 emp · Security', a6:'1100 emp · Telematics', a7:'5000 emp · SaaS', a8:'14000 emp · Recruiting', a9:'1500 emp · Sales', a10:'700 emp · Analytics', a11:'1200 emp · Fintech', a12:'16000 emp · Identity' },
+    bombora:  { a1:'72 (Rising)', a2:'88 (Surging)', a3:'31 (Low)', a4:'55 (Moderate)', a5:'91 (Surging)', a6:'44 (Low)', a7:'38 (Low)', a8:'29 (Low)', a9:'67 (Rising)', a10:'83 (Surging)', a11:'52 (Moderate)', a12:'41 (Low)' },
+    g2:       { a1:'3 visits (7d)', a2:'0 visits', a3:'1 visit', a4:'2 visits', a5:'5 visits', a6:'1 visit', a7:'4 visits', a8:'0 visits', a9:'0 visits', a10:'6 visits', a11:'1 visit', a12:'0 visits' },
+    usergems: { a1:'1 champ moved in', a2:'—', a3:'—', a4:'1 champ moved out', a5:'2 champs moved in', a6:'—', a7:'1 champ at new co', a8:'—', a9:'—', a10:'1 new buyer', a11:'—', a12:'—' },
+    commonroom: { a1:'5 community posts', a2:'—', a3:'2 Slack msgs', a4:'—', a5:'8 GitHub stars', a6:'—', a7:'3 community posts', a8:'—', a9:'1 review', a10:'12 GitHub events', a11:'—', a12:'—' },
+    sfdc2:    { a1:'Enterprise Tier', a2:'Strategic', a3:'—', a4:'Mid-Market', a5:'Enterprise', a6:'Mid-Market', a7:'Enterprise', a8:'—', a9:'Enterprise', a10:'Growth', a11:'—', a12:'Strategic' },
+    hubspot:  { a1:'Discovery Call', a2:'Proposal', a3:'—', a4:'Demo Scheduled', a5:'Negotiation', a6:'Re-engage', a7:'Churned', a8:'—', a9:'Closed Won', a10:'Demo Scheduled', a11:'—', a12:'Closed Won' },
+    gong3:    { a1:'Send pricing deck', a2:'Legal review docs', a3:'—', a4:'Schedule exec call', a5:'Finalize MSA', a6:'Send re-eng email', a7:'Escalate to AE', a8:'—', a9:'QBR scheduled', a10:'Competitive response', a11:'—', a12:'Renewal review' },
+    marketo:  { a1:'72', a2:'91', a3:'18', a4:'55', a5:'88', a6:'43', a7:'31', a8:'12', a9:'94', a10:'79', a11:'38', a12:'96' },
+  };
+  return (maps[srcId] && maps[srcId][acc.id]) || '—';
+}
+
+function addRevvyCol() {
+  const name = document.getElementById('revvy-col-name')?.value?.trim();
+  const prompt = document.getElementById('revvy-prompt')?.value?.trim();
+  if (!name || !prompt) { alert('Please enter a column name and prompt.'); return; }
+  const newId = 'revvy_' + Date.now();
+  const sampleData = {};
+  ACCOUNTS.forEach(a => { sampleData[a.id] = generateFakeAIResponse(a, prompt); });
+  customCols.push({ id:newId, label:name, source:'RevvyAI', color:'#7C3AED', badge:'AI', data:sampleData, prompt });
+  closeAddCol();
+  renderTable();
+  updateLegend();
+}
+
+function removeCol(colId) {
+  if (!confirm('Remove this column?')) return;
+  customCols = customCols.filter(c=>c.id!==colId);
+  if (colOrder) colOrder = colOrder.filter(id=>id!==colId);
+  renderTable();
+  updateLegend();
+}
+
+function updateLegend() {
+  const el = document.getElementById('byod-custom-legend');
+  const revvyCols = customCols.filter(c=>c.source==='RevvyAI');
+  if (revvyCols.length) el.textContent = `✦ RevvyAI (${revvyCols.length} col${revvyCols.length>1?'s':''})`;
+  else el.textContent = '';
+}
+
+// Close cell edit on outside click
+document.addEventListener('click', function(e) {
+  const edit = document.getElementById('byod-cell-edit');
+  if (edit && edit.style.display !== 'none' && !edit.contains(e.target)) {
+    const tbody = document.getElementById('byod-tbody');
+    if (tbody && tbody.contains(e.target)) return; // clicking another cell handled by openCellEdit
+    cancelCell();
+  }
+});
+
+return { open, close, openAddCol, closeAddCol, switchSrcTab, selectSrcItem, confirmAddCol,
+  addRevvyCol, updateRevvyPreview, removeCol, filterAccounts, filterStage: filterStageF, 
+  filterType: filterTypeF, saveCell, cancelCell, renderTable, updateLegend };
 })();
 
 </script>
