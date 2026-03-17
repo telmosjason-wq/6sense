@@ -723,30 +723,18 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 <!-- ── PP SESSION CSS ── -->
 <style>
 #app-int2 {
-  --pp-bg: #0B1628;
-  --pp-card: #111E33;
-  --pp-border: rgba(255,255,255,.1);
-  --pp-teal: #5EEAD4;
-  --pp-teal-dim: rgba(94,234,212,.15);
-  --pp-gold: #FBBF24;
-  --pp-gold-dim: rgba(251,191,36,.12);
-  --pp-muted: rgba(255,255,255,.4);
-  --pp-text: rgba(255,255,255,.9);
-  --pp-funded: #059669;
-  --pp-eval: #D97706;
-  --pp-ns: #334155;
   font-family: 'DM Sans', sans-serif;
-  background: var(--pp-bg);
-  color: var(--pp-text);
+  background: #F1F5F9;
   width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
+
+/* ── Topbar ── */
 #app-int2 .pp-topbar {
-  background: #0D1F3C;
-  border-bottom: 1px solid var(--pp-border);
+  background: #0F2044;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -756,301 +744,245 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 }
 #app-int2 .pp-tb-l { display:flex;align-items:center;gap:.55em }
 #app-int2 .pp-logo { font-family:'DM Serif Display',serif;font-size:1.2em;color:#fff }
-#app-int2 .pp-logo span { color: var(--pp-teal) }
-#app-int2 .pp-sep { color: var(--pp-border); font-size:1.2em }
-#app-int2 .pp-ctx { font-size:.75em; color: var(--pp-muted) }
+#app-int2 .pp-logo span { color:#5EEAD4 }
+#app-int2 .pp-sep { color:rgba(255,255,255,.2);font-size:1.2em }
+#app-int2 .pp-ctx { font-size:.75em;color:rgba(255,255,255,.45) }
 #app-int2 .pp-tb-r { display:flex;align-items:center;gap:.55em }
 #app-int2 .pp-btn {
   font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;
   padding:.3em .85em;border-radius:.4em;
-  border:1px solid var(--pp-border);background:transparent;
-  color:var(--pp-muted);cursor:pointer;transition:all .12s;
+  border:1px solid rgba(255,255,255,.2);background:transparent;
+  color:rgba(255,255,255,.6);cursor:pointer;transition:all .12s;
 }
-#app-int2 .pp-btn:hover { background:rgba(255,255,255,.08);color:#fff }
-#app-int2 .pp-btn.accent { background:var(--pp-teal);border-color:var(--pp-teal);color:#0B1628;font-weight:700 }
-#app-int2 .pp-btn.accent:hover { background:#4DD4C0 }
-#app-int2 .pp-btn.gold { background:var(--pp-gold);border-color:var(--pp-gold);color:#0B1628;font-weight:700 }
+#app-int2 .pp-btn:hover { background:rgba(255,255,255,.1);color:#fff }
+#app-int2 .pp-btn.gold { background:#FBBF24;border-color:#FBBF24;color:#0F2044;font-weight:700 }
 #app-int2 .pp-btn.gold:hover { background:#F59E0B }
 
-/* ── MATRIX AREA ── */
+/* ── Subheader ── */
+#app-int2 .pp-subhead {
+  background:#fff;
+  border-bottom:1px solid #E2E8F0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 1.8%;
+  height:3em;
+  flex-shrink:0;
+}
+#app-int2 .pp-subhead-l { display:flex;align-items:center;gap:.6em }
+#app-int2 .pp-eyebrow { font-size:.58em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#64748B }
+#app-int2 .pp-subhead-title { font-family:'DM Serif Display',serif;font-size:1.1em;color:#0F2044 }
+
+/* ── Matrix area ── */
 #app-int2 .pp-matrix-wrap {
-  flex: 1;
-  min-height: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  display: flex;
-  flex-direction: row;
-  padding: 1.2% 1.8%;
-  gap: .4em;
-}
-#app-int2 .pp-grid {
-  display: grid;
-  grid-template-rows: 2.2em 1fr 1fr 2em;
-  flex: 1;
-  min-height: 0;
-  gap: .4em;
-}
-#app-int2 .pp-grid-inner {
-  display: contents;
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:row;
+  padding:1.2% 1.8%;
+  gap:.5em;
+  overflow-x:auto;
+  overflow-y:hidden;
 }
 
-/* Row label column */
-#app-int2 .pp-row-labels {
-  display: grid;
-  grid-template-rows: 2.2em 1fr 1fr 2em;
-  gap: .4em;
-  width: 6em;
-  flex-shrink: 0;
+/* ── Row label sidebar ── */
+#app-int2 .pp-labels {
+  display:flex;
+  flex-direction:column;
+  gap:.5em;
+  width:5em;
+  flex-shrink:0;
 }
-#app-int2 .pp-row-lbl {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: .7em;
-  font-size: .65em;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--pp-muted);
+#app-int2 .pp-lbl-spacer { height:2.6em;flex-shrink:0 }
+#app-int2 .pp-lbl {
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-right:.7em;
+  font-size:.58em;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#94A3B8;
 }
-#app-int2 .pp-row-lbl.push { color: var(--pp-teal) }
-#app-int2 .pp-row-lbl.pull { color: var(--pp-gold) }
-#app-int2 .pp-row-lbl.status { color: var(--pp-muted); font-size:.6em }
-
-/* Main scrollable table */
-#app-int2 .pp-table-wrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-x: auto;
-  min-height: 0;
-}
-#app-int2 .pp-layout {
-  display: flex;
-  flex-direction: row;
-  gap: .4em;
-  height: 100%;
-  min-width: max-content;
+#app-int2 .pp-lbl.push { color:#0D9488 }
+#app-int2 .pp-lbl.pull { color:#B45309 }
+#app-int2 .pp-lbl-status {
+  height:2.2em;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-right:.7em;
+  font-size:.52em;
+  font-weight:700;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:#94A3B8;
 }
 
-/* Column */
+/* ── Columns scroll area ── */
+#app-int2 .pp-cols-scroll {
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:row;
+  gap:.5em;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+
+/* ── Individual column ── */
 #app-int2 .pp-col {
-  display: flex;
-  flex-direction: column;
-  gap: .4em;
-  width: 13em;
-  flex-shrink: 0;
+  width:14em;
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  gap:.5em;
+  height:100%;
 }
+
+/* Column header */
 #app-int2 .pp-col-hdr {
-  height: 2.2em;
-  background: var(--pp-card);
-  border: 1px solid var(--pp-border);
-  border-radius: .5em;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 .7em;
-  flex-shrink: 0;
+  height:2.6em;
+  background:#fff;
+  border:1.5px solid #E2E8F0;
+  border-radius:.6em;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 .75em;
+  flex-shrink:0;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
 }
 #app-int2 .pp-col-nm {
-  font-size: .75em;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size:.75em;
+  font-weight:700;
+  color:#0F2044;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  flex:1;
 }
 #app-int2 .pp-del-btn {
-  background: none;
-  border: none;
-  color: var(--pp-muted);
-  cursor: pointer;
-  font-size: .85em;
-  line-height: 1;
-  padding: 0 .1em;
-  transition: color .12s;
-  flex-shrink: 0;
+  background:none;border:none;color:#CBD5E1;cursor:pointer;
+  font-size:.9em;padding:0 .1em;line-height:1;transition:color .12s;flex-shrink:0;
 }
-#app-int2 .pp-del-btn:hover { color: #f87171 }
+#app-int2 .pp-del-btn:hover { color:#F87171 }
 
-/* Cells */
+/* Push / Pull cells */
 #app-int2 .pp-cell {
-  flex: 1;
-  min-height: 0;
-  background: var(--pp-card);
-  border: 1px solid var(--pp-border);
-  border-radius: .45em;
-  overflow: hidden;
-  transition: border-color .12s;
+  flex:1;
+  min-height:0;
+  background:#fff;
+  border:1.5px solid #E2E8F0;
+  border-radius:.55em;
+  overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+  transition:border-color .12s,box-shadow .12s;
 }
-#app-int2 .pp-cell:focus-within { border-color: var(--pp-teal) }
-#app-int2 .pp-cell.pull-cell:focus-within { border-color: var(--pp-gold) }
+#app-int2 .pp-cell:focus-within {
+  box-shadow:0 0 0 2px rgba(13,148,136,.2);
+}
+#app-int2 .pp-cell.push-cell {
+  border-top:3px solid #5EEAD4;
+}
+#app-int2 .pp-cell.push-cell:focus-within {
+  border-color:#0D9488;
+  box-shadow:0 0 0 2px rgba(13,148,136,.15);
+}
+#app-int2 .pp-cell.pull-cell {
+  border-top:3px solid #FCD34D;
+}
+#app-int2 .pp-cell.pull-cell:focus-within {
+  border-color:#B45309;
+  box-shadow:0 0 0 2px rgba(180,83,9,.15);
+}
 #app-int2 .pp-cell textarea {
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  border: none;
-  outline: none;
-  resize: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .7em;
-  color: var(--pp-text);
-  padding: .6em .7em;
-  line-height: 1.5;
-  box-sizing: border-box;
+  width:100%;height:100%;
+  background:transparent;border:none;outline:none;resize:none;
+  font-family:'DM Sans',sans-serif;font-size:.7em;
+  color:#1E293B;padding:.65em .75em;line-height:1.6;box-sizing:border-box;
 }
-#app-int2 .pp-cell textarea::placeholder { color: rgba(255,255,255,.18) }
-#app-int2 .pp-cell.push-cell { border-top: 2px solid rgba(94,234,212,.3) }
-#app-int2 .pp-cell.pull-cell { border-top: 2px solid rgba(251,191,36,.25) }
+#app-int2 .pp-cell textarea::placeholder { color:#CBD5E1 }
 
-/* Status row */
-#app-int2 .pp-status-cell {
-  height: 2em;
-  border-radius: .4em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: .65em;
-  font-weight: 700;
-  letter-spacing: .04em;
-  border: 1px solid transparent;
-  transition: all .13s;
-  user-select: none;
-  flex-shrink: 0;
+/* Status badges */
+#app-int2 .pp-status {
+  height:2.2em;flex-shrink:0;
+  border-radius:.45em;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:.62em;font-weight:700;letter-spacing:.04em;
+  border:1.5px solid transparent;user-select:none;transition:all .13s;
 }
-#app-int2 .pp-status-cell.funded {
-  background: rgba(5,150,105,.18);
-  border-color: rgba(5,150,105,.4);
-  color: #34D399;
+#app-int2 .pp-status:hover { filter:brightness(.95) }
+#app-int2 .pp-status.funded {
+  background:#F0FDF4;border-color:#BBF7D0;color:#166534;
 }
-#app-int2 .pp-status-cell.evaluating {
-  background: rgba(217,119,6,.18);
-  border-color: rgba(217,119,6,.4);
-  color: #FCD34D;
+#app-int2 .pp-status.evaluating {
+  background:#FFFBEB;border-color:#FDE68A;color:#92400E;
 }
-#app-int2 .pp-status-cell.not-started {
-  background: rgba(51,65,85,.3);
-  border-color: rgba(51,65,85,.5);
-  color: rgba(255,255,255,.3);
+#app-int2 .pp-status.not-started {
+  background:#F8FAFC;border-color:#E2E8F0;color:#94A3B8;
 }
-#app-int2 .pp-status-cell:hover { filter: brightness(1.15) }
 
-/* Add column button */
+/* Add col button */
 #app-int2 .pp-add-col {
-  width: 13em;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: .4em;
+  width:14em;flex-shrink:0;
+  display:flex;flex-direction:column;height:100%;
 }
-#app-int2 .pp-add-col-btn {
-  height: 2.2em;
-  background: transparent;
-  border: 1.5px dashed rgba(255,255,255,.18);
-  border-radius: .5em;
-  color: var(--pp-muted);
-  font-family: 'DM Sans', sans-serif;
-  font-size: .72em;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all .13s;
-  white-space: nowrap;
+#app-int2 .pp-add-btn {
+  height:2.6em;background:transparent;
+  border:1.5px dashed #CBD5E1;border-radius:.6em;
+  color:#94A3B8;font-family:'DM Sans',sans-serif;font-size:.72em;font-weight:500;
+  cursor:pointer;transition:all .13s;white-space:nowrap;
 }
-#app-int2 .pp-add-col-btn:hover {
-  border-color: var(--pp-teal);
-  color: var(--pp-teal);
-  background: var(--pp-teal-dim);
+#app-int2 .pp-add-btn:hover {
+  border-color:#0D9488;color:#0D9488;background:rgba(13,148,136,.05);
 }
 
 /* Modal */
 #app-int2 .pp-modal-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
+  position:absolute;inset:0;background:rgba(15,32,68,.5);
+  display:none;align-items:center;justify-content:center;z-index:50;
 }
-#app-int2 .pp-modal-overlay.open { display: flex }
+#app-int2 .pp-modal-overlay.open { display:flex }
 #app-int2 .pp-modal {
-  background: #162030;
-  border: 1px solid var(--pp-border);
-  border-radius: .8em;
-  padding: 1.8em 2em;
-  width: 22em;
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
+  background:#fff;border:1px solid #E2E8F0;border-radius:.8em;
+  padding:1.8em 2em;width:22em;display:flex;flex-direction:column;gap:1em;
+  box-shadow:0 20px 60px rgba(0,0,0,.15);
 }
 #app-int2 .pp-modal-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 1.2em;
-  color: #fff;
+  font-family:'DM Serif Display',serif;font-size:1.2em;color:#0F2044;
 }
 #app-int2 .pp-modal-inp {
-  background: rgba(255,255,255,.06);
-  border: 1px solid var(--pp-border);
-  border-radius: .45em;
-  padding: .55em .75em;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .85em;
-  color: #fff;
-  outline: none;
-  transition: border-color .12s;
-  width: 100%;
-  box-sizing: border-box;
+  background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:.45em;
+  padding:.55em .75em;font-family:'DM Sans',sans-serif;font-size:.85em;
+  color:#1E293B;outline:none;transition:border-color .12s;width:100%;box-sizing:border-box;
 }
-#app-int2 .pp-modal-inp:focus { border-color: var(--pp-teal) }
+#app-int2 .pp-modal-inp:focus { border-color:#0D9488 }
 #app-int2 .pp-modal-btns { display:flex;gap:.6em;justify-content:flex-end }
 #app-int2 .pp-modal-cancel {
   font-family:'DM Sans',sans-serif;font-size:.8em;padding:.4em .9em;
-  border-radius:.4em;border:1px solid var(--pp-border);background:transparent;
-  color:var(--pp-muted);cursor:pointer;
+  border-radius:.4em;border:1.5px solid #E2E8F0;background:#fff;color:#64748B;cursor:pointer;
 }
 #app-int2 .pp-modal-confirm {
   font-family:'DM Sans',sans-serif;font-size:.8em;padding:.4em .9em;
-  border-radius:.4em;border:none;background:var(--pp-teal);
-  color:#0B1628;font-weight:700;cursor:pointer;
+  border-radius:.4em;border:none;background:#0F2044;color:#fff;font-weight:700;cursor:pointer;
 }
-#app-int2 .pp-modal-confirm:hover { background:#4DD4C0 }
+#app-int2 .pp-modal-confirm:hover { background:#1a3a6b }
 
 /* Footer */
 #app-int2 .pp-footer {
-  background: #0D1F3C;
-  border-top: 1px solid var(--pp-border);
-  display: flex;
-  align-items: center;
-  padding: 0 1.8%;
-  height: 2.8em;
-  flex-shrink: 0;
-  gap: .8em;
+  background:#fff;border-top:1px solid #E2E8F0;
+  display:flex;align-items:center;padding:0 1.8%;height:2.8em;flex-shrink:0;gap:.8em;
 }
-#app-int2 .pp-footer-hint {
-  font-size: .62em;
-  color: var(--pp-muted);
-  flex: 1;
-}
-#app-int2 .pp-legend {
-  display: flex;
-  align-items: center;
-  gap: .9em;
-}
-#app-int2 .pp-leg-item {
-  display: flex;
-  align-items: center;
-  gap: .32em;
-  font-size: .62em;
-  color: var(--pp-muted);
-}
-#app-int2 .pp-leg-dot {
-  width: .5em;
-  height: .5em;
-  border-radius: 50%;
-}
-#app-int2 .pp-leg-dot.push { background: var(--pp-teal) }
-#app-int2 .pp-leg-dot.pull { background: var(--pp-gold) }
+#app-int2 .pp-footer-hint { font-size:.6em;color:#94A3B8;flex:1 }
+#app-int2 .pp-legend { display:flex;align-items:center;gap:.9em }
+#app-int2 .pp-leg-item { display:flex;align-items:center;gap:.32em;font-size:.6em;color:#64748B }
+#app-int2 .pp-leg-dot { width:.45em;height:.45em;border-radius:50% }
+#app-int2 .pp-leg-dot.push { background:#0D9488 }
+#app-int2 .pp-leg-dot.pull { background:#B45309 }
 </style>
 </head>
 <body>
@@ -1259,7 +1191,6 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 
 <!-- ══ PUSH / PULL MATRIX SESSION ══ -->
 <div id="app-int2" class="app-screen" style="display:none">
-  <div style="width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative">
 
     <!-- Topbar -->
     <div class="pp-topbar">
@@ -1274,6 +1205,15 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
       </div>
     </div>
 
+    <!-- Subheader -->
+    <div class="pp-subhead">
+      <div class="pp-subhead-l">
+        <span class="pp-eyebrow">Integration Strategy</span>
+        <span style="color:#E2E8F0">·</span>
+        <span class="pp-subhead-title">What does 6sense push to & pull from each system?</span>
+      </div>
+    </div>
+
     <!-- Matrix -->
     <div class="pp-matrix-wrap" id="pp-matrix-wrap">
       <!-- rendered by JS -->
@@ -1281,7 +1221,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 
     <!-- Footer -->
     <div class="pp-footer">
-      <span class="pp-footer-hint">Click a system header to rename · Click status badge to cycle · Click ✕ to remove column</span>
+      <span class="pp-footer-hint">Click status badge to cycle · Click ✕ to remove column</span>
       <div class="pp-legend">
         <div class="pp-leg-item"><div class="pp-leg-dot push"></div>PUSH → 6sense sends out</div>
         <div class="pp-leg-item"><div class="pp-leg-dot pull"></div>PULL → 6sense receives</div>
@@ -1300,7 +1240,6 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
       </div>
     </div>
 
-  </div>
 </div>
 
 <!-- ══ DATA LAYER SESSION ══ -->
@@ -3848,53 +3787,54 @@ function render() {
   var parts = [];
 
   // ── Row label sidebar ──
-  parts.push('<div style="display:flex;flex-direction:column;gap:.4em;width:5.8em;flex-shrink:0;">');
-  parts.push('<div style="height:2.2em;flex-shrink:0;"></div>');
-  parts.push('<div style="flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.6em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#5EEAD4;">PUSH</div>');
-  parts.push('<div style="flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.6em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#FBBF24;">PULL</div>');
-  parts.push('<div style="height:2em;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.55em;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.25);">FY27</div>');
+  parts.push('<div class="pp-labels">');
+  parts.push('<div class="pp-lbl-spacer"></div>');
+  parts.push('<div class="pp-lbl push">Push</div>');
+  parts.push('<div class="pp-lbl pull">Pull</div>');
+  parts.push('<div class="pp-lbl-status">FY27</div>');
   parts.push('</div>');
 
   // ── Scrollable columns ──
-  parts.push('<div style="flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;display:flex;flex-direction:row;gap:.4em;">');
+  parts.push('<div class="pp-cols-scroll">');
 
   state.cols.forEach(function(col) {
     var cid = col.id;
-    parts.push('<div style="width:13em;flex-shrink:0;display:flex;flex-direction:column;gap:.4em;height:100%;">');
+    parts.push('<div class="pp-col">');
 
     // Header
-    parts.push('<div style="height:2.2em;background:#111E33;border:1px solid rgba(255,255,255,.12);border-radius:.5em;display:flex;align-items:center;justify-content:space-between;padding:0 .65em;flex-shrink:0;">');
-    parts.push('<span style="font-size:.72em;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">' + escH(col.name) + '</span>');
-    parts.push('<button onclick="PP.deleteCol(\'' + cid + '\')" title="Remove" style="background:none;border:none;color:rgba(255,255,255,.25);cursor:pointer;font-size:.85em;padding:0 .1em;line-height:1;" onmouseover="this.style.color=\'#f87171\'" onmouseout="this.style.color=\'rgba(255,255,255,.25)\'">✕</button>');
+    parts.push('<div class="pp-col-hdr">');
+    parts.push('<span class="pp-col-nm">' + escH(col.name) + '</span>');
+    parts.push('<button class="pp-del-btn" onclick="PP.deleteCol('' + cid + '')" title="Remove">✕</button>');
     parts.push('</div>');
 
     // Push cell
-    parts.push('<div style="flex:1;min-height:0;background:#111E33;border:1px solid rgba(255,255,255,.1);border-top:2px solid rgba(94,234,212,.35);border-radius:.45em;overflow:hidden;">');
-    parts.push('<textarea oninput="PP.saveCell(\'' + cid + '\',\'push\',this.value)" placeholder="What 6sense pushes to this system…" style="width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:\'DM Sans\',sans-serif;font-size:.68em;color:rgba(255,255,255,.88);padding:.6em .7em;line-height:1.55;box-sizing:border-box;">');
+    parts.push('<div class="pp-cell push-cell">');
+    parts.push('<textarea oninput="PP.saveCell('' + cid + '','push',this.value)" placeholder="What 6sense pushes to this system…">');
     parts.push(escH(col.push));
     parts.push('</textarea></div>');
 
     // Pull cell
-    parts.push('<div style="flex:1;min-height:0;background:#111E33;border:1px solid rgba(255,255,255,.1);border-top:2px solid rgba(251,191,36,.3);border-radius:.45em;overflow:hidden;">');
-    parts.push('<textarea oninput="PP.saveCell(\'' + cid + '\',\'pull\',this.value)" placeholder="What 6sense pulls from this system…" style="width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:\'DM Sans\',sans-serif;font-size:.68em;color:rgba(255,255,255,.88);padding:.6em .7em;line-height:1.55;box-sizing:border-box;">');
+    parts.push('<div class="pp-cell pull-cell">');
+    parts.push('<textarea oninput="PP.saveCell('' + cid + '','pull',this.value)" placeholder="What 6sense pulls from this system…">');
     parts.push(escH(col.pull));
     parts.push('</textarea></div>');
 
     // Status badge
     var sc = col.status || 'not-started';
-    parts.push('<div onclick="PP.cycleStatus(\'' + cid + '\')" style="' + statusCSS(sc) + 'height:2em;border-radius:.4em;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.62em;font-weight:700;letter-spacing:.03em;border:1px solid transparent;flex-shrink:0;user-select:none;">');
-    parts.push(STATUS_LABELS[sc]);
+    var lbl = STATUS_LABELS[sc];
+    parts.push('<div class="pp-status ' + sc + '" onclick="PP.cycleStatus('' + cid + '')">');
+    parts.push(lbl);
     parts.push('</div>');
 
     parts.push('</div>'); // end col
   });
 
   // Add column button
-  parts.push('<div style="width:13em;flex-shrink:0;display:flex;flex-direction:column;gap:.4em;height:100%;">');
-  parts.push('<button onclick="PP.openModal()" style="height:2.2em;background:transparent;border:1.5px dashed rgba(255,255,255,.18);border-radius:.5em;color:rgba(255,255,255,.35);font-family:\'DM Sans\',sans-serif;font-size:.7em;font-weight:500;cursor:pointer;white-space:nowrap;" onmouseover="this.style.borderColor=\'#5EEAD4\';this.style.color=\'#5EEAD4\';this.style.background=\'rgba(94,234,212,.08)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.18)\';this.style.color=\'rgba(255,255,255,.35)\';this.style.background=\'transparent\'">+ Add System</button>');
+  parts.push('<div class="pp-add-col">');
+  parts.push('<button class="pp-add-btn" onclick="PP.openModal()">+ Add System</button>');
   parts.push('</div>');
 
-  parts.push('</div>'); // end scrollable
+  parts.push('</div>'); // end cols-scroll
 
   wrap.innerHTML = parts.join('');
 }
