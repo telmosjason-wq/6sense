@@ -1,1 +1,336 @@
-{}
+{
+  "bdr": {
+    "acct-pri": {
+      "comp": {
+        "6s": "diff",
+        "zi": "mod",
+        "db": "best",
+        "apollo": "basic",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Core differentiation. Predictive buying-stage scoring depth unmatched."
+    },
+    "intent-res": {
+      "comp": {
+        "6s": "diff",
+        "zi": "best",
+        "db": "best",
+        "apollo": "basic",
+        "hg": "mod",
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": "Intent breadth and depth is the moat. ZI has solid coverage; Apollo minimal."
+    },
+    "contact-disc": {
+      "comp": {
+        "6s": "mod",
+        "zi": "best",
+        "db": "mod",
+        "apollo": "best",
+        "hg": "none",
+        "cognism": "best"
+      },
+      "assess": "partner",
+      "notes": "Commoditizing fast. ZI/Cognism/Apollo closing gap. Win by owning identity resolution on top of partner data."
+    },
+    "techno-psycho": {
+      "comp": {
+        "6s": "best",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "basic",
+        "hg": "diff",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "HG owns standalone technographics. We win by combining with intent + buying stage."
+    },
+    "chrome": {
+      "comp": {
+        "6s": "best",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "best",
+        "hg": "none",
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": "Primary distribution channel going forward. Most critical build area."
+    },
+    "ai-insights": {
+      "comp": {
+        "6s": "best",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Adoption low \u2014 likely distribution gap, not product gap. Needs Chrome Ext delivery."
+    },
+    "comp-takeout": {
+      "comp": {
+        "6s": "diff",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "basic",
+        "hg": "mod",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Only 6sense combines tech + competitor intent + buying stage. Underexposed use case."
+    }
+  },
+  "ae": {
+    "deal-ent": {
+      "comp": {
+        "6s": "diff",
+        "zi": "mod",
+        "db": "best",
+        "apollo": "basic",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "6sense flagship. ZI/Apollo reactive only. AEs need behavior change to act pre-hand-raise."
+    },
+    "buy-cmte": {
+      "comp": {
+        "6s": "best",
+        "zi": "mod",
+        "db": "best",
+        "apollo": "mod",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Apollo partial coverage. Key for multi-threading before deals stall."
+    },
+    "deal-acc": {
+      "comp": {
+        "6s": "mod",
+        "zi": "basic",
+        "db": "mod",
+        "apollo": "basic",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "partner",
+      "notes": "Gong/Clari own conversation-intelligence side. We own account-signal side. Complementary."
+    },
+    "acct-plan": {
+      "comp": {
+        "6s": "best",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "basic",
+        "hg": "mod",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "ZI strong on firmographics. We win by combining with buying-stage signals for white-space ID."
+    },
+    "reengage": {
+      "comp": {
+        "6s": "diff",
+        "zi": "basic",
+        "db": "mod",
+        "apollo": "basic",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Signal-driven dormant reactivation. Only 6sense can own this. Alert delivery is the gap."
+    }
+  },
+  "mgr": {
+    "rep-pri": {
+      "comp": {
+        "6s": "diff",
+        "zi": "none",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Coaching-layer use case. Unique to 6sense. Needs to be part of natural management workflow."
+    },
+    "pipe-quality": {
+      "comp": {
+        "6s": "best",
+        "zi": "basic",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "We own the signal lens; Clari owns activity lens. Complementary \u2014 not competing."
+    },
+    "forecast-align": {
+      "comp": {
+        "6s": "mod",
+        "zi": "basic",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "partner",
+      "notes": "Clari dominant. We supply signals into Clari. Deep integration > competing view."
+    },
+    "outbound-design": {
+      "comp": {
+        "6s": "diff",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "basic",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "No competitor combines buying-stage + intent + play design at manager level."
+    },
+    "utilization-value": {
+      "comp": {
+        "6s": "diff",
+        "zi": "none",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "CRITICAL. Logins metric dead in Chrome Extension world. Must define new value metric."
+    }
+  },
+  "ops": {
+    "acct-map": {
+      "comp": {
+        "6s": "basic",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "partner",
+      "notes": "Crossbeam owns partner overlap. Build account overlap as 6sense-native; partner for ecosystem layer."
+    },
+    "abm-model": {
+      "comp": {
+        "6s": "diff",
+        "zi": "mod",
+        "db": "best",
+        "apollo": "basic",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Operational backbone of 6sense. Routing + orchestration must be best-in-class."
+    },
+    "pipe-attr": {
+      "comp": {
+        "6s": "best",
+        "zi": "mod",
+        "db": "best",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Without CFO-defensible attribution, renewal conversations rely on anecdote."
+    },
+    "territory": {
+      "comp": {
+        "6s": "basic",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "partner",
+      "notes": "RevOps builds this in CRM using our data. Product gap exists but may not be our lane."
+    },
+    "bi-conn": {
+      "comp": {
+        "6s": "basic",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "mod",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "BI Connector is TBD. Retention risk if RevOps never opens app but consumes elsewhere."
+    },
+    "crm-hygiene": {
+      "comp": {
+        "6s": "basic",
+        "zi": "best",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": "none",
+        "cognism": "mod"
+      },
+      "assess": "partner",
+      "notes": "LeanData/Openprise own hygiene. Our job is clean data in/out. Partner play."
+    }
+  },
+  "cs": {
+    "churn-risk": {
+      "comp": {
+        "6s": "mod",
+        "zi": "none",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Signals exist. Gap is delivery \u2014 CS lives in Gainsight not SI. Gainsight integration is blocking."
+    },
+    "expansion-sig": {
+      "comp": {
+        "6s": "mod",
+        "zi": "none",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "Expansion signals exist. Distribution to CS workflow (Gainsight/Slack) is the gap."
+    },
+    "champion": {
+      "comp": {
+        "6s": "mod",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": "none",
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": "Job-change signals already in 6sense. Distribution gap more than data gap."
+    },
+    "comp-monitor": {
+      "comp": {
+        "6s": "best",
+        "zi": "none",
+        "db": "mod",
+        "apollo": "none",
+        "hg": "none",
+        "cognism": "none"
+      },
+      "assess": "mustbuild",
+      "notes": "6sense uniquely owns competitor-research signals. Surface in Gainsight/Slack \u2014 not just SI."
+    }
+  }
+}
