@@ -2185,7 +2185,7 @@ async function exportPPT() {
         drawTierScale(sl, ucS);
       });
 
-      // ── PERSONA MATRIX SLIDE (Harvey Balls)
+      // ── PERSONA MATRIX SLIDE (Harvey Balls via unicode)
       {
         const sl = pres.addSlide();
         sl.background = {color:BG};
@@ -2194,7 +2194,7 @@ async function exportPPT() {
         drawPersonaHdr(sl, p, pi, ratedN);
         sl.addShape(pres.shapes.RECTANGLE,{x:0,y:MAIN_Y,w:10,h:5.625-MAIN_Y,fill:{color:BG}});
 
-        const nUC = p.useCases.length;
+        const nUC  = p.useCases.length;
         const hUcW = 2.3, hAssW = 1.05, hGap = 0.04;
         const hGX  = PAD + hUcW + hGap + hAssW + hGap;
         const hNc  = COMPETITORS.length;
@@ -2203,25 +2203,12 @@ async function exportPPT() {
         const hHdrH = 0.34;
         const avail  = BOTTOM - hHdrY - hHdrH - 0.04;
         const rH     = Math.min(0.55, avail / nUC);
-        const ballR  = Math.min(rH * 0.32, 0.14); // radius of harvey ball circle
 
-        // Harvey ball pie wedge helper — returns points array for freeform
-        // cx,cy = center in inches; r = radius; frac = filled fraction (0-1)
-        function hbPoints(cx, cy, r, frac) {
-          if (frac <= 0) return null;
-          if (frac >= 1) return 'full';
-          const steps = 32;
-          const pts = [{x:cx, y:cy}];
-          // start at 12 o'clock, sweep clockwise
-          for (let i = 0; i <= Math.round(steps * frac); i++) {
-            const angle = (i / steps) * 2 * Math.PI - Math.PI/2;
-            pts.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
-          }
-          pts.push({x:cx, y:cy});
-          return pts;
-        }
+        // Unicode Harvey Ball characters for each tier
+        const hbChar = {diff:'●', best:'◕', mod:'◑', basic:'◔', none:'○'};
+        const hbEmpty = '○';
 
-        // Column headers: USE CASE + ASSESSMENT + competitors
+        // Column headers
         sl.addText('USE CASE', {x:PAD, y:hHdrY, w:hUcW, h:hHdrH,
           fontSize:6, fontFace:'Trebuchet MS', bold:true, color:MU,
           charSpacing:0.5, valign:'middle', margin:0});
@@ -2232,8 +2219,7 @@ async function exportPPT() {
           const cx = hGX + ci*(hCW+hGap);
           const isSix = comp.id === '6s';
           sl.addShape(pres.shapes.RECTANGLE, {x:cx, y:hHdrY, w:hCW, h:hHdrH,
-            fill:{color: isSix ? '0F766E' : N},
-            line:{color: isSix ? '0F766E' : N}});
+            fill:{color: isSix ? '0F766E' : N}});
           sl.addText(comp.name, {x:cx, y:hHdrY, w:hCW, h:hHdrH*0.58,
             fontSize:7, fontFace:'Trebuchet MS', bold:true, color:W,
             align:'center', valign:'middle', margin:0});
@@ -2247,7 +2233,6 @@ async function exportPPT() {
           const ry  = hHdrY + hHdrH + 0.04 + ri * rH;
           const bg  = ri % 2 === 0 ? W : 'F8FAFC';
           const ucS = S[p.id][uc.id];
-          const cy  = ry + rH/2;  // vertical center of row
 
           // Row background
           sl.addShape(pres.shapes.RECTANGLE, {x:PAD, y:ry, w:10-PAD*1.2, h:rH-0.025,
@@ -2261,81 +2246,48 @@ async function exportPPT() {
           // Assessment pill
           if (ucS.assess) {
             const ax = PAD + hUcW + hGap;
-            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.06, w:hAssW-0.08, h:rH-0.14,
-              fill:{color:aBgH[ucS.assess]}, line:{color:aSel[ucS.assess], pt:0.75}});
-            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.06, w:0.045, h:rH-0.14,
+            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.05, w:hAssW-0.08, h:rH-0.12,
+              fill:{color:aBgH[ucS.assess]}});
+            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.05, w:0.045, h:rH-0.12,
               fill:{color:aSel[ucS.assess]}});
-            sl.addText(aLbl[ucS.assess], {x:ax+0.10, y:ry+0.06, w:hAssW-0.18, h:rH-0.14,
+            sl.addText(aLbl[ucS.assess], {x:ax+0.10, y:ry+0.05, w:hAssW-0.18, h:rH-0.12,
               fontSize:6, fontFace:'Trebuchet MS', bold:true, color:aClrH[ucS.assess],
               valign:'middle', margin:0});
           }
 
-          // Harvey Balls per competitor
+          // Harvey Ball unicode characters per competitor
           COMPETITORS.forEach((comp, ci) => {
-            const bx  = hGX + ci*(hCW+hGap) + hCW/2;  // center x of cell
+            const cx  = hGX + ci*(hCW+hGap);
             const tid = ucS.comp[comp.id];
-            const fracs = {diff:1, best:0.75, mod:0.5, basic:0.25, none:0};
-            const frac  = tid ? (fracs[tid] || 0) : 0;
-            const col   = tid ? tSelH[tid] : 'CBD5E1';
-
-            // Outer circle (border)
-            sl.addShape(pres.shapes.OVAL, {
-              x: bx - ballR, y: cy - ballR, w: ballR*2, h: ballR*2,
-              fill: {color: tid ? W : 'F8FAFC'},
-              line: {color: col, pt: 1.2}
-            });
-
-            // Filled wedge via freeform
-            if (frac > 0) {
-              const pts = hbPoints(bx, cy, ballR * 0.88, frac);
-              if (pts === 'full') {
-                // Full fill — just another oval on top
-                sl.addShape(pres.shapes.OVAL, {
-                  x: bx - ballR*0.88, y: cy - ballR*0.88,
-                  w: ballR*1.76, h: ballR*1.76,
-                  fill: {color: col}, line: {color: col, pt: 0}
-                });
-              } else if (pts) {
-                sl.addShape(pres.shapes.FREEFORM, {
-                  points: pts,
-                  fill: {color: col},
-                  line: {color: col, pt: 0}
-                });
-              }
-            }
+            const ch  = tid ? (hbChar[tid] || hbEmpty) : hbEmpty;
+            const col = tid ? tSelH[tid] : 'CBD5E1';
+            // cell bg
+            sl.addShape(pres.shapes.RECTANGLE, {x:cx, y:ry, w:hCW, h:rH-0.025,
+              fill:{color:bg}, line:{color:'E2E8F0', pt:0.5}});
+            // Harvey Ball glyph
+            sl.addText(ch, {x:cx, y:ry, w:hCW, h:rH-0.025,
+              fontSize:13, fontFace:'Arial Unicode MS', color:col,
+              align:'center', valign:'middle', margin:0});
           });
         });
 
-        // Legend row at bottom
-        const legY = BOTTOM + 0.03;
-        const legItems = [
-          {id:'diff', label:'True differentiator'},
-          {id:'best', label:'Best in class'},
-          {id:'mod',  label:'Moderate'},
-          {id:'basic',label:'Basic'},
-          {id:'none', label:'No offering'},
+        // Legend
+        const legY = BOTTOM + 0.04;
+        const legData = [
+          {id:'diff', ch:'●', label:'True differentiator'},
+          {id:'best', ch:'◕', label:'Best in class'},
+          {id:'mod',  ch:'◑', label:'Moderate'},
+          {id:'basic',ch:'◔', label:'Basic'},
+          {id:'none', ch:'○', label:'No offering'},
         ];
         let legX = PAD;
-        legItems.forEach(item => {
-          const frac = {diff:1,best:0.75,mod:0.5,basic:0.25,none:0}[item.id];
-          const col  = tSelH[item.id];
-          const br   = 0.065;
-          const lcy  = legY + br;
-          sl.addShape(pres.shapes.OVAL, {x:legX, y:legY, w:br*2, h:br*2,
-            fill:{color:frac>0?W:'F8FAFC'}, line:{color:col, pt:1}});
-          if (frac > 0) {
-            const pts = hbPoints(legX+br, lcy, br*0.85, frac);
-            if (pts === 'full') {
-              sl.addShape(pres.shapes.OVAL, {x:legX+br*0.15, y:legY+br*0.15,
-                w:br*1.7, h:br*1.7, fill:{color:col}, line:{color:col,pt:0}});
-            } else if (pts) {
-              sl.addShape(pres.shapes.FREEFORM, {points:pts,
-                fill:{color:col}, line:{color:col,pt:0}});
-            }
-          }
-          sl.addText(item.label, {x:legX+br*2+0.04, y:legY, w:1.3, h:br*2,
-            fontSize:5.5, fontFace:'Trebuchet MS', color:MU, valign:'middle', margin:0});
-          legX += br*2 + 0.04 + 1.35;
+        legData.forEach(item => {
+          sl.addText(item.ch + '  ' + item.label, {
+            x:legX, y:legY, w:1.7, h:0.18,
+            fontSize:6.5, fontFace:'Arial Unicode MS', color:tSelH[item.id] || MU,
+            valign:'middle', margin:0
+          });
+          legX += 1.75;
         });
       }
     });
