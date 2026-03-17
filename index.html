@@ -1899,176 +1899,155 @@ function showCloudToast(msg, color) {
   setTimeout(function(){ t.remove(); }, 2700);
 }
 
-function cloudSave() {
-  var btn = document.getElementById('cloud-save-btn');
-  if (btn) { btn.textContent='☁ Saving…'; btn.disabled=true; }
-  fetch(GH_API, {headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
-  .then(function(r){ return r.json(); })
-  .then(function(meta) {
-    var content = btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))));
-    return fetch(GH_API, {method:'PUT',
-      headers:{'Authorization':'token '+GH_TOK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-      body:JSON.stringify({message:'Update SI session ratings',content:content,sha:meta.sha})});
+function listSaveFiles(callback) {
+  fetch('https://api.github.com/repos/'+GH_REPO+'/contents/?t='+Date.now(), {
+    headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}
   })
   .then(function(r){ return r.json(); })
-  .then(function(res) {
-    if (btn) { btn.textContent='☁ Save'; btn.disabled=false; }
-    showCloudToast(res.content ? '✓ Saved to cloud' : '✗ Save failed', res.content ? null : '#E11D48');
+  .then(function(files) {
+    if (!Array.isArray(files)) { callback([]); return; }
+    var slots = files.filter(function(f){
+      return f.name==='session-data.json' || /^session-data-.+\.json$/.test(f.name);
+    }).map(function(f){
+      var label = f.name==='session-data.json' ? 'Default' :
+        f.name.replace('session-data-','').replace('.json','');
+      return {name:f.name, label:label};
+    });
+    callback(slots);
   })
-  .catch(function() {
-    if (btn) { btn.textContent='☁ Save'; btn.disabled=false; }
-    showCloudToast('✗ Network error','#E11D48');
+  .catch(function(){ callback([]); });
+}
+
+function showSaveModal() {
+  var old = document.getElementById('cloud-modal');
+  if (old) old.remove();
+  var modal = document.createElement('div');
+  modal.id = 'cloud-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-family:inherit;';
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:12px;padding:24px;width:380px;box-shadow:0 24px 60px rgba(0,0,0,.25);">'+
+      '<div style="font-size:16px;font-weight:700;color:#0F172A;margin-bottom:6px;">Save Session</div>'+
+      '<div style="font-size:12px;color:#64748B;margin-bottom:14px;">Name this save slot, or leave blank for a timestamp.</div>'+
+      '<input id="cloud-slot-name" placeholder="e.g. Pre-session baseline, After Anurag, Final\u2026" '+
+        'style="width:100%;border:1.5px solid #E2E8F0;border-radius:8px;padding:9px 12px;font-size:13px;'+
+        'font-family:inherit;box-sizing:border-box;outline:none;margin-bottom:16px;" '+
+        'onfocus="this.style.borderColor=\'#0D9488\'" onblur="this.style.borderColor=\'#E2E8F0\'">'+
+      '<div style="display:flex;gap:10px;justify-content:flex-end;">'+
+        '<button onclick="document.getElementById(\'cloud-modal\').remove()" '+
+          'style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 18px;'+
+          'font-size:13px;cursor:pointer;font-family:inherit;color:#64748B;">Cancel</button>'+
+        '<button onclick="SI.doCloudSave()" '+
+          'style="background:#0D9488;border:none;border-radius:8px;padding:8px 18px;'+
+          'font-size:13px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;">Save</button>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(modal);
+  setTimeout(function(){ var i=document.getElementById('cloud-slot-name'); if(i) i.focus(); }, 50);
+  document.getElementById('cloud-slot-name').addEventListener('keydown', function(e){
+    if (e.key==='Enter') SI.doCloudSave();
+    if (e.key==='Escape') { var m=document.getElementById('cloud-modal'); if(m) m.remove(); }
   });
 }
 
-function cloudLoad() {
-  var btn = document.getElementById('cloud-load-btn');
-  if (btn) { btn.textContent='↓ Loading…'; btn.disabled=true; }
-  fetch(GH_API+'?t='+Date.now(), {headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
+function doCloudSave() {
+  var inp = document.getElementById('cloud-slot-name');
+  var rawName = inp ? inp.value.trim() : '';
+  var modal = document.getElementById('cloud-modal');
+  if (modal) modal.remove();
+
+  var ts = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  var slotName = rawName || ts;
+  var safeName = slotName.replace(/[^a-zA-Z0-9 _]/g,'').trim().replace(/\s+/g,'-').toLowerCase();
+  var fileName = (!safeName || safeName==='') ? 'session-data.json' : 'session-data-'+safeName+'.json';
+  var apiUrl   = 'https://api.github.com/repos/'+GH_REPO+'/contents/'+fileName;
+  var btn = document.getElementById('cloud-save-btn');
+  if (btn) { btn.textContent='\u2601 Saving\u2026'; btn.disabled=true; }
+
+  fetch(apiUrl+'?t='+Date.now(), {headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){ return r.status===404 ? null : r.json(); })
+  .then(function(existing) {
+    var content = btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))));
+    var body = {message:'Save slot: '+slotName, content:content};
+    if (existing && existing.sha) body.sha = existing.sha;
+    return fetch(apiUrl,{method:'PUT',
+      headers:{'Authorization':'token '+GH_TOK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+      body:JSON.stringify(body)});
+  })
   .then(function(r){ return r.json(); })
-  .then(function(meta) {
+  .then(function(res){
+    if (btn) { btn.textContent='\u2601 Save'; btn.disabled=false; }
+    showCloudToast(res.content ? '\u2713 Saved as "'+slotName+'"' : '\u2717 Save failed', res.content?null:'#E11D48');
+  })
+  .catch(function(){
+    if (btn) { btn.textContent='\u2601 Save'; btn.disabled=false; }
+    showCloudToast('\u2717 Network error','#E11D48');
+  });
+}
+
+function cloudSave() { showSaveModal(); }
+
+function showLoadModal() {
+  var btn = document.getElementById('cloud-load-btn');
+  if (btn) { btn.textContent='\u2193 Loading\u2026'; btn.disabled=true; }
+  listSaveFiles(function(slots){
+    if (btn) { btn.textContent='\u2193 Load'; btn.disabled=false; }
+    if (!slots.length) { showCloudToast('No saved slots found','#64748B'); return; }
+    var old = document.getElementById('cloud-modal');
+    if (old) old.remove();
+    var modal = document.createElement('div');
+    modal.id = 'cloud-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-family:inherit;';
+    var rows = slots.map(function(s){
+      return '<div onclick="SI.doCloudLoad(\''+s.name+'\')" '+
+        'style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;'+
+        'border-radius:8px;cursor:pointer;border:1px solid #E2E8F0;margin-bottom:8px;background:#fff;" '+
+        'onmouseenter="this.style.background=\'#F0FDF9\';this.style.borderColor=\'#0D9488\'" '+
+        'onmouseleave="this.style.background=\'#fff\';this.style.borderColor=\'#E2E8F0\'">'+
+        '<div>'+
+          '<div style="font-size:13px;font-weight:600;color:#0F172A;">'+s.label+'</div>'+
+          '<div style="font-size:11px;color:#94A3B8;margin-top:1px;">'+s.name+'</div>'+
+        '</div>'+
+        '<span style="font-size:16px;color:#0D9488;">\u2192</span>'+
+      '</div>';
+    }).join('');
+    modal.innerHTML =
+      '<div style="background:#fff;border-radius:12px;padding:24px;width:420px;max-height:70vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);">'+
+        '<div style="font-size:16px;font-weight:700;color:#0F172A;margin-bottom:6px;">Load Session</div>'+
+        '<div style="font-size:12px;color:#64748B;margin-bottom:14px;">Choose a saved slot to restore.</div>'+
+        rows+
+        '<div style="display:flex;justify-content:flex-end;margin-top:8px;">'+
+          '<button onclick="document.getElementById(\'cloud-modal\').remove()" '+
+            'style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 18px;'+
+            'font-size:13px;cursor:pointer;font-family:inherit;color:#64748B;">Cancel</button>'+
+        '</div>'+
+      '</div>';
+    document.body.appendChild(modal);
+  });
+}
+
+function doCloudLoad(fileName) {
+  var modal = document.getElementById('cloud-modal');
+  if (modal) modal.remove();
+  var apiUrl = 'https://api.github.com/repos/'+GH_REPO+'/contents/'+fileName+'?t='+Date.now();
+  fetch(apiUrl, {headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){ return r.json(); })
+  .then(function(meta){
     var decoded = decodeURIComponent(escape(atob(meta.content.replace(/\n/g,''))));
     var parsed  = JSON.parse(decoded);
-    if (!parsed || Object.keys(parsed).length===0) {
-      showCloudToast('No saved data found','#64748B');
-      if (btn) { btn.textContent='↓ Load'; btn.disabled=false; }
-      return;
-    }
-    PERSONAS.forEach(function(p) {
-      if (parsed[p.id]) p.useCases.forEach(function(uc) {
+    if (!parsed || !Object.keys(parsed).length) { showCloudToast('Slot is empty','#64748B'); return; }
+    PERSONAS.forEach(function(p){
+      if (parsed[p.id]) p.useCases.forEach(function(uc){
         if (parsed[p.id][uc.id]) S[p.id][uc.id]=parsed[p.id][uc.id];
       });
     });
     persist(); render();
-    if (btn) { btn.textContent='↓ Load'; btn.disabled=false; }
-    showCloudToast('✓ Session loaded from cloud');
+    var label = fileName==='session-data.json'?'Default':fileName.replace('session-data-','').replace('.json','');
+    showCloudToast('\u2713 Loaded "'+label+'"');
   })
-  .catch(function() {
-    if (btn) { btn.textContent='↓ Load'; btn.disabled=false; }
-    showCloudToast('✗ Load failed','#E11D48');
-  });
+  .catch(function(){ showCloudToast('\u2717 Load failed','#E11D48'); });
 }
 
-// ── HARVEY BALLS ─────────────────────────────────────────────────────────────
-function harveyBall(tierId) {
-  var cx=11,cy=11,r=10;
-  var cols={diff:'#059669',best:'#0D9488',mod:'#D97706',basic:'#1D4ED8',none:'#94A3B8'};
-  var fracs={diff:1,best:0.75,mod:0.5,basic:0.25,none:0};
-  var col=cols[tierId]||'#E2E8F0';
-  var frac=tierId?(fracs[tierId]!==undefined?fracs[tierId]:0):0;
-  var stroke=tierId?col:'#CBD5E1';
-  var fillPath='';
-  if(frac===1){
-    fillPath='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r-1)+'" fill="'+col+'"/>';
-  }else if(frac>0){
-    var angle=frac*2*Math.PI;
-    var ex=cx+(r-1)*Math.sin(angle);
-    var ey=cy-(r-1)*Math.cos(angle);
-    var large=frac>0.5?1:0;
-    fillPath='<path d="M '+cx+' '+cy+' L '+cx+' '+(cy-r+1)+' A '+(r-1)+' '+(r-1)+' 0 '+large+' 1 '+ex.toFixed(3)+' '+ey.toFixed(3)+' Z" fill="'+col+'"/>';
-  }
-  return '<svg width="14" height="14" viewBox="0 0 22 22" style="display:block"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(tierId?'#fff':'#F8FAFC')+'" stroke="'+stroke+'" stroke-width="1.5"/>'+fillPath+'</svg>';
-}
-
-function cycleTier(tierId) {
-  var order=[null,'diff','best','mod','basic','none'];
-  return order[(order.indexOf(tierId)+1)%order.length];
-}
-
-function toggleMatrix(personaId) {
-  matrixView[personaId]=!matrixView[personaId];
-  render();
-}
-
-function goToPersona(pi) {
-  var firstStep=STEPS.findIndex(function(s){ return s.pi===pi; });
-  if(firstStep>=0){ step=firstStep; matrixView[PERSONAS[pi].id]=true; render(); }
-}
-
-function matrixSelectTier(personaId, ucId, compId) {
-  S[personaId][ucId].comp[compId]=cycleTier(S[personaId][ucId].comp[compId]);
-  renderMatrix(personaId); persist();
-}
-
-function matrixSelectAssess(personaId, ucId, val) {
-  S[personaId][ucId].assess=(S[personaId][ucId].assess===val)?null:val;
-  var sel=document.getElementById('mx-assess-'+personaId+'-'+ucId);
-  if(sel) sel.value=S[personaId][ucId].assess||'';
-  var pi=PERSONAS.findIndex(function(p){ return p.id===personaId; });
-  var r2=pRated(pi),t2=PERSONAS[pi].useCases.length;
-  document.getElementById('ph-prog-lbl').textContent=r2+' / '+t2+' rated';
-  document.getElementById('ph-prog-fill').style.width=Math.round(r2/t2*100)+'%';
-  persist();
-}
-
-function renderMatrix(personaId) {
-  var pi=PERSONAS.findIndex(function(p){ return p.id===personaId; });
-  var p=PERSONAS[pi];
-  var aColors={mustbuild:'#059669',partner:'#1D4ED8',stop:'#E11D48'};
-  var aBgs={mustbuild:'#D1FAE5',partner:'#DBEAFE',stop:'#FFE4E6'};
-
-  var hdrCells='<th style="text-align:left;padding:.5em .75em;font-size:.55em;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);position:sticky;left:0;z-index:3;min-width:10em;">Use Case</th>'+
-    '<th style="text-align:center;padding:.5em .5em;font-size:.55em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);min-width:6.5em;">Assessment</th>';
-  COMPETITORS.forEach(function(comp){
-    var isSix=comp.id==='6s';
-    hdrCells+='<th style="text-align:center;padding:.5em .4em;font-size:.6em;font-weight:700;color:'+(isSix?'var(--teal)':'var(--navy)')+';background:#fff;border-bottom:2px solid '+(isSix?'var(--teal)':'var(--border)')+';min-width:4.5em;white-space:nowrap;">'+
-      '<div>'+comp.name+'</div><div style="font-weight:400;font-size:.85em;color:var(--muted);margin-top:.1em;">'+comp.cat+'</div></th>';
-  });
-
-  var bodyRows='';
-  p.useCases.forEach(function(uc,ui){
-    var s=S[p.id][uc.id];
-    var rowBg=ui%2===0?'#fff':'var(--bg)';
-    var assessVal=s.assess||'';
-    var aColor=assessVal?aColors[assessVal]:'var(--muted)';
-    var aBg=assessVal?aBgs[assessVal]:'transparent';
-    var tipAttr=uc.prompt?' title="'+uc.prompt.replace(/"/g,"'").slice(0,200)+'"':'';
-    var compCells='';
-    COMPETITORS.forEach(function(comp){
-      var tier=s.comp[comp.id];
-      var isSix=comp.id==='6s';
-      var tierObj=TIERS.find(function(t){ return t.id===tier; });
-      var tipLabel=tierObj?tierObj.label:'Click to set';
-      compCells+='<td style="padding:.3em .35em;border-bottom:1px solid var(--border);text-align:center;border-left:'+(isSix?'2px solid var(--tealLt,#CCFBF1)':'1px solid var(--border)')+';">'+
-        '<div onclick="SI.matrixSelectTier(\''+p.id+'\',\''+uc.id+'\',\''+comp.id+'\')" title="'+tipLabel+'" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .1s" onmouseenter="this.style.transform=\'scale(1.2)\'" onmouseleave="this.style.transform=\'scale(1)\'">'+
-        harveyBall(tier)+'</div></td>';
-    });
-    bodyRows+='<tr onmouseenter="this.style.background=\'#EFF6FF\'" onmouseleave="this.style.background=\''+rowBg.replace(/'/g,"\\'")+'\'" style="background:'+rowBg+'">'+
-      '<td style="padding:.45em .75em;font-size:.72em;font-weight:600;color:var(--navy);border-bottom:1px solid var(--border);position:sticky;left:0;background:inherit;z-index:2;">'+
-        '<span'+tipAttr+'>'+uc.name+'</span>'+
-        (uc.prompt?' <span'+tipAttr+' style="font-size:.8em;color:var(--gold,#D97706);cursor:help;">ⓘ</span>':'')+
-      '</td>'+
-      '<td style="padding:.35em .4em;border-bottom:1px solid var(--border);text-align:center;">'+
-        '<select id="mx-assess-'+p.id+'-'+uc.id+'" onchange="SI.matrixSelectAssess(\''+p.id+'\',\''+uc.id+'\',this.value||null)" style="font-family:inherit;font-size:.6em;font-weight:600;border:1.5px solid '+(assessVal?aColor:'var(--border)')+';border-radius:.4em;padding:.25em .5em;background:'+aBg+';color:'+aColor+';cursor:pointer;outline:none;min-width:6em;">'+
-          '<option value="">— TBD</option>'+
-          '<option value="mustbuild"'+(assessVal==='mustbuild'?' selected':'')+'>↑ Must-Build</option>'+
-          '<option value="partner"'+(assessVal==='partner'?' selected':'')+'>⇄ Partner</option>'+
-          '<option value="stop"'+(assessVal==='stop'?' selected':'')+'>↓ Stop</option>'+
-        '</select>'+
-      '</td>'+compCells+'</tr>';
-  });
-
-  var legendHtml='<div style="display:flex;align-items:center;gap:.8em;font-size:.58em;color:var(--muted);padding:.6em .8em;flex-wrap:wrap;border-top:1px solid var(--border);">'+
-    '<span style="font-weight:600;">Scale:</span>';
-  TIERS.forEach(function(t){
-    legendHtml+='<span style="display:flex;align-items:center;gap:.3em;">'+harveyBall(t.id)+'<span>'+t.label+'</span></span>';
-  });
-  legendHtml+='</div>';
-
-  var el=document.getElementById('matrix-main');
-  if(el){
-    el.innerHTML='<div style="overflow:auto;padding:.5em .8em;">'+
-      '<table style="border-collapse:collapse;width:100%;font-family:inherit;">'+
-        '<thead><tr>'+hdrCells+'</tr></thead>'+
-        '<tbody>'+bodyRows+'</tbody>'+
-      '</table></div>'+legendHtml;
-  }
-  var r2=pRated(pi),t2=p.useCases.length;
-  var lbl=document.getElementById('ph-prog-lbl');
-  var fill=document.getElementById('ph-prog-fill');
-  if(lbl) lbl.textContent=r2+' / '+t2+' rated';
-  if(fill) fill.style.width=Math.round(r2/t2*100)+'%';
-}
+function cloudLoad() { showLoadModal(); }
 
 // boot — render called by showApp
 initState();
