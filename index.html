@@ -720,120 +720,336 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 </style>
 
 
-<!-- ── INT2 SESSION CSS ── -->
+<!-- ── PP SESSION CSS ── -->
 <style>
-
 #app-int2 {
-  --bg: #F1F5F9;
-  --white: #FFFFFF;
+  --pp-bg: #0B1628;
+  --pp-card: #111E33;
+  --pp-border: rgba(255,255,255,.1);
+  --pp-teal: #5EEAD4;
+  --pp-teal-dim: rgba(94,234,212,.15);
+  --pp-gold: #FBBF24;
+  --pp-gold-dim: rgba(251,191,36,.12);
+  --pp-muted: rgba(255,255,255,.4);
+  --pp-text: rgba(255,255,255,.9);
+  --pp-funded: #059669;
+  --pp-eval: #D97706;
+  --pp-ns: #334155;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--pp-bg);
+  color: var(--pp-text);
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
-#app-int2 .frame {width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
-#app-int2 .slide {
-  aspect-ratio:16/9;
-  width:min(100vw,calc(100vh * 16/9));
-  height:min(100vh,calc(100vw * 9/16));
-  background:var(--bg);
-  display:grid;
-  grid-template-rows:6.5% 13% 1fr 10%;
-  overflow:hidden;position:relative;
-  font-size:calc(min(100vw,calc(100vh * 16/9)) * 0.0125);
+#app-int2 .pp-topbar {
+  background: #0D1F3C;
+  border-bottom: 1px solid var(--pp-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.8%;
+  height: 3.4em;
+  flex-shrink: 0;
 }
-#app-int2 .topbar{background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 1.8%}
-#app-int2 .tb-l{display:flex;align-items:center;gap:.55em}
-#app-int2 .tb-logo{font-family:'DM Serif Display',serif;font-size:1.3em;color:#fff}
-#app-int2 .tb-logo span{color:#5EEAD4}
-#app-int2 .tb-sep{color:rgba(255,255,255,.2)}
-#app-int2 .tb-ctx{font-size:.8em;color:rgba(255,255,255,.45)}
-#app-int2 .tb-r{display:flex;align-items:center;gap:.65em}
-#app-int2 .tb-pct{font-size:.78em;color:#5EEAD4;font-weight:600}
-#app-int2 .tb-btn{font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;padding:.28em .8em;border-radius:.4em;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.65);cursor:pointer;transition:all .12s}
-#app-int2 .tb-btn:hover{background:rgba(255,255,255,.1);color:#fff}
-#app-int2 .tb-btn.exp{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
-#app-int2 .tb-btn.exp:hover{background:#92400e}
-#app-int2 .sh{background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2%}
-#app-int2 .sh-ey{font-size:.58em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-#app-int2 .sh-nm{font-family:'DM Serif Display',serif;font-size:1.85em;color:var(--navy);line-height:1.05}
-#app-int2 .sh-jt{font-size:.65em;color:var(--muted);font-style:italic;margin-top:.12em}
-#app-int2 .sh-r{display:flex;align-items:center;gap:.9em;flex-shrink:0}
-#app-int2 .sh-badge{background:var(--navy);color:#fff;font-size:.58em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.32em .8em;border-radius:2em}
-#app-int2 .sh-prog{text-align:right}
-#app-int2 .sh-prog-lbl{font-size:.6em;color:var(--muted)}
-#app-int2 .sh-prog-bar{width:6.5em;height:.25em;background:var(--border);border-radius:1em;margin-top:.22em;overflow:hidden}
-#app-int2 .sh-prog-fill{height:100%;background:var(--teal);border-radius:1em;transition:width .3s}
-#app-int2 .main{display:grid;grid-template-columns:24% 1fr;gap:1.2%;padding:1.2% 1.8%;overflow:hidden}
-#app-int2 .left{display:flex;flex-direction:column;gap:.6em;overflow:hidden}
-#app-int2 .intg-card{background:var(--white);border:1px solid var(--border);border-radius:.7em;padding:5% 6%;flex-shrink:0}
-#app-int2 .intg-lbl{font-size:.56em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin-bottom:.3em}
-#app-int2 .intg-nm{font-family:'DM Serif Display',serif;font-size:1.35em;color:var(--navy);line-height:1.15;margin-bottom:.35em}
-#app-int2 .intg-desc{font-size:.78em;color:var(--slate);line-height:1.55}
-#app-int2 .prompt-box{background:var(--goldLt);border-left:3px solid var(--gold);border-radius:.4em;padding:.5em .65em;flex-shrink:0}
-#app-int2 .prompt-lbl{font-size:.52em;font-weight:600;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.25em}
-#app-int2 .prompt-txt{font-size:.68em;color:var(--goldDk);line-height:1.45}
-#app-int2 .overall-card{background:var(--white);border:1px solid var(--border);border-radius:.7em;padding:5% 6%;flex:1;display:flex;flex-direction:column;gap:.45em;min-height:0;overflow:hidden}
-#app-int2 .overall-lbl{font-size:.56em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
-#app-int2 .overall-opts{display:flex;flex-direction:column;gap:.32em;flex:1;min-height:0}
-#app-int2 .oopt{flex:1;min-height:0;display:flex;align-items:center;gap:.5em;padding:0 .75em;border-radius:.45em;border:1.5px solid transparent;cursor:pointer;transition:all .12s;user-select:none;font-size:.72em;font-weight:500}
-#app-int2 .oopt:hover{transform:translateX(2px)}
-#app-int2 .oopt .odot{width:.5em;height:.5em;border-radius:50%;flex-shrink:0}
-#app-int2 .oo-must{background:#F0FDF4;color:#166534;border-color:#bbf7d0}
-#app-int2 .oo-must.sel{background:var(--green);color:#fff;border-color:var(--green)}
-#app-int2 .oo-fund{background:var(--blueLt);color:#1e40af;border-color:#bfdbfe}
-#app-int2 .oo-fund.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
-#app-int2 .oo-eval{background:var(--goldLt);color:#92400e;border-color:#fde68a}
-#app-int2 .oo-eval.sel{background:var(--gold);color:#fff;border-color:var(--gold)}
-#app-int2 .oo-depri{background:#F8FAFC;color:var(--muted);border-color:var(--border)}
-#app-int2 .oo-depri.sel{background:var(--slate);color:#fff;border-color:var(--slate)}
-#app-int2 .notes-row{display:flex;align-items:flex-start;gap:.35em;flex-shrink:0}
-#app-int2 .notes-icon{color:var(--muted);font-size:.72em;margin-top:.1em;flex-shrink:0}
-#app-int2 .notes-inp{border:none;outline:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.65em;color:var(--text);width:100%;resize:none;line-height:1.4}
-#app-int2 .notes-inp::placeholder{color:#CBD5E1}
-#app-int2 .right{display:flex;flex-direction:column;overflow:hidden;gap:.3em}
-#app-int2 .persona-header-row{display:grid;gap:.3em;flex-shrink:0}
-#app-int2 .p-hdr{border-radius:.45em .45em 0 0;padding:.4em .3em;text-align:center}
-#app-int2 .p-hdr-nm{font-size:.68em;font-weight:600;color:#fff;line-height:1.1}
-#app-int2 .priority-grid{display:grid;gap:.3em;flex:1;min-height:0}
-#app-int2 .p-col{display:flex;flex-direction:column;gap:.22em}
-#app-int2 .priority-btn{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;border-radius:.4em;border:1.5px solid transparent;cursor:pointer;transition:all .13s;user-select:none;font-size:.62em;font-weight:600;text-align:center;padding:.1em .2em;line-height:1.2}
-#app-int2 .priority-btn:hover{filter:brightness(.94);transform:scaleY(1.02)}
-#app-int2 .pb-h{background:#D1FAE5;color:#065F46;border-color:#6EE7B7}
-#app-int2 .pb-h.sel{background:#059669;color:#fff;border-color:#059669;box-shadow:0 0 0 2px #059669}
-#app-int2 .pb-m{background:#FEF3C7;color:#92400E;border-color:#FCD34D}
-#app-int2 .pb-m.sel{background:#D97706;color:#fff;border-color:#D97706;box-shadow:0 0 0 2px #D97706}
-#app-int2 .pb-l{background:#DBEAFE;color:#1E3A8A;border-color:#93C5FD}
-#app-int2 .pb-l.sel{background:#1D4ED8;color:#fff;border-color:#1D4ED8;box-shadow:0 0 0 2px #1D4ED8}
-#app-int2 .pb-tbd{background:#F1F5F9;color:#94A3B8;border-color:#E2E8F0}
-#app-int2 .pb-tbd.sel{background:#334155;color:#fff;border-color:#334155;box-shadow:0 0 0 2px #334155}
-#app-int2 .footer{background:var(--white);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 1.8%;gap:.7em;overflow:hidden}
-#app-int2 .crumb-track{flex:1;display:flex;align-items:center;gap:.28em;overflow:hidden;min-width:0}
-#app-int2 .crumb{display:flex;align-items:center;gap:.25em;cursor:pointer;flex-shrink:0;max-width:11em}
-#app-int2 .cdot{width:.45em;height:.45em;border-radius:50%;flex-shrink:0}
-#app-int2 .ctxt{font-size:.58em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#app-int2 .carr{color:var(--border);font-size:.6em;flex-shrink:0}
-#app-int2 .crumb.past .cdot{background:var(--teal)}
-#app-int2 .crumb.past .ctxt{color:var(--teal);font-weight:500}
-#app-int2 .crumb.cur .cdot{background:var(--navy)}
-#app-int2 .crumb.cur .ctxt{color:var(--navy);font-weight:700}
-#app-int2 .crumb.fut .cdot{background:var(--border)}
-#app-int2 .crumb.fut .ctxt{color:var(--muted)}
-#app-int2 .crumb-ctr{font-size:.58em;color:var(--muted);flex-shrink:0;white-space:nowrap}
-#app-int2 .foot-btns{display:flex;gap:.45em;flex-shrink:0}
-#app-int2 .nbtn{font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;padding:.38em .9em;border-radius:.45em;border:1.5px solid var(--border);background:var(--white);color:var(--slate);cursor:pointer;transition:all .12s;white-space:nowrap}
-#app-int2 .nbtn:hover{background:var(--bg)}
-#app-int2 .nbtn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
-#app-int2 .nbtn.pri:hover{background:#1a3060}
-#app-int2 .nbtn:disabled{opacity:.3;cursor:default;pointer-events:none}
-#app-int2 .done{position:absolute;inset:0;background:var(--white);display:none;flex-direction:column;align-items:center;padding:2% 3%;gap:.8em;z-index:20;overflow-y:auto}
-#app-int2 .done-icon{width:2.6em;height:2.6em;border-radius:50%;background:var(--tealLt);display:flex;align-items:center;justify-content:center;font-size:1.4em;color:var(--teal);font-weight:700;flex-shrink:0}
-#app-int2 .done-title{font-family:'DM Serif Display',serif;font-size:2em;color:var(--navy)}
-#app-int2 .done-sub{font-size:.75em;color:var(--muted);text-align:center;max-width:35em;line-height:1.5}
-#app-int2 .done-btns{display:flex;gap:.6em}
-#app-int2 .sum-wrap{width:100%;overflow-y:auto;flex:1;font-size:.62em}
-#app-int2 .sum-table{width:100%;border-collapse:collapse}
-#app-int2 .sum-table th{background:var(--navy);color:#fff;padding:.55em .8em;text-align:left;font-weight:500;position:sticky;top:0}
-#app-int2 .sum-table td{padding:.45em .8em;border-bottom:1px solid var(--border);vertical-align:top}
-#app-int2 .sum-table tr.sec td{background:#e4f4f2;font-weight:700;color:var(--navy)}
-#app-int2 .sum-table tr:nth-child(even):not(.sec) td{background:var(--bg)}
+#app-int2 .pp-tb-l { display:flex;align-items:center;gap:.55em }
+#app-int2 .pp-logo { font-family:'DM Serif Display',serif;font-size:1.2em;color:#fff }
+#app-int2 .pp-logo span { color: var(--pp-teal) }
+#app-int2 .pp-sep { color: var(--pp-border); font-size:1.2em }
+#app-int2 .pp-ctx { font-size:.75em; color: var(--pp-muted) }
+#app-int2 .pp-tb-r { display:flex;align-items:center;gap:.55em }
+#app-int2 .pp-btn {
+  font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;
+  padding:.3em .85em;border-radius:.4em;
+  border:1px solid var(--pp-border);background:transparent;
+  color:var(--pp-muted);cursor:pointer;transition:all .12s;
+}
+#app-int2 .pp-btn:hover { background:rgba(255,255,255,.08);color:#fff }
+#app-int2 .pp-btn.accent { background:var(--pp-teal);border-color:var(--pp-teal);color:#0B1628;font-weight:700 }
+#app-int2 .pp-btn.accent:hover { background:#4DD4C0 }
+#app-int2 .pp-btn.gold { background:var(--pp-gold);border-color:var(--pp-gold);color:#0B1628;font-weight:700 }
+#app-int2 .pp-btn.gold:hover { background:#F59E0B }
 
+/* ── MATRIX AREA ── */
+#app-int2 .pp-matrix-wrap {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 1.2% 1.8%;
+  gap: .6em;
+}
+#app-int2 .pp-grid {
+  display: grid;
+  grid-template-rows: 2.2em 1fr 1fr 2em;
+  flex: 1;
+  min-height: 0;
+  gap: .4em;
+}
+#app-int2 .pp-grid-inner {
+  display: contents;
+}
+
+/* Row label column */
+#app-int2 .pp-row-labels {
+  display: grid;
+  grid-template-rows: 2.2em 1fr 1fr 2em;
+  gap: .4em;
+  width: 6em;
+  flex-shrink: 0;
+}
+#app-int2 .pp-row-lbl {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: .7em;
+  font-size: .65em;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--pp-muted);
+}
+#app-int2 .pp-row-lbl.push { color: var(--pp-teal) }
+#app-int2 .pp-row-lbl.pull { color: var(--pp-gold) }
+#app-int2 .pp-row-lbl.status { color: var(--pp-muted); font-size:.6em }
+
+/* Main scrollable table */
+#app-int2 .pp-table-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
+  min-height: 0;
+}
+#app-int2 .pp-layout {
+  display: flex;
+  flex-direction: row;
+  gap: .4em;
+  height: 100%;
+  min-width: max-content;
+}
+
+/* Column */
+#app-int2 .pp-col {
+  display: flex;
+  flex-direction: column;
+  gap: .4em;
+  width: 13em;
+  flex-shrink: 0;
+}
+#app-int2 .pp-col-hdr {
+  height: 2.2em;
+  background: var(--pp-card);
+  border: 1px solid var(--pp-border);
+  border-radius: .5em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 .7em;
+  flex-shrink: 0;
+}
+#app-int2 .pp-col-nm {
+  font-size: .75em;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#app-int2 .pp-del-btn {
+  background: none;
+  border: none;
+  color: var(--pp-muted);
+  cursor: pointer;
+  font-size: .85em;
+  line-height: 1;
+  padding: 0 .1em;
+  transition: color .12s;
+  flex-shrink: 0;
+}
+#app-int2 .pp-del-btn:hover { color: #f87171 }
+
+/* Cells */
+#app-int2 .pp-cell {
+  flex: 1;
+  min-height: 0;
+  background: var(--pp-card);
+  border: 1px solid var(--pp-border);
+  border-radius: .45em;
+  overflow: hidden;
+  transition: border-color .12s;
+}
+#app-int2 .pp-cell:focus-within { border-color: var(--pp-teal) }
+#app-int2 .pp-cell.pull-cell:focus-within { border-color: var(--pp-gold) }
+#app-int2 .pp-cell textarea {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .7em;
+  color: var(--pp-text);
+  padding: .6em .7em;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+#app-int2 .pp-cell textarea::placeholder { color: rgba(255,255,255,.18) }
+#app-int2 .pp-cell.push-cell { border-top: 2px solid rgba(94,234,212,.3) }
+#app-int2 .pp-cell.pull-cell { border-top: 2px solid rgba(251,191,36,.25) }
+
+/* Status row */
+#app-int2 .pp-status-cell {
+  height: 2em;
+  border-radius: .4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: .65em;
+  font-weight: 700;
+  letter-spacing: .04em;
+  border: 1px solid transparent;
+  transition: all .13s;
+  user-select: none;
+  flex-shrink: 0;
+}
+#app-int2 .pp-status-cell.funded {
+  background: rgba(5,150,105,.18);
+  border-color: rgba(5,150,105,.4);
+  color: #34D399;
+}
+#app-int2 .pp-status-cell.evaluating {
+  background: rgba(217,119,6,.18);
+  border-color: rgba(217,119,6,.4);
+  color: #FCD34D;
+}
+#app-int2 .pp-status-cell.not-started {
+  background: rgba(51,65,85,.3);
+  border-color: rgba(51,65,85,.5);
+  color: rgba(255,255,255,.3);
+}
+#app-int2 .pp-status-cell:hover { filter: brightness(1.15) }
+
+/* Add column button */
+#app-int2 .pp-add-col {
+  width: 13em;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .4em;
+}
+#app-int2 .pp-add-col-btn {
+  height: 2.2em;
+  background: transparent;
+  border: 1.5px dashed rgba(255,255,255,.18);
+  border-radius: .5em;
+  color: var(--pp-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .13s;
+  white-space: nowrap;
+}
+#app-int2 .pp-add-col-btn:hover {
+  border-color: var(--pp-teal);
+  color: var(--pp-teal);
+  background: var(--pp-teal-dim);
+}
+
+/* Modal */
+#app-int2 .pp-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+#app-int2 .pp-modal-overlay.open { display: flex }
+#app-int2 .pp-modal {
+  background: #162030;
+  border: 1px solid var(--pp-border);
+  border-radius: .8em;
+  padding: 1.8em 2em;
+  width: 22em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+#app-int2 .pp-modal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.2em;
+  color: #fff;
+}
+#app-int2 .pp-modal-inp {
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--pp-border);
+  border-radius: .45em;
+  padding: .55em .75em;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85em;
+  color: #fff;
+  outline: none;
+  transition: border-color .12s;
+  width: 100%;
+  box-sizing: border-box;
+}
+#app-int2 .pp-modal-inp:focus { border-color: var(--pp-teal) }
+#app-int2 .pp-modal-btns { display:flex;gap:.6em;justify-content:flex-end }
+#app-int2 .pp-modal-cancel {
+  font-family:'DM Sans',sans-serif;font-size:.8em;padding:.4em .9em;
+  border-radius:.4em;border:1px solid var(--pp-border);background:transparent;
+  color:var(--pp-muted);cursor:pointer;
+}
+#app-int2 .pp-modal-confirm {
+  font-family:'DM Sans',sans-serif;font-size:.8em;padding:.4em .9em;
+  border-radius:.4em;border:none;background:var(--pp-teal);
+  color:#0B1628;font-weight:700;cursor:pointer;
+}
+#app-int2 .pp-modal-confirm:hover { background:#4DD4C0 }
+
+/* Footer */
+#app-int2 .pp-footer {
+  background: #0D1F3C;
+  border-top: 1px solid var(--pp-border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.8%;
+  height: 2.8em;
+  flex-shrink: 0;
+  gap: .8em;
+}
+#app-int2 .pp-footer-hint {
+  font-size: .62em;
+  color: var(--pp-muted);
+  flex: 1;
+}
+#app-int2 .pp-legend {
+  display: flex;
+  align-items: center;
+  gap: .9em;
+}
+#app-int2 .pp-leg-item {
+  display: flex;
+  align-items: center;
+  gap: .32em;
+  font-size: .62em;
+  color: var(--pp-muted);
+}
+#app-int2 .pp-leg-dot {
+  width: .5em;
+  height: .5em;
+  border-radius: 50%;
+}
+#app-int2 .pp-leg-dot.push { background: var(--pp-teal) }
+#app-int2 .pp-leg-dot.pull { background: var(--pp-gold) }
 </style>
 </head>
 <body>
@@ -882,8 +1098,8 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 
       <div class="session-card integration2" onclick="showApp('app-int2')">
         <div class="sc-day">Tuesday · Session 2 (alt)</div>
-        <div class="sc-title">Integration Priorities</div>
-        <div class="sc-desc">H / M / L priority rating per integration category (CRM, CDW, SEP, CX…) scored across Marketer, Seller, RevOps, and CS personas</div>
+        <div class="sc-title">Push / Pull Matrix</div>
+        <div class="sc-desc">For each integration partner — discuss what 6sense pushes out and what it pulls in. Identify FY27 status and capture notes per system.</div>
         <div class="sc-facilitators">Tom Paradis & Jason Telmos</div>
         <div class="sc-meta">
           <span class="sc-duration">90 min</span>
@@ -1040,80 +1256,52 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 </div>
 
 
-<!-- ══ INT2 SESSION (H/M/L per persona) ══ -->
+<!-- ══ PUSH / PULL MATRIX SESSION ══ -->
 <div id="app-int2" class="app-screen" style="display:none">
   <div class="frame">
-<div class="slide" id="i2-slide">
-  <div class="topbar">
-    <div class="tb-l">
-      <div class="tb-logo">Integration <span>Priorities</span></div>
-      <span class="tb-sep">·</span>
-      <span class="tb-ctx" id="i2-tb-ctx">Integration 1 of 11</span>
-    </div>
-    <div class="tb-r">
-      <span class="tb-pct" id="i2-tb-pct">0%</span>
-      <button class="tb-btn" onclick="INT2.resetAll()">Reset</button>
-      <button class="tb-btn exp" onclick="INT2.exportPPT()">&#11015; Export PPT</button>
-    </div>
-  </div>
-  <div class="sh">
-    <div>
-      <div class="sh-ey" id="i2-sh-ey">Integration 1 of 11</div>
-      <div class="sh-nm" id="i2-sh-nm">&#8212;</div>
-      <div class="sh-jt" id="i2-sh-jt"></div>
-    </div>
-    <div class="sh-r">
-      <div class="sh-badge" id="i2-sh-badge"></div>
-      <div class="sh-prog">
-        <div class="sh-prog-lbl" id="i2-sh-prog-lbl">0 / 0 rated</div>
-        <div class="sh-prog-bar"><div class="sh-prog-fill" id="i2-sh-prog-fill"></div></div>
+  <div style="position:relative;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden">
+
+    <!-- Topbar -->
+    <div class="pp-topbar">
+      <div class="pp-tb-l">
+        <div class="pp-logo">Push <span>/</span> Pull</div>
+        <span class="pp-sep">·</span>
+        <span class="pp-ctx">Integration Strategy · FY27</span>
+      </div>
+      <div class="pp-tb-r">
+        <button class="pp-btn" onclick="PP.resetAll()">Reset</button>
+        <button class="pp-btn gold" onclick="PP.exportPPT()">⬇ Export PPT</button>
       </div>
     </div>
-  </div>
-  <div class="main">
-    <div class="left">
-      <div class="intg-card">
-        <div class="intg-lbl" id="i2-intg-lbl">Integration 1 of 11</div>
-        <div class="intg-nm" id="i2-intg-nm">&#8212;</div>
-        <div class="intg-desc" id="i2-intg-desc"></div>
+
+    <!-- Matrix -->
+    <div class="pp-matrix-wrap" id="pp-matrix-wrap">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- Footer -->
+    <div class="pp-footer">
+      <span class="pp-footer-hint">Click a system header to rename · Click status badge to cycle · Click ✕ to remove column</span>
+      <div class="pp-legend">
+        <div class="pp-leg-item"><div class="pp-leg-dot push"></div>PUSH → 6sense sends out</div>
+        <div class="pp-leg-item"><div class="pp-leg-dot pull"></div>PULL → 6sense receives</div>
       </div>
-      <div class="prompt-box" id="i2-prompt-box" style="display:none">
-        <div class="prompt-lbl">Discussion prompt</div>
-        <div class="prompt-txt" id="i2-prompt-txt"></div>
-      </div>
-      <div class="overall-card">
-        <div class="overall-lbl">Overall priority</div>
-        <div class="overall-opts" id="i2-overall-opts"></div>
-        <div class="notes-row">
-          <span class="notes-icon">&#9998;</span>
-          <textarea class="notes-inp" id="i2-notes-inp" rows="2" placeholder="Notes..." oninput="INT2.saveNote(this.value)"></textarea>
+    </div>
+
+    <!-- Add column modal -->
+    <div class="pp-modal-overlay" id="pp-modal">
+      <div class="pp-modal">
+        <div class="pp-modal-title">Add Integration</div>
+        <input class="pp-modal-inp" id="pp-modal-inp" type="text" placeholder="e.g. HubSpot, Outreach, Snowflake…" />
+        <div class="pp-modal-btns">
+          <button class="pp-modal-cancel" onclick="PP.closeModal()">Cancel</button>
+          <button class="pp-modal-confirm" onclick="PP.confirmAdd()">Add</button>
         </div>
       </div>
     </div>
-    <div class="right">
-      <div class="persona-header-row" id="i2-persona-header-row"></div>
-      <div class="priority-grid" id="i2-priority-grid"></div>
-    </div>
+
   </div>
-  <div class="footer">
-    <div class="crumb-track" id="i2-crumb-track"></div>
-    <div class="foot-btns">
-      <button class="nbtn" id="i2-btn-back" onclick="INT2.nav(-1)">&#8592; Back</button>
-      <button class="nbtn pri" id="i2-btn-next" onclick="INT2.nav(1)">Next &#8594;</button>
-    </div>
   </div>
-  <div class="done" id="i2-done">
-    <div class="done-icon">&#9733;</div>
-    <div class="done-title">Session Complete</div>
-    <div class="done-sub" id="i2-done-sub"></div>
-    <div class="done-btns">
-      <button class="nbtn" onclick="INT2.goTo(INT2.STEPS.length-1)">&#8592; Back</button>
-      <button class="nbtn pri" onclick="INT2.exportPPT()">&#11015; Export PPT</button>
-    </div>
-    <div class="sum-wrap"><table class="sum-table" id="i2-sum-table"></table></div>
-  </div>
-</div>
-</div>
 </div>
 
 <!-- ══ DATA LAYER SESSION ══ -->
@@ -1179,10 +1367,10 @@ function showApp(id) {
     window._int_init = true;
     INT.render();
   }
-  if (id === 'app-int2' && !window._int2_init) {
-    window._int2_init = true;
-    INT2.initState();
-    INT2.render();
+  if (id === 'app-int2' && !window._pp_init) {
+    window._pp_init = true;
+    PP.initState();
+    PP.render();
   }
   if (id === 'app-dl' && !window._dl_init) {
     window._dl_init = true;
@@ -3585,6 +3773,252 @@ return { open, close, openAddCol, closeAddCol, switchSrcTab, selectSrcItem, conf
   addRevvyCol, updateRevvyPreview, removeCol, filterAccounts, filterStage: filterStageF, 
   filterType: filterTypeF, saveCell, cancelCell, renderTable, updateLegend };
 })();
+
+// ════════════════════════════════════════════════════════
+// PUSH / PULL MATRIX  (window.PP)
+// ════════════════════════════════════════════════════════
+window.PP = (function() {
+
+var STATUSES = ['funded', 'evaluating', 'not-started'];
+var STATUS_LABELS = { funded:'✓ Funded', evaluating:'⟳ Evaluating', 'not-started':'— Not Started' };
+
+var DEFAULT_COLS = [
+  {
+    id:'sfdc', name:'Salesforce / CRM',
+    push:'Account scores & buying stage\nContact intelligence\nBuying group signals\nSegment membership',
+    pull:'Account hierarchy & firmographics\nOpportunity data\nContact records & ownership\nActivity history',
+    status:'funded'
+  },
+  {
+    id:'mkto', name:'Marketo / MAP',
+    push:'Predictive segments & audiences\nBuying stage transitions\nAccount engagement scores\nAI-qualified leads',
+    pull:'Email engagement data\nForm fills & conversions\nProgram membership\nLead scoring fields',
+    status:'funded'
+  },
+  {
+    id:'gong', name:'Gong',
+    push:'Account context & buying stage\nCompetitor intelligence flags\nChampion / detractor signals',
+    pull:'Call transcript insights\nDeal risk signals\nTalk track effectiveness\nCompetitor mentions',
+    status:'evaluating'
+  },
+  {
+    id:'clari', name:'Clari',
+    push:'Buying stage & account scores\nSignal-driven risk flags\nIn-market timing data',
+    pull:'Pipeline forecast data\nRep activity signals\nDeal health scores',
+    status:'evaluating'
+  },
+  {
+    id:'sls', name:'Salesloft / SEP',
+    push:'Prioritized account lists\nBuying group contacts\nPersonalization signals & keywords',
+    pull:'Sequence enrollment & status\nEmail & call engagement\nCadence performance data',
+    status:'funded'
+  },
+  {
+    id:'gs', name:'Gainsight / CS',
+    push:'Expansion signals & whitespace\nChampion job change alerts\nCompetitor research signals',
+    pull:'Health scores & usage data\nRenewal risk flags\nCSM activity & engagement',
+    status:'not-started'
+  },
+];
+
+var state = { cols: [] };
+
+function initState() {
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem('pp_state_v1')); } catch(e) {}
+  if (saved && saved.cols && saved.cols.length) {
+    state = saved;
+  } else {
+    state = { cols: JSON.parse(JSON.stringify(DEFAULT_COLS)) };
+  }
+}
+
+function persist() {
+  try { localStorage.setItem('pp_state_v1', JSON.stringify(state)); } catch(e) {}
+}
+
+function resetAll() {
+  if (!confirm('Reset Push/Pull Matrix to defaults?')) return;
+  state = { cols: JSON.parse(JSON.stringify(DEFAULT_COLS)) };
+  persist();
+  render();
+}
+
+function render() {
+  var wrap = document.getElementById('pp-matrix-wrap');
+  if (!wrap) return;
+
+  var html = '<div style="display:flex;flex-direction:row;height:100%;gap:.4em;">';
+
+  // Row labels
+  html += '<div style="display:flex;flex-direction:column;gap:.4em;width:5.8em;flex-shrink:0;padding-top:0;">';
+  html += '<div style="height:2.2em;flex-shrink:0"></div>'; // header spacer
+  html += '<div class="pp-row-lbl push" style="display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.62em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#5EEAD4;flex:1">PUSH</div>';
+  html += '<div class="pp-row-lbl pull" style="display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.62em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#FBBF24;flex:1">PULL</div>';
+  html += '<div style="height:2em;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.56em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.3)">FY27</div>';
+  html += '</div>';
+
+  // Scrollable columns area
+  html += '<div style="flex:1;overflow-x:auto;overflow-y:hidden;display:flex;flex-direction:row;gap:.4em;min-width:0;">';
+
+  state.cols.forEach(function(col) {
+    var sid = CSS.escape ? CSS.escape(col.id) : col.id;
+    html += '<div class="pp-col" style="width:13em;flex-shrink:0;display:flex;flex-direction:column;gap:.4em;height:100%;">';
+
+    // Header
+    html += '<div class="pp-col-hdr" style="height:2.2em;background:#111E33;border:1px solid rgba(255,255,255,.1);border-radius:.5em;display:flex;align-items:center;justify-content:space-between;padding:0 .7em;flex-shrink:0;">';
+    html += '<span class="pp-col-nm" style="font-size:.73em;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">' + escH(col.name) + '</span>';
+    html += '<button class="pp-del-btn" onclick="PP.deleteCol('' + col.id + '')" title="Remove" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.9em;flex-shrink:0;padding:0 .15em;transition:color .12s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(255,255,255,.3)'">✕</button>';
+    html += '</div>';
+
+    // Push cell
+    html += '<div class="pp-cell push-cell" style="flex:1;min-height:0;background:#111E33;border:1px solid rgba(255,255,255,.1);border-top:2px solid rgba(94,234,212,.3);border-radius:.45em;overflow:hidden;">';
+    html += '<textarea placeholder="What 6sense pushes to this system…" oninput="PP.saveCell('' + col.id + '','push',this.value)" style="width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:'DM Sans',sans-serif;font-size:.68em;color:rgba(255,255,255,.9);padding:.6em .7em;line-height:1.55;box-sizing:border-box;">' + escH(col.push) + '</textarea>';
+    html += '</div>';
+
+    // Pull cell
+    html += '<div class="pp-cell pull-cell" style="flex:1;min-height:0;background:#111E33;border:1px solid rgba(255,255,255,.1);border-top:2px solid rgba(251,191,36,.25);border-radius:.45em;overflow:hidden;">';
+    html += '<textarea placeholder="What 6sense pulls from this system…" oninput="PP.saveCell('' + col.id + '','pull',this.value)" style="width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:'DM Sans',sans-serif;font-size:.68em;color:rgba(255,255,255,.9);padding:.6em .7em;line-height:1.55;box-sizing:border-box;">' + escH(col.pull) + '</textarea>';
+    html += '</div>';
+
+    // Status
+    var sc = col.status || 'not-started';
+    var statusStyle = statusCSS(sc);
+    html += '<div class="pp-status-cell ' + sc + '" onclick="PP.cycleStatus('' + col.id + '')" style="' + statusStyle + 'height:2em;border-radius:.4em;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.63em;font-weight:700;letter-spacing:.04em;border:1px solid transparent;flex-shrink:0;user-select:none;">';
+    html += STATUS_LABELS[sc];
+    html += '</div>';
+
+    html += '</div>'; // end col
+  });
+
+  // Add column button
+  html += '<div style="width:13em;flex-shrink:0;display:flex;flex-direction:column;gap:.4em;height:100%;">';
+  html += '<button onclick="PP.openModal()" style="height:2.2em;background:transparent;border:1.5px dashed rgba(255,255,255,.18);border-radius:.5em;color:rgba(255,255,255,.35);font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;cursor:pointer;transition:all .13s;white-space:nowrap;" onmouseover="this.style.borderColor='#5EEAD4';this.style.color='#5EEAD4';this.style.background='rgba(94,234,212,.08)'" onmouseout="this.style.borderColor='rgba(255,255,255,.18)';this.style.color='rgba(255,255,255,.35)';this.style.background='transparent'">+ Add System</button>';
+  html += '</div>';
+
+  html += '</div>'; // end scrollable
+  html += '</div>'; // end outer row
+
+  wrap.innerHTML = html;
+}
+
+function statusCSS(sc) {
+  if (sc === 'funded')      return 'background:rgba(5,150,105,.18);border-color:rgba(5,150,105,.4)!important;color:#34D399;';
+  if (sc === 'evaluating')  return 'background:rgba(217,119,6,.18);border-color:rgba(217,119,6,.4)!important;color:#FCD34D;';
+  return 'background:rgba(51,65,85,.25);border-color:rgba(51,65,85,.45)!important;color:rgba(255,255,255,.28);';
+}
+
+function saveCell(colId, field, val) {
+  var col = state.cols.find(function(c){ return c.id === colId; });
+  if (col) { col[field] = val; persist(); }
+}
+
+function cycleStatus(colId) {
+  var col = state.cols.find(function(c){ return c.id === colId; });
+  if (!col) return;
+  var idx = STATUSES.indexOf(col.status || 'not-started');
+  col.status = STATUSES[(idx + 1) % STATUSES.length];
+  persist();
+  render();
+}
+
+function deleteCol(colId) {
+  state.cols = state.cols.filter(function(c){ return c.id !== colId; });
+  persist();
+  render();
+}
+
+function openModal() {
+  var overlay = document.getElementById('pp-modal');
+  var inp = document.getElementById('pp-modal-inp');
+  if (overlay) overlay.classList.add('open');
+  if (inp) { inp.value = ''; inp.focus(); }
+}
+
+function closeModal() {
+  var overlay = document.getElementById('pp-modal');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function confirmAdd() {
+  var inp = document.getElementById('pp-modal-inp');
+  var name = inp ? inp.value.trim() : '';
+  if (!name) return;
+  var id = 'col_' + Date.now();
+  state.cols.push({ id:id, name:name, push:'', pull:'', status:'not-started' });
+  persist();
+  closeModal();
+  render();
+}
+
+function escH(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function exportPPT() {
+  if (typeof PptxGenJS === 'undefined') { alert('PptxGenJS not loaded'); return; }
+  var pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE';
+
+  state.cols.forEach(function(col) {
+    var slide = pptx.addSlide();
+    slide.background = { color: '0B1628' };
+
+    // Title
+    slide.addText(col.name, {
+      x:0.4, y:0.2, w:12, h:0.5,
+      fontSize:22, bold:true, color:'FFFFFF',
+      fontFace:'DM Serif Display'
+    });
+
+    // Status badge
+    var sc = col.status || 'not-started';
+    var badgeColor = sc==='funded' ? '059669' : sc==='evaluating' ? 'D97706' : '334155';
+    var badgeText = STATUS_LABELS[sc].replace(/[✓⟳—]\s/,'');
+    slide.addText(badgeText, {
+      x:10.5, y:0.25, w:2.5, h:0.4,
+      fontSize:10, bold:true, color:'FFFFFF',
+      fill:{ color:badgeColor }, align:'center',
+      rectRadius:0.05
+    });
+
+    // Push section
+    slide.addText('PUSH  →  6sense sends out', {
+      x:0.4, y:0.9, w:5.8, h:0.3,
+      fontSize:9, bold:true, color:'5EEAD4'
+    });
+    slide.addText(col.push || '', {
+      x:0.4, y:1.25, w:5.8, h:4.8,
+      fontSize:11, color:'E2F8F4', valign:'top', wrap:true, lineSpacingMultiple:1.4
+    });
+
+    // Pull section
+    slide.addText('PULL  →  6sense receives', {
+      x:6.8, y:0.9, w:5.8, h:0.3,
+      fontSize:9, bold:true, color:'FBBF24'
+    });
+    slide.addText(col.pull || '', {
+      x:6.8, y:1.25, w:5.8, h:4.8,
+      fontSize:11, color:'FEF3C7', valign:'top', wrap:true, lineSpacingMultiple:1.4
+    });
+  });
+
+  pptx.writeFile({ fileName:'PushPull_Matrix_FY27.pptx' });
+}
+
+// Handle Enter in modal
+document.addEventListener('keydown', function(e) {
+  var overlay = document.getElementById('pp-modal');
+  if (overlay && overlay.classList.contains('open')) {
+    if (e.key === 'Enter') confirmAdd();
+    if (e.key === 'Escape') closeModal();
+  }
+});
+
+return { initState, render, saveCell, cycleStatus, deleteCol, openModal, closeModal, confirmAdd, resetAll, exportPPT };
+
+})();
+
 
 </script>
 
