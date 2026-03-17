@@ -1159,7 +1159,16 @@ function showApp(id) {
   if (id === 'app-si' && !window._si_init) {
     window._si_init = true;
     SI.initState();
+    var hadSaved = SI.loadSaved ? SI.loadSaved() : false;
     SI.render();
+    if (hadSaved) {
+      var toast = document.createElement('div');
+      toast.textContent = '✓ Previous session restored';
+      toast.style.cssText = 'position:fixed;bottom:1.2em;left:50%;transform:translateX(-50%);background:#0D9488;color:#fff;padding:.4em 1.2em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;opacity:1;transition:opacity 1s;pointer-events:none;font-family:inherit;';
+      document.body.appendChild(toast);
+      setTimeout(function(){ toast.style.opacity='0'; }, 2200);
+      setTimeout(function(){ toast.remove(); }, 3300);
+    }
   }
   if (id === 'app-int' && !window._int_init) {
     window._int_init = true;
@@ -1386,15 +1395,7 @@ async function exportPPT(){
       sl.addText('OVERALL PRIORITY',{x:lx,y:ly,w:lw,h:0.13,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,margin:0}); ly+=0.15;
       const aH=0.26,aGap=0.05;
       OVERALL_OPTS.forEach((o,oi)=>{const ay=ly+oi*(aH+aGap);const isSel=s.overall===o.id;const dotC={must:'059669',fund:'1D4ED8',eval:'D97706',depri:'475569'}[o.id];sl.addShape(pres.shapes.RECTANGLE,{x:lx,y:ay,w:lw,h:aH,fill:{color:isSel?ovColors[o.id]:(o.id==='must'?'F0FDF4':o.id==='fund'?'EFF6FF':o.id==='eval'?'FFFBEB':'F8FAFC')}});if(isSel)sl.addShape(pres.shapes.RECTANGLE,{x:lx,y:ay,w:0.05,h:aH,fill:{color:ovColors[o.id]}});sl.addShape(pres.shapes.OVAL,{x:lx+0.1,y:ay+(aH-0.09)/2,w:0.09,h:0.09,fill:{color:isSel?ovColors[o.id]:dotC}});sl.addText(o.label,{x:lx+0.23,y:ay,w:lw-0.25,h:aH,fontSize:7.5,fontFace:'Trebuchet MS',bold:isSel,color:MU,valign:'middle',margin:0});});
-      PERSONAS.forEach((p,pi)=>{const cx=GX+pi*(PW+PGAP);sl.addShape(pres.shapes.RECTANGLE,{x:cx,y:INNER_Y,w:PW,h:PH_HDR,fill:{color:p.color}});sl.addText(p.name,{x:cx,y:INNER_Y,w:PW,h:PH_HDR,fontSize:8.5,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});const sel=s.personas[p.id];PRIORITIES.forEach((pr,ri)=>{const ty=ROWS_Y+ri*(RH+PGAP);const isSel=sel===pr.id;sl.addShape(pres.shapes.RECTANGLE,{x:cx,y:ty,w:PW,h:RH,fill:{color:isSel?pColors[pr.id]:pBgs[pr.id]}});sl.addText(isSel?`✓  ${pr.id}`:pr.id,{x:cx,y:ty,w:PW,h:RH,fontSize:isSel?12:10,fontFace:'Trebuchet MS',bold:isSel,color:isSel?W:pTxts[pr.id],align:'center',valign:'middle',margin:0});});});
-    });
-    await pres.writeFile({fileName:'Integration-Priority-Matrix.pptx'});
-  }catch(e){alert('Export failed: '+e.message);}
-  btn.innerHTML=orig;
-}
-
-return { STEPS, INTEGRATIONS, PERSONAS, PRIORITIES, OVERALL_OPTS, S,
-  initState, render, nav, goTo, resetAllwindow.SI = (function() {
+      PERSONAS.forEach((p,pi)=>{const cx=GX+pi*(PW+PGAP);sl.addShape(pres.shapes.RECTANGLE,{x:cx,y:INNER_Y,w:PW,h:PH_HDR,fill:{color:p.color}});sl.addText(p.name,{x:cx,y:INNER_Y,w:PW,h:PH_HDR,fontSize:8.5,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});const sel=s.personas[p.id];PRIORITIES.window.SI = (function() {
 // ── DATA ─────────────────────────────────────────────────────────────────────
 
 const COMPETITORS = [
@@ -2356,19 +2357,9 @@ function cloudLoad(){
   });
 }
 
-// boot
+// boot — initState only; render is called by showApp() when app-si is opened
 initState();
-var hadSaved = loadSaved();
-render();
-if (hadSaved) {
-  // small toast to confirm data was restored
-  var toast = document.createElement('div');
-  toast.textContent = '✓ Previous session restored';
-  toast.style.cssText = 'position:fixed;bottom:1.2em;left:50%;transform:translateX(-50%);background:#0D9488;color:#fff;padding:.4em 1.2em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;opacity:1;transition:opacity 1s;pointer-events:none;font-family:inherit;';
-  document.body.appendChild(toast);
-  setTimeout(function(){ toast.style.opacity='0'; }, 2200);
-  setTimeout(function(){ toast.remove(); }, 3300);
-}
+loadSaved();
 
 
   // Public API
@@ -2408,6 +2399,21 @@ if (hadSaved) {
     toggleMatrix: typeof toggleMatrix !== "undefined" ? toggleMatrix : undefined,
     matrixSelectTier: typeof matrixSelectTier !== "undefined" ? matrixSelectTier : undefined,
     matrixSelectAssess: typeof matrixSelectAssess !== "undefined" ? matrixSelectAssess : undefined,
+    goToPersona: typeof goToPersona !== "undefined" ? goToPersona : undefined,
+    renderMatrix: typeof renderMatrix !== "undefined" ? renderMatrix : undefined,
+    cloudSave: typeof cloudSave !== "undefined" ? cloudSave : undefined,
+    cloudLoad: typeof cloudLoad !== "undefined" ? cloudLoad : undefined,
+    loadSaved: typeof loadSaved !== "undefined" ? loadSaved : undefined
+  };
+})();
+
+tAssess !== "undefined" ? matrixSelectAssess : undefined,
+    goToPersona: typeof goToPersona !== "undefined" ? goToPersona : undefined,
+    renderMatrix: typeof renderMatrix !== "undefined" ? renderMatrix : undefined
+  };
+})();
+
+ss: typeof matrixSelectAssess !== "undefined" ? matrixSelectAssess : undefined,
     goToPersona: typeof goToPersona !== "undefined" ? goToPersona : undefined,
     renderMatrix: typeof renderMatrix !== "undefined" ? renderMatrix : undefined,
     cloudSave: typeof cloudSave !== "undefined" ? cloudSave : undefined,
