@@ -1799,57 +1799,91 @@ async function exportPPT() {
         drawTierScale(sl, ucS);
       });
 
-      // ── PERSONA SUMMARY SLIDE
+      // ── PERSONA MATRIX SLIDE (Harvey Balls via unicode)
       {
         const sl = pres.addSlide();
         sl.background = {color:BG};
-
-        drawTopbar(sl, `${p.name}  ·  Summary`, p.badge);
+        drawTopbar(sl, `${p.name}  ·  Matrix View`, p.badge);
         drawPersonaHdr(sl, p, pi, ratedN);
         sl.addShape(pres.shapes.RECTANGLE,{x:0,y:MAIN_Y,w:10,h:5.625-MAIN_Y,fill:{color:BG}});
 
-        const nUC = p.useCases.length;
-        const sUcW = 2.1, sAssW = 1.1, sGap = 0.04;
-        const sGX = PAD + sUcW + sGap + sAssW + sGap;
-        const sNc = COMPETITORS.length;
-        const sCW = (10 - sGX - PAD*0.5 - (sNc-1)*sGap) / sNc;
-        const hY = INNER_Y;
-        const hH = 0.32;
-        const avail = BOTTOM - hY - hH - 0.04;
-        const rH = Math.min(0.62, avail/nUC);
+        const hbChar = {diff:'●', best:'◕', mod:'◑', basic:'◔', none:'○'};
+        const nUC    = p.useCases.length;
+        const hUcW   = 2.3, hAssW = 1.05, hGap = 0.04;
+        const hGX    = PAD + hUcW + hGap + hAssW + hGap;
+        const hNc    = COMPETITORS.length;
+        const hCW    = (10 - hGX - PAD*0.5 - (hNc-1)*hGap) / hNc;
+        const hHdrY  = INNER_Y;
+        const hHdrH  = 0.34;
+        const avail  = BOTTOM - hHdrY - hHdrH - 0.04;
+        const rH     = Math.min(0.55, avail / nUC);
 
         // Column headers
-        sl.addText('USE CASE',{x:PAD,y:hY,w:sUcW,h:hH,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,valign:'middle',margin:0});
-        sl.addText('ASSESSMENT',{x:PAD+sUcW+sGap,y:hY,w:sAssW,h:hH,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,valign:'middle',margin:0});
-        COMPETITORS.forEach((c,ci)=>{
-          const cx=sGX+ci*(sCW+sGap);
-          sl.addShape(pres.shapes.RECTANGLE,{x:cx,y:hY,w:sCW,h:hH,fill:{color:c.id==='6s'?'0F766E':N}});
-          sl.addText(c.name,{x:cx,y:hY,w:sCW,h:hH,fontSize:6.5,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
+        sl.addText('USE CASE', {x:PAD, y:hHdrY, w:hUcW, h:hHdrH,
+          fontSize:6, fontFace:'Trebuchet MS', bold:true, color:MU, charSpacing:0.5, valign:'middle', margin:0});
+        sl.addText('ASSESSMENT', {x:PAD+hUcW+hGap, y:hHdrY, w:hAssW, h:hHdrH,
+          fontSize:6, fontFace:'Trebuchet MS', bold:true, color:MU, charSpacing:0.5, valign:'middle', margin:0});
+        COMPETITORS.forEach((comp, ci) => {
+          const cx = hGX + ci*(hCW+hGap);
+          const isSix = comp.id === '6s';
+          sl.addShape(pres.shapes.RECTANGLE, {x:cx, y:hHdrY, w:hCW, h:hHdrH,
+            fill:{color: isSix ? '0F766E' : N}});
+          sl.addText(comp.name, {x:cx, y:hHdrY, w:hCW, h:hHdrH*0.58,
+            fontSize:7, fontFace:'Trebuchet MS', bold:true, color:W, align:'center', valign:'middle', margin:0});
+          sl.addText(comp.cat, {x:cx, y:hHdrY+hHdrH*0.52, w:hCW, h:hHdrH*0.48,
+            fontSize:5.5, fontFace:'Trebuchet MS', color:isSix?TLT:'AABDD6', align:'center', valign:'middle', margin:0});
         });
 
         // Data rows
-        p.useCases.forEach((uc,ri)=>{
-          const ry = hY+hH+0.04+ri*rH;
-          const bg = ri%2===0?W:'F8FAFC';
+        p.useCases.forEach((uc, ri) => {
+          const ry  = hHdrY + hHdrH + 0.04 + ri * rH;
+          const bg  = ri % 2 === 0 ? W : 'F8FAFC';
           const ucS = S[p.id][uc.id];
-          sl.addShape(pres.shapes.RECTANGLE,{x:PAD,y:ry,w:10-PAD*1.2,h:rH-0.03,fill:{color:bg}});
-          sl.addText(uc.name,{x:PAD+0.05,y:ry,w:sUcW-0.1,h:rH-0.03,fontSize:7,fontFace:'Trebuchet MS',bold:true,color:SL,valign:'middle',margin:2});
 
-          if(ucS.assess){
-            const ax=PAD+sUcW+sGap;
-            sl.addShape(pres.shapes.RECTANGLE,{x:ax+0.04,y:ry+0.05,w:sAssW-0.08,h:rH-0.13,fill:{color:aBgH[ucS.assess]}});
-            sl.addShape(pres.shapes.RECTANGLE,{x:ax+0.04,y:ry+0.05,w:0.055,h:rH-0.13,fill:{color:aSel[ucS.assess]}});
-            sl.addText(aLbl[ucS.assess],{x:ax+0.11,y:ry+0.05,w:sAssW-0.19,h:rH-0.13,fontSize:6.5,fontFace:'Trebuchet MS',bold:true,color:aClrH[ucS.assess],valign:'middle',margin:0});
+          sl.addShape(pres.shapes.RECTANGLE, {x:PAD, y:ry, w:10-PAD*1.2, h:rH-0.025,
+            fill:{color:bg}, line:{color:'E2E8F0', pt:0.5}});
+          sl.addText(uc.name, {x:PAD+0.06, y:ry, w:hUcW-0.08, h:rH-0.025,
+            fontSize:7, fontFace:'Trebuchet MS', bold:true, color:SL, valign:'middle', margin:2});
+
+          // Assessment pill
+          if (ucS.assess) {
+            const ax = PAD + hUcW + hGap;
+            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.05, w:hAssW-0.08, h:rH-0.12,
+              fill:{color:aBgH[ucS.assess]}});
+            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.05, w:0.045, h:rH-0.12,
+              fill:{color:aSel[ucS.assess]}});
+            sl.addText(aLbl[ucS.assess], {x:ax+0.10, y:ry+0.05, w:hAssW-0.18, h:rH-0.12,
+              fontSize:6, fontFace:'Trebuchet MS', bold:true, color:aClrH[ucS.assess], valign:'middle', margin:0});
           }
 
-          COMPETITORS.forEach((c,ci)=>{
-            const cx=sGX+ci*(sCW+sGap);
-            const tid=ucS.comp[c.id];
-            if(tid){
-              sl.addShape(pres.shapes.RECTANGLE,{x:cx+0.02,y:ry+0.04,w:sCW-0.04,h:rH-0.11,fill:{color:tSelH[tid]}});
-              sl.addText(tLbl[tid],{x:cx+0.02,y:ry+0.04,w:sCW-0.04,h:rH-0.11,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
-            }
+          // Harvey Ball unicode glyphs per competitor
+          COMPETITORS.forEach((comp, ci) => {
+            const cx  = hGX + ci*(hCW+hGap);
+            const tid = ucS.comp[comp.id];
+            const ch  = tid ? (hbChar[tid] || '○') : '○';
+            const col = tid ? tSelH[tid] : 'CBD5E1';
+            sl.addShape(pres.shapes.RECTANGLE, {x:cx, y:ry, w:hCW, h:rH-0.025,
+              fill:{color:bg}, line:{color:'E2E8F0', pt:0.5}});
+            sl.addText(ch, {x:cx, y:ry, w:hCW, h:rH-0.025,
+              fontSize:13, fontFace:'Arial Unicode MS', color:col,
+              align:'center', valign:'middle', margin:0});
           });
+        });
+
+        // Legend
+        const legY = BOTTOM + 0.04;
+        const legItems = [
+          {id:'diff',ch:'●',label:'True differentiator'},
+          {id:'best',ch:'◕',label:'Best in class'},
+          {id:'mod', ch:'◑',label:'Moderate'},
+          {id:'basic',ch:'◔',label:'Basic'},
+          {id:'none',ch:'○',label:'No offering'},
+        ];
+        let legX = PAD;
+        legItems.forEach(item => {
+          sl.addText(item.ch+'  '+item.label, {x:legX, y:legY, w:1.72, h:0.18,
+            fontSize:6.5, fontFace:'Arial Unicode MS', color:tSelH[item.id]||MU, valign:'middle', margin:0});
+          legX += 1.76;
         });
       }
     });
