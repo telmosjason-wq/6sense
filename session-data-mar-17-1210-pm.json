@@ -1,0 +1,336 @@
+{
+  "bdr": {
+    "acct-pri": {
+      "comp": {
+        "6s": "diff",
+        "zi": "mod",
+        "db": "best",
+        "apollo": "mod",
+        "hg": "basic",
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "intent-res": {
+      "comp": {
+        "6s": "diff",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "basic",
+        "hg": "basic",
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "contact-disc": {
+      "comp": {
+        "6s": "mod",
+        "zi": "diff",
+        "db": "best",
+        "apollo": "best",
+        "hg": "basic",
+        "cognism": "best"
+      },
+      "assess": "partner",
+      "notes": ""
+    },
+    "techno-psycho": {
+      "comp": {
+        "6s": "diff",
+        "zi": "best",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": "diff",
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "chrome": {
+      "comp": {
+        "6s": "mod",
+        "zi": "best",
+        "db": "basic",
+        "apollo": "best",
+        "hg": "basic",
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "ai-insights": {
+      "comp": {
+        "6s": "best",
+        "zi": "diff",
+        "db": "mod",
+        "apollo": "best",
+        "hg": "basic",
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "comp-takeout": {
+      "comp": {
+        "6s": "mod",
+        "zi": "diff",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": "basic",
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    }
+  },
+  "ae": {
+    "deal-ent": {
+      "comp": {
+        "6s": "diff",
+        "zi": "diff",
+        "db": "diff",
+        "apollo": "diff",
+        "hg": "basic",
+        "cognism": "best"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "buy-cmte": {
+      "comp": {
+        "6s": "basic",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": null,
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "deal-acc": {
+      "comp": {
+        "6s": "best",
+        "zi": "mod",
+        "db": "mod",
+        "apollo": "basic",
+        "hg": null,
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "acct-plan": {
+      "comp": {
+        "6s": "mod",
+        "zi": "diff",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": null,
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "reengage": {
+      "comp": {
+        "6s": "best",
+        "zi": "best",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": null,
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    }
+  },
+  "mgr": {
+    "rep-pri": {
+      "comp": {
+        "6s": "mod",
+        "zi": "diff",
+        "db": "basic",
+        "apollo": "mod",
+        "hg": null,
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "pipe-quality": {
+      "comp": {
+        "6s": null,
+        "zi": null,
+        "db": null,
+        "apollo": null,
+        "hg": null,
+        "cognism": null
+      },
+      "assess": null,
+      "notes": ""
+    },
+    "forecast-align": {
+      "comp": {
+        "6s": null,
+        "zi": null,
+        "db": null,
+        "apollo": null,
+        "hg": null,
+        "cognism": null
+      },
+      "assess": null,
+      "notes": ""
+    },
+    "outbound-design": {
+      "comp": {
+        "6s": null,
+        "zi": null,
+        "db": null,
+        "apollo": null,
+        "hg": null,
+        "cognism": null
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "utilization-value": {
+      "comp": {
+        "6s": "basic",
+        "zi": "mod",
+        "db": "basic",
+        "apollo": "basic",
+        "hg": "basic",
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    }
+  },
+  "ops": {
+    "acct-map": {
+      "comp": {
+        "6s": "best",
+        "zi": "diff",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": null,
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "abm-model": {
+      "comp": {
+        "6s": "mod",
+        "zi": "diff",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": null,
+        "cognism": "mod"
+      },
+      "assess": "partner",
+      "notes": ""
+    },
+    "pipe-attr": {
+      "comp": {
+        "6s": "best",
+        "zi": "best",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": "mod",
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "territory": {
+      "comp": {
+        "6s": "mod",
+        "zi": "best",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": null,
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "bi-conn": {
+      "comp": {
+        "6s": "mod",
+        "zi": "diff",
+        "db": "best",
+        "apollo": "mod",
+        "hg": "diff",
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "crm-hygiene": {
+      "comp": {
+        "6s": "mod",
+        "zi": "diff",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": "mod",
+        "cognism": "mod"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    }
+  },
+  "cs": {
+    "churn-risk": {
+      "comp": {
+        "6s": "basic",
+        "zi": "best",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": null,
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "expansion-sig": {
+      "comp": {
+        "6s": "basic",
+        "zi": "best",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": "basic",
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "champion": {
+      "comp": {
+        "6s": "basic",
+        "zi": "best",
+        "db": "mod",
+        "apollo": "mod",
+        "hg": null,
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    },
+    "comp-monitor": {
+      "comp": {
+        "6s": "basic",
+        "zi": "mod",
+        "db": "basic",
+        "apollo": "basic",
+        "hg": "basic",
+        "cognism": "basic"
+      },
+      "assess": "mustbuild",
+      "notes": ""
+    }
+  }
+}
