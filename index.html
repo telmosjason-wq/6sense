@@ -1310,6 +1310,8 @@ function showApp(id) {
     PP.initState();
     PP.render();
   }
+  // pp session needs display:flex not block
+  if (id === 'app-int2') target.style.display = 'flex';
   if (id === 'app-dl' && !window._dl_init) {
     window._dl_init = true;
     DL.initState();
