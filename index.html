@@ -1196,7 +1196,16 @@ function showApp(id) {
 function addHomeButtons() {
   document.querySelectorAll('.app-screen:not(#app-home) .tb-r, .app-screen:not(#app-home) .topbar .tb-r').forEach(tbr => {
     if (tbr.querySelector('.home-btn')) return;
-    const btn = docuwindow.SI = (function() {
+    var btn = document.createElement('button');
+    btn.className = 'tb-btn home-btn';
+    btn.textContent = '← Home';
+    btn.style.cssText = 'margin-right:.4em;';
+    btn.onclick = function() { showApp('app-home'); };
+    tbr.insertBefore(btn, tbr.firstChild);
+  });
+}
+window.addEventListener('load', addHomeButtons);
+window.SI = (function() {
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
 
