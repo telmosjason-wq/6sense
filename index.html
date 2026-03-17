@@ -375,9 +375,8 @@ html, body { width:100%; height:100%; overflow:hidden; font-family:'DM Sans',san
 #app-si .slide > #matrix-main {
   grid-row: 3;
   grid-column: 1;
-  overflow: auto;
   min-height: 0;
-  background: var(--bg);
+  background: var(--bg,#F1F5F9);
 }
 #app-si .slide > .main {
   grid-row: 3;
@@ -1415,17 +1414,24 @@ function saveNote(v) { curS().notes = v; persist(); }
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
 function render() {
-  var done = step >= TOTAL;
-  document.getElementById('done').style.display = done ? 'flex' : 'none';
-  if (done) { renderDone(); updateTopbar(); return; }
-  var pi = STEPS[step].pi;
-  var p  = PERSONAS[pi];
-  renderTopbar();
-  renderPH();
-  document.getElementById('main').style.display = 'none';
-  document.getElementById('matrix-main').style.display = 'block';
-  document.getElementById('footer').style.cssText = 'display:flex;padding:.3em .6em;background:#fff;border-top:1px solid #E2E8F0;';
-  renderMatrix(p.id);
+  try {
+    var done = step >= TOTAL;
+    document.getElementById('done').style.display = done ? 'flex' : 'none';
+    if (done) { renderDone(); updateTopbar(); return; }
+    var pi = STEPS[step].pi;
+    var p  = PERSONAS[pi];
+    renderTopbar();
+    renderPH();
+    var mainEl = document.getElementById('main');
+    var mxEl   = document.getElementById('matrix-main');
+    if (mainEl) mainEl.style.display = 'none';
+    if (mxEl)   { mxEl.style.display = 'block'; mxEl.style.height = '100%'; }
+    document.getElementById('footer').style.cssText = 'display:flex;padding:.3em .6em;background:#fff;border-top:1px solid #E2E8F0;';
+    renderMatrix(p.id);
+  } catch(e) {
+    var el = document.getElementById('matrix-main');
+    if (el) el.innerHTML = '<div style="padding:2em;color:red;font-family:monospace;font-size:12px;">render() error: ' + e.message + '</div>';
+  }
 }
 
 
@@ -1918,126 +1924,81 @@ function harveyBall(tid) {
 }
 
 function renderMatrix(pid) {
-  var pi = PERSONAS.findIndex(function(p){ return p.id===pid; }), p = PERSONAS[pi];
-  var aclr = {mustbuild:'#059669',partner:'#1D4ED8',stop:'#E11D48'};
-  var abg  = {mustbuild:'#D1FAE5',partner:'#DBEAFE',stop:'#FFE4E6'};
+  var pi = PERSONAS.findIndex(function(p){ return p.id===pid; });
+  var p  = PERSONAS[pi];
   var el = document.getElementById('matrix-main');
   if (!el) return;
-  el.innerHTML = '';
 
-  // Scroll wrapper
-  var wrap = document.createElement('div');
-  wrap.style.cssText = 'overflow:auto;padding:.5em .8em;';
-  el.appendChild(wrap);
+  var aclr = {mustbuild:'#059669',partner:'#1D4ED8',stop:'#E11D48'};
+  var abg  = {mustbuild:'#D1FAE5',partner:'#DBEAFE',stop:'#FFE4E6'};
 
-  // Table
-  var table = document.createElement('table');
-  table.style.cssText = 'border-collapse:collapse;width:100%;font-family:inherit;';
-  wrap.appendChild(table);
-
-  // Header row
-  var thead = document.createElement('thead');
-  var hrow  = document.createElement('tr');
-  table.appendChild(thead); thead.appendChild(hrow);
-
-  // Use Case header
-  var th0 = document.createElement('th');
-  th0.style.cssText = 'text-align:left;padding:.5em .75em;font-size:.55em;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);position:sticky;left:0;z-index:3;min-width:10em;';
-  th0.textContent = 'Use Case'; hrow.appendChild(th0);
-
-  // Assessment header
-  var th1 = document.createElement('th');
-  th1.style.cssText = 'text-align:center;padding:.5em;font-size:.55em;font-weight:600;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);min-width:6.5em;';
-  th1.textContent = 'Assessment'; hrow.appendChild(th1);
-
-  // Competitor headers
+  var hdr = '<th style="text-align:left;padding:.5em .75em;font-size:.55em;font-weight:600;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);position:sticky;left:0;z-index:3;min-width:10em;">Use Case</th>';
+  hdr += '<th style="text-align:center;padding:.5em;font-size:.55em;font-weight:600;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);min-width:6.5em;">Assessment</th>';
   COMPETITORS.forEach(function(comp) {
-    var th = document.createElement('th');
     var sx = comp.id==='6s';
-    th.style.cssText = 'text-align:center;padding:.5em .4em;font-size:.6em;font-weight:700;color:'+(sx?'var(--teal)':'var(--navy)')+';background:#fff;border-bottom:2px solid '+(sx?'var(--teal)':'var(--border)')+';min-width:4.5em;white-space:nowrap;';
-    th.innerHTML = '<div>'+comp.name+'</div><div style="font-weight:400;font-size:.85em;color:var(--muted);">'+comp.cat+'</div>';
-    hrow.appendChild(th);
+    var color = sx ? 'var(--teal)' : 'var(--navy)';
+    var bdrC  = sx ? 'var(--teal)' : 'var(--border)';
+    hdr += '<th style="text-align:center;padding:.5em .4em;font-size:.6em;font-weight:700;color:'+color+';background:#fff;border-bottom:2px solid '+bdrC+';min-width:4.5em;white-space:nowrap;"><div>'+comp.name+'</div><div style="font-weight:400;font-size:.85em;color:var(--muted)">'+comp.cat+'</div></th>';
   });
 
-  // Body rows
-  var tbody = document.createElement('tbody');
-  table.appendChild(tbody);
+  var rows = '';
   p.useCases.forEach(function(uc, ui) {
     var s   = S[p.id][uc.id];
-    var bg  = ui%2===0 ? '#fff' : 'var(--bg)';
-    var av  = s.assess||'';
+    var bg  = ui%2===0 ? '#fff' : '#F8FAFC';
+    var av  = s.assess || '';
     var ac2 = av ? aclr[av] : 'var(--muted)';
     var ab2 = av ? abg[av]  : 'transparent';
-    var tr  = document.createElement('tr');
-    tr.style.background = bg;
-    tr.onmouseenter = function(){ this.style.background='#EFF6FF'; };
-    tr.onmouseleave = function(){ this.style.background=bg; };
-    tbody.appendChild(tr);
+    var bdr = av ? ac2 : 'var(--border)';
 
-    // Use case name cell
-    var td0 = document.createElement('td');
-    td0.style.cssText = 'padding:.45em .75em;font-size:.72em;font-weight:600;color:var(--navy);border-bottom:1px solid var(--border);position:sticky;left:0;background:inherit;z-index:2;';
-    var nm = document.createElement('span');
-    nm.textContent = uc.name;
-    if (uc.prompt) nm.title = uc.prompt.slice(0,200);
-    td0.appendChild(nm);
-    if (uc.prompt) {
-      var ti = document.createElement('span');
-      ti.innerHTML = ' &#9432;';
-      ti.title = uc.prompt.slice(0,200);
-      ti.style.cssText = 'font-size:.8em;color:var(--gold,#D97706);cursor:help;';
-      td0.appendChild(ti);
-    }
-    tr.appendChild(td0);
+    var ucTip = uc.prompt ? uc.prompt.slice(0,200).replace(/'/g,'&#39;') : '';
+    var ucCell = '<td style="padding:.45em .75em;font-size:.72em;font-weight:600;color:var(--navy);border-bottom:1px solid var(--border);position:sticky;left:0;background:'+bg+';z-index:2;">'
+      + uc.name
+      + (uc.prompt ? ' <span title="'+ucTip+'" style="font-size:.8em;color:#D97706;cursor:help;">&#9432;</span>' : '')
+      + '</td>';
 
-    // Assessment dropdown cell
-    var td1 = document.createElement('td');
-    td1.style.cssText = 'padding:.35em .4em;border-bottom:1px solid var(--border);text-align:center;';
-    var sel = document.createElement('select');
-    sel.id = 'mx-assess-'+p.id+'-'+uc.id;
-    sel.style.cssText = 'font-family:inherit;font-size:.6em;font-weight:600;border:1.5px solid '+(av?ac2:'var(--border)')+';border-radius:.4em;padding:.25em .5em;background:'+ab2+';color:'+ac2+';cursor:pointer;outline:none;min-width:6em;';
-    [['','— TBD'],['mustbuild','↑ Must-Build'],['partner','⇄ Partner'],['stop','↓ Stop']].forEach(function(o){
-      var opt = document.createElement('option');
-      opt.value = o[0]; opt.textContent = o[1];
-      if (av===o[0]) opt.selected = true;
-      sel.appendChild(opt);
-    });
-    (function(locPid, locUcId){ sel.onchange = function(){ SI.matrixSelectAssess(locPid, locUcId, this.value||null); }; })(p.id, uc.id);
-    td1.appendChild(sel); tr.appendChild(td1);
+    var selId = 'mx-assess-'+p.id+'-'+uc.id;
+    var assOpts = '<option value="">&#8212; TBD</option>'
+      + '<option value="mustbuild"'+(av==='mustbuild'?' selected':'')+'>&#8593; Must-Build</option>'
+      + '<option value="partner"'+(av==='partner'?' selected':'')+'>&#8644; Partner</option>'
+      + '<option value="stop"'+(av==='stop'?' selected':'')+'>&#8595; Stop</option>';
+    var assCell = '<td style="padding:.35em .4em;border-bottom:1px solid var(--border);text-align:center;">'
+      + '<select id="'+selId+'" onchange="SI.matrixSelectAssess(this.dataset.pid,this.dataset.ucid,this.value||null)" data-pid="'+p.id+'" data-ucid="'+uc.id+'" style="font-family:inherit;font-size:.6em;font-weight:600;border:1.5px solid '+bdr+';border-radius:.4em;padding:.25em .5em;background:'+ab2+';color:'+ac2+';cursor:pointer;outline:none;min-width:6em;">'
+      + assOpts+'</select></td>';
 
-    // Harvey Ball cells
+    var compCells = '';
     COMPETITORS.forEach(function(comp) {
-      var td  = document.createElement('td');
-      var sx  = comp.id==='6s';
-      td.style.cssText = 'padding:.3em .35em;border-bottom:1px solid var(--border);text-align:center;border-left:'+(sx?'2px solid var(--tealLt,#CCFBF1)':'1px solid var(--border)')+';';
-      var div = document.createElement('div');
-      div.style.cssText = 'cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .1s;';
-      div.onmouseenter = function(){ this.style.transform='scale(1.2)'; };
-      div.onmouseleave = function(){ this.style.transform='scale(1)'; };
+      var sx   = comp.id==='6s';
       var tier = s.comp[comp.id];
       var tobj = TIERS.find(function(x){ return x.id===tier; });
-      div.title = tobj ? tobj.label : 'Click to set';
-      div.innerHTML = harveyBall(tier);
-      (function(locPid,locUcId,locCid){ div.onclick = function(){ SI.matrixSelectTier(locPid,locUcId,locCid); }; })(p.id,uc.id,comp.id);
-      td.appendChild(div); tr.appendChild(td);
+      var tip  = tobj ? tobj.label : 'Click to set';
+      var bleft = sx ? '2px solid #CCFBF1' : '1px solid var(--border)';
+      compCells += '<td style="padding:.3em .35em;border-bottom:1px solid var(--border);text-align:center;border-left:'+bleft+';">'
+        + '<div onclick="SI.matrixSelectTier(this.dataset.pid,this.dataset.ucid,this.dataset.cid)" data-pid="'+p.id+'" data-ucid="'+uc.id+'" data-cid="'+comp.id+'" title="'+tip+'" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .1s;" onmouseenter="this.style.transform=\'scale(1.2)\'" onmouseleave="this.style.transform=\'scale(1)\'">'
+        + harveyBall(tier)
+        + '</div></td>';
     });
+
+    rows += '<tr style="background:'+bg+'" onmouseenter="this.style.background=\'#EFF6FF\'" onmouseleave="this.style.background=\''+bg+'\'">'
+      + ucCell + assCell + compCells + '</tr>';
   });
 
-  // Legend
-  var leg = document.createElement('div');
-  leg.style.cssText = 'display:flex;align-items:center;gap:.8em;font-size:.58em;color:var(--muted);padding:.6em .8em;flex-wrap:wrap;border-top:1px solid var(--border);';
-  var lbl = document.createElement('span'); lbl.style.fontWeight='600'; lbl.textContent='Scale:';
-  leg.appendChild(lbl);
+  var legHTML = '<span style="font-weight:600">Scale:</span>';
   TIERS.forEach(function(t) {
-    var sp = document.createElement('span');
-    sp.style.cssText = 'display:flex;align-items:center;gap:.3em;';
-    sp.innerHTML = harveyBall(t.id)+'<span>'+t.label+'</span>';
-    leg.appendChild(sp);
+    legHTML += '<span style="display:flex;align-items:center;gap:.3em">'+harveyBall(t.id)+'<span>'+t.label+'</span></span>';
   });
-  el.appendChild(leg);
 
-  var r2=pRated(pi),t2=p.useCases.length;
-  var pll=document.getElementById('ph-prog-lbl'),pf=document.getElementById('ph-prog-fill');
+  el.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:var(--bg,#F1F5F9);height:100%;';
+  el.innerHTML = ''
+    + '<div style="flex:1;overflow:auto;padding:.5em .8em;">'
+    +   '<table style="border-collapse:collapse;width:100%;font-family:inherit;">'
+    +     '<thead><tr>'+hdr+'</tr></thead>'
+    +     '<tbody>'+rows+'</tbody>'
+    +   '</table>'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;gap:.8em;font-size:.58em;color:var(--muted);padding:.5em .8em;flex-wrap:wrap;border-top:1px solid var(--border);flex-shrink:0;">'+legHTML+'</div>';
+
+  var r2=pRated(pi), t2=p.useCases.length;
+  var pll=document.getElementById('ph-prog-lbl'), pf=document.getElementById('ph-prog-fill');
   if(pll) pll.textContent=r2+' / '+t2+' rated';
   if(pf)  pf.style.width=Math.round(r2/t2*100)+'%';
 }
