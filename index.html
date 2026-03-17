@@ -1158,17 +1158,7 @@ function showApp(id) {
   // Initialize app when first shown
   if (id === 'app-si' && !window._si_init) {
     window._si_init = true;
-    SI.initState();
-    var hadSaved = SI.loadSaved ? SI.loadSaved() : false;
     SI.render();
-    if (hadSaved) {
-      var toast = document.createElement('div');
-      toast.textContent = '✓ Previous session restored';
-      toast.style.cssText = 'position:fixed;bottom:1.2em;left:50%;transform:translateX(-50%);background:#0D9488;color:#fff;padding:.4em 1.2em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;opacity:1;transition:opacity 1s;pointer-events:none;font-family:inherit;';
-      document.body.appendChild(toast);
-      setTimeout(function(){ toast.style.opacity='0'; }, 2200);
-      setTimeout(function(){ toast.remove(); }, 3300);
-    }
   }
   if (id === 'app-int' && !window._int_init) {
     window._int_init = true;
@@ -1204,198 +1194,8 @@ window.addEventListener('load', addHomeButtons);
 
 <!-- ── INT2 SESSION JS ── -->
 <script>
-window.INT2 = (function() {
+window.SI = (function() {
 
-const PERSONAS = [
-  { id:'mktg',  name:'Marketer',  color:'0F766E' },
-  { id:'sell',  name:'Seller',    color:'1D4ED8' },
-  { id:'revops',name:'RevOps',    color:'7C3AED' },
-  { id:'cs',    name:'CS',        color:'D97706' },
-];
-const PRIORITIES = [
-  { id:'H',   label:'H — High',   cls:'pb-h',   dot:'#059669' },
-  { id:'M',   label:'M — Medium', cls:'pb-m',   dot:'#D97706' },
-  { id:'L',   label:'L — Lower',  cls:'pb-l',   dot:'#1D4ED8' },
-  { id:'TBD', label:'TBD',        cls:'pb-tbd', dot:'#94A3B8' },
-];
-const OVERALL_OPTS = [
-  { id:'must',  label:'Must-Have',     cls:'oo-must',  dot:'#059669' },
-  { id:'fund',  label:'Fund',          cls:'oo-fund',  dot:'#1D4ED8' },
-  { id:'eval',  label:'Evaluate',      cls:'oo-eval',  dot:'#D97706' },
-  { id:'depri', label:'De-prioritize', cls:'oo-depri', dot:'#64748B' },
-];
-const INTEGRATIONS = [
-  { id:'crm',  name:'CRM',             sub:'Salesforce / HubSpot / Dynamics',         desc:'Account scores in CRM iFrames, routing logic, opportunity/pipeline sync. Near-universal dependency across all personas.',                                                         prompt:'Which single CRM integration would hurt most to lose? How deep is HubSpot and Dynamics vs. Salesforce — are we treating them as equal bets?',                                                               tbd:false },
-  { id:'cdw',  name:'CDW',             sub:'Snowflake / Databricks / BigQuery',        desc:'Bi-directional data warehouse connectivity for enterprise RevOps. Enables 6sense intelligence to flow into existing analytics infrastructure.',                                     prompt:'Is bi-directional CDW complete today, or are there gaps? If a RevOps leader can only access 6sense data through Salesforce dashboards — not their warehouse — is that a renewal risk?',                       tbd:false },
-  { id:'cdp',  name:'CDP',             sub:'Segment / Adobe',                          desc:'Audience sync, identity resolution, and campaign activation for marketers. Adobe strategy not yet fully defined.',                                                                  prompt:'Adobe strategy is not yet defined. Is CDP a strategic integration category for marketers, or secondary to CRM and MAP? Who in the customer base is asking for Adobe specifically?',                          tbd:false },
-  { id:'sep',  name:'SEP',             sub:'Salesloft (funded) / Outreach (TBD)',      desc:'Sequence triggering from buying-stage signals. Salesloft is funded. Outreach strategy TBD — strategic parity or intentionally de-prioritized?',                                   prompt:'Outreach is TBD. Salesloft is funded. Is Outreach strategic parity or lower priority? What is the customer ask — how often does Outreach come up in seller conversations vs. Salesloft?',                    tbd:true  },
-  { id:'cx',   name:'CX Platforms',    sub:'Gainsight (evaluating) / Totango',         desc:'Churn signal, expansion signal, and health score delivery for CS teams. Gainsight is Priority #1 and still evaluating. Account Health and Churn Signal APIs both TBD.',           prompt:'Gainsight is labeled Priority #1 but still evaluating. What is the actual blocker? Is Totango an either/or vs. Gainsight or a separate bet?',                                                                  tbd:true  },
-  { id:'dq',   name:'Data Quality',    sub:'LeanData / Openprise',                     desc:'CRM data hygiene and routing logic. Currently live. Question is whether coverage is sufficient.',                                                                                   prompt:'DQ integrations are live. Is the current coverage meeting the bar for RevOps, or are there routing and hygiene gaps that hurt data quality downstream?',                                                      tbd:false },
-  { id:'pu',   name:'Product Usage',   sub:'Amplitude — TBD',                          desc:'Product usage signals as a health input for CS and RevOps. No strategy defined yet. Significant gap for CS health scoring.',                                                       prompt:'Product Usage has no defined strategy. CS health scoring depends on product usage signals. How urgent is this gap — is it hurting CS renewal conversations today?',                                           tbd:true  },
-  { id:'cms',  name:'CMS',             sub:'Aqui / Folloze — TBD',                     desc:'Content delivery personalized by buying stage for marketers. No strategy defined. Question is whether this is a strategic integration category.',                                  prompt:'CMS has no defined strategy. Is content management a strategic integration for marketers, or lower priority? Who is asking for this?',                                                                        tbd:true  },
-  { id:'msr',  name:'Measurement',     sub:'Bizible / Rockerbox',                      desc:'Marketing attribution and revenue proof. Some endpoints TBD. Critical for marketers and RevOps to prove 6sense ROI.',                                                              prompt:'Attribution endpoints are TBD in places. How much does incomplete attribution hurt marketers and RevOps ability to prove 6sense ROI? Is this a renewal risk today?',                                          tbd:true  },
-  { id:'rpt',  name:'Reporting / BI',  sub:'Tableau / PowerBI / Looker — TBD',         desc:'Native BI connector for RevOps reporting stacks. Currently TBD. If RevOps cannot consume 6sense data in their BI tools, the data layer value is hidden.',                        prompt:'BI Connector is TBD. How critical is native BI connectivity for RevOps? If RevOps never opens the SI app but consumes data in Tableau, are we providing enough value for renewal?',                           tbd:true  },
-  { id:'agy',  name:'Agency',          sub:'Dentsu / Havas',                            desc:'Agency coordination for marketers running managed programs. Strategic priority or niche need?',                                                                                    prompt:'Agency integrations — strategic priority or niche customer request? Who in the customer base is asking for this?',                                                                                           tbd:false },
-];
-const STEPS = INTEGRATIONS.map((_,i)=>i);
-const TOTAL = STEPS.length;
-let step = 0;
-let S = {};
-
-const DEFAULTS = {"crm": {"mktg": "H", "sell": "H", "revops": "H", "cs": "H", "overall": "must"}, "cdw": {"mktg": "M", "sell": "L", "revops": "H", "cs": "M", "overall": "fund"}, "cdp": {"mktg": "H", "sell": "L", "revops": "M", "cs": "L", "overall": "fund"}, "sep": {"mktg": "M", "sell": "H", "revops": "M", "cs": "L", "overall": "fund"}, "cx": {"mktg": "L", "sell": "L", "revops": "M", "cs": "H", "overall": "eval"}, "dq": {"mktg": "M", "sell": "L", "revops": "H", "cs": "M", "overall": "fund"}, "pu": {"mktg": "L", "sell": "L", "revops": "M", "cs": "H", "overall": "eval"}, "cms": {"mktg": "M", "sell": "L", "revops": "L", "cs": "L", "overall": "eval"}, "msr": {"mktg": "H", "sell": "M", "revops": "H", "cs": "L", "overall": "fund"}, "rpt": {"mktg": "M", "sell": "L", "revops": "H", "cs": "L", "overall": "eval"}, "agy": {"mktg": "M", "sell": "L", "revops": "L", "cs": "L", "overall": "depri"}};
-function initState(){
-  S={};
-  INTEGRATIONS.forEach(intg=>{
-    const d = DEFAULTS[intg.id] || {};
-    S[intg.id]={ 
-      personas:Object.fromEntries(PERSONAS.map(p=>[p.id, d[p.id]||null])),
-      overall: d.overall||null, 
-      notes:'' 
-    };
-  });
-}
-function curIntg(){ return INTEGRATIONS[step]; }
-function curS(){ return S[curIntg().id]; }
-function rated(){ return INTEGRATIONS.filter(intg=>{ const s=S[intg.id]; return s.overall!==null||Object.values(s.personas).some(v=>v!==null); }).length; }
-function nav(dir){ step=Math.max(0,Math.min(TOTAL,step+dir)); render(); }
-function goTo(s){ step=Math.max(0,Math.min(TOTAL,s)); render(); }
-function resetAll(){ if(!confirm('Reset all data?')) return; initState(); step=0; render(); }
-function selectPersona(pid,priId){ const s=curS(); s.personas[pid]=s.personas[pid]===priId?null:priId; renderGrid(); updateMeta(); }
-function selectOverall(oid){ const s=curS(); s.overall=s.overall===oid?null:oid; renderOverall(); updateMeta(); }
-function saveNote(v){ curS().notes=v; }
-
-function render(){
-  const done=step>=TOTAL;
-  document.getElementById('i2-done').style.display=done?'flex':'none';
-  if(done){ renderDone(); updateMeta(); return; }
-  renderTopbar(); renderSectionHdr(); renderLeft(); renderGrid(); renderOverall(); renderFooter();
-  document.getElementById('i2-notes-inp').value=curS().notes;
-}
-function updateMeta(){ document.getElementById('i2-tb-pct').textContent=Math.round(rated()/TOTAL*100)+'%'; }
-function renderTopbar(){ document.getElementById('i2-tb-ctx').textContent=curIntg().name; updateMeta(); }
-function renderSectionHdr(){
-  const intg=curIntg();
-  document.getElementById('i2-sh-ey').textContent=`Integration ${step+1} of ${TOTAL}`;
-  document.getElementById('i2-sh-nm').textContent=intg.name;
-  document.getElementById('i2-sh-jt').textContent=intg.sub;
-  const badge=document.getElementById('i2-sh-badge');
-  badge.textContent=intg.tbd?'TBD':'Active';
-  badge.style.background=intg.tbd?'#D97706':'#0D1B3E';
-  const r=rated();
-  document.getElementById('i2-sh-prog-lbl').textContent=`${r} / ${TOTAL} rated`;
-  document.getElementById('i2-sh-prog-fill').style.width=Math.round(r/TOTAL*100)+'%';
-}
-function renderLeft(){
-  const intg=curIntg();
-  document.getElementById('i2-intg-lbl').textContent=`Integration ${step+1} of ${TOTAL}${intg.tbd?' · TBD':''}`;
-  document.getElementById('i2-intg-nm').textContent=intg.name+' — '+intg.sub;
-  document.getElementById('i2-intg-desc').textContent=intg.desc;
-  if(intg.prompt){ document.getElementById('i2-prompt-box').style.display='block'; document.getElementById('i2-prompt-txt').textContent=intg.prompt; }
-  else { document.getElementById('i2-prompt-box').style.display='none'; }
-}
-function renderOverall(){
-  const s=curS();
-  document.getElementById('i2-overall-opts').innerHTML=OVERALL_OPTS.map(o=>{
-    const sel=s.overall===o.id?'sel':'';
-    return `<div class="oopt ${o.cls} ${sel}" onclick="INT2.selectOverall('${o.id}')"><span class="odot" style="background:${o.dot}"></span>${o.label}</div>`;
-  }).join('');
-}
-function renderGrid(){
-  const s=curS();
-  const nP=PERSONAS.length;
-  document.getElementById('i2-persona-header-row').style.gridTemplateColumns=`repeat(${nP},1fr)`;
-  document.getElementById('i2-persona-header-row').innerHTML=PERSONAS.map(p=>`<div class="p-hdr" style="background:#${p.color}"><div class="p-hdr-nm">${p.name}</div></div>`).join('');
-  document.getElementById('i2-priority-grid').style.gridTemplateColumns=`repeat(${nP},1fr)`;
-  document.getElementById('i2-priority-grid').innerHTML=PERSONAS.map(p=>{
-    const sel=s.personas[p.id];
-    return `<div class="p-col">${PRIORITIES.map(pr=>{
-      const isSel=sel===pr.id;
-      return `<div class="priority-btn ${pr.cls}${isSel?' sel':''}" onclick="INT2.selectPersona('${p.id}','${pr.id}')">${isSel?'✓ ':''}${pr.label}</div>`;
-    }).join('')}</div>`;
-  }).join('');
-}
-function renderFooter(){
-  const lo=Math.max(0,step-2),hi=Math.min(TOTAL-1,step+3);
-  let html='';
-  for(let s=lo;s<=hi;s++){
-    const intg=INTEGRATIONS[s];
-    const cls=s<step?'past':s===step?'cur':'fut';
-    const nm=intg.name.length>16?intg.name.slice(0,15)+'…':intg.name;
-    const arr=s<hi?'<span class="carr">›</span>':'';
-    html+=`<div class="crumb ${cls}" onclick="INT2.goTo(${s})"><span class="cdot"></span><span class="ctxt">${nm}${intg.tbd?' ⚠':''}</span></div>${arr}`;
-  }
-  html+=`<span class="crumb-ctr">${step+1} / ${TOTAL}</span>`;
-  document.getElementById('i2-crumb-track').innerHTML=html;
-  document.getElementById('i2-btn-back').disabled=step===0;
-  document.getElementById('i2-btn-next').textContent=step===TOTAL-1?'Finish →':'Next →';
-}
-function renderDone(){
-  document.getElementById('i2-done-sub').textContent=`${rated()} of ${TOTAL} integrations rated.`;
-  const ovLabel={must:'Must-Have',fund:'Fund',eval:'Evaluate',depri:'De-prioritize'};
-  let rows=`<tr><th>Integration</th><th>Overall</th>${PERSONAS.map(p=>`<th>${p.name}</th>`).join('')}<th>Notes</th></tr>`;
-  INTEGRATIONS.forEach(intg=>{
-    const s=S[intg.id];
-    const ov=s.overall?`<b>${ovLabel[s.overall]}</b>`:'—';
-    const pcells=PERSONAS.map(p=>{ const v=s.personas[p.id]; return `<td style="text-align:center">${v||'—'}</td>`; }).join('');
-    rows+=`<tr${intg.tbd?' style="background:#FFFBEB"':''}><td><b>${intg.name}</b>${intg.tbd?' <span style="color:#D97706;font-size:.85em">TBD</span>':''}<br><span style="color:#64748B;font-size:.9em">${intg.sub}</span></td><td>${ov}</td>${pcells}<td style="font-style:italic;color:#64748B">${s.notes||''}</td></tr>`;
-  });
-  document.getElementById('i2-sum-table').innerHTML=rows;
-}
-async function exportPPT(){
-  const btn=document.querySelector('#app-int2 .tb-btn.exp');
-  const orig=btn.innerHTML; btn.innerHTML='⏳ Building…';
-  try{
-    const pres=new PptxGenJS(); pres.layout='LAYOUT_16x9';
-    const N='0D1B3E',T='0D9488',TLT='CCFBF1',W='FFFFFF',BG='F1F5F9',MU='64748B',SL='334155';
-    const GOLD='D97706',GOLD_LT='FEF9EC',GOLD_DK='78350F';
-    const TB_H=0.36,PH_H=0.70,MAIN_Y=TB_H+PH_H,PAD=0.15;
-    const INNER_Y=MAIN_Y+PAD,BOTTOM=5.58;
-    const LP_X=PAD,LP_W=2.45;
-    const GX=LP_X+LP_W+PAD*0.6,GW=10-GX-PAD;
-    const nP=PERSONAS.length,PGAP=0.04;
-    const PW=(GW-(nP-1)*PGAP)/nP;
-    const PH_HDR=0.38;
-    const ROWS_Y=INNER_Y+PH_HDR+0.03;
-    const ROWS_H=BOTTOM-ROWS_Y;
-    const nR=PRIORITIES.length;
-    const RH=(ROWS_H-(nR-1)*PGAP)/nR;
-    const pColors={H:'059669',M:'D97706',L:'1D4ED8',TBD:'334155'};
-    const pBgs={H:'D1FAE5',M:'FEF3C7',L:'DBEAFE',TBD:'F1F5F9'};
-    const pTxts={H:'065F46',M:'92400E',L:'1E3A8A',TBD:'94A3B8'};
-    const ovColors={must:'059669',fund:'1D4ED8',eval:'D97706',depri:'475569'};
-    const ovBgs={must:'D1FAE5',fund:'DBEAFE',eval:'FEF3C7',depri:'F1F5F9'};
-    const ovLabels={must:'Must-Have',fund:'Fund',eval:'Evaluate',depri:'De-prioritize'};
-    const ms=()=>({type:'outer',blur:4,offset:2,angle:135,color:'000000',opacity:0.07});
-    {const sl=pres.addSlide();sl.background={color:N};
-      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:.1,h:5.625,fill:{color:T}});
-      sl.addText('Integration Priorities',{x:.4,y:1.1,w:8,h:.85,fontSize:30,fontFace:'Georgia',bold:true,color:W});
-      sl.addText('Session Results · Tom Paradis & Jason Telmos',{x:.4,y:1.95,w:8,h:.5,fontSize:17,fontFace:'Georgia',color:'AABDD6'});
-      sl.addText(`${rated()} of ${TOTAL} integrations rated · ${PERSONAS.length} personas`,{x:.4,y:2.7,w:8,h:.38,fontSize:10,fontFace:'Trebuchet MS',color:'5EEAD4'});
-    }
-    INTEGRATIONS.forEach((intg,idx)=>{
-      const sl=pres.addSlide(); sl.background={color:BG};
-      const s=S[intg.id];
-      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:10,h:TB_H,fill:{color:N}});
-      sl.addText([{text:'Integration ',options:{bold:true,color:W}},{text:'Priorities',options:{bold:true,color:TLT}},{text:`  ·  ${intg.name}  ·  ${idx+1} of ${TOTAL}`,options:{color:'9CB3CC'}}],{x:PAD,y:0,w:8,h:TB_H,fontSize:9.5,fontFace:'Trebuchet MS',valign:'middle',margin:0});
-      sl.addText(intg.tbd?'TBD':'Active',{x:8.0,y:0,w:1.85,h:TB_H,fontSize:8,fontFace:'Trebuchet MS',bold:true,color:intg.tbd?'FCD34D':TLT,align:'right',valign:'middle',margin:0});
-      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:TB_H,w:10,h:PH_H,fill:{color:W}});
-      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:TB_H+PH_H-0.006,w:10,h:0.006,fill:{color:'E2E8F0'}});
-      sl.addText(`INTEGRATION ${idx+1} OF ${TOTAL}${intg.tbd?' · TBD':''}`,{x:PAD,y:TB_H+0.05,w:6,h:0.14,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:1,margin:0});
-      sl.addText(intg.name,{x:PAD,y:TB_H+0.18,w:6.5,h:0.34,fontSize:19,fontFace:'Georgia',bold:true,color:N,margin:0});
-      sl.addText(intg.sub,{x:PAD,y:TB_H+0.51,w:6.5,h:0.16,fontSize:7,fontFace:'Trebuchet MS',italic:true,color:MU,margin:0});
-      if(s.overall){sl.addShape(pres.shapes.RECTANGLE,{x:8.0,y:TB_H+0.14,w:1.82,h:0.28,fill:{color:ovColors[s.overall]}});sl.addText(ovLabels[s.overall],{x:8.0,y:TB_H+0.14,w:1.82,h:0.28,fontSize:8,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});}
-      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:MAIN_Y,w:10,h:5.625-MAIN_Y,fill:{color:BG}});
-      sl.addShape(pres.shapes.RECTANGLE,{x:LP_X,y:INNER_Y,w:LP_W,h:BOTTOM-INNER_Y,fill:{color:W},shadow:ms()});
-      const lx=LP_X+0.13,lw=LP_W-0.26; let ly=INNER_Y+0.13;
-      sl.addText('INTEGRATION',{x:lx,y:ly,w:lw,h:0.13,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:T,charSpacing:1,margin:0}); ly+=0.16;
-      sl.addText(intg.name,{x:lx,y:ly,w:lw,h:0.45,fontSize:13,fontFace:'Georgia',bold:true,color:N,lineSpacingMultiple:1.1,margin:0}); ly+=0.5;
-      sl.addText(intg.desc,{x:lx,y:ly,w:lw,h:0.9,fontSize:7.5,fontFace:'Trebuchet MS',color:SL,lineSpacingMultiple:1.4,margin:0}); ly+=0.96;
-      if(intg.prompt){const ph=1.0;sl.addShape(pres.shapes.RECTANGLE,{x:lx,y:ly,w:lw,h:ph,fill:{color:GOLD_LT}});sl.addShape(pres.shapes.RECTANGLE,{x:lx,y:ly,w:0.05,h:ph,fill:{color:GOLD}});sl.addText('DISCUSSION PROMPT',{x:lx+0.09,y:ly+0.07,w:lw-0.1,h:0.13,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:GOLD,charSpacing:0.5,margin:0});const sp=intg.prompt.length>200?intg.prompt.slice(0,198)+'…':intg.prompt;sl.addText(sp,{x:lx+0.09,y:ly+0.21,w:lw-0.1,h:ph-0.25,fontSize:6.5,fontFace:'Trebuchet MS',color:GOLD_DK,lineSpacingMultiple:1.3,margin:0});ly+=ph+0.09;}
-      sl.addShape(pres.shapes.RECTANGLE,{x:lx,y:ly,w:lw,h:0.005,fill:{color:'E2E8F0'}}); ly+=0.1;
-      sl.addText('OVERALL PRIORITY',{x:lx,y:ly,w:lw,h:0.13,fontSize:5.5,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,margin:0}); ly+=0.15;
-      const aH=0.26,aGap=0.05;
-      OVERALL_OPTS.forEach((o,oi)=>{const ay=ly+oi*(aH+aGap);const isSel=s.overall===o.id;const dotC={must:'059669',fund:'1D4ED8',eval:'D97706',depri:'475569'}[o.id];sl.addShape(pres.shapes.RECTANGLE,{x:lx,y:ay,w:lw,h:aH,fill:{color:isSel?ovColors[o.id]:(o.id==='must'?'F0FDF4':o.id==='fund'?'EFF6FF':o.id==='eval'?'FFFBEB':'F8FAFC')}});if(isSel)sl.addShape(pres.shapes.RECTANGLE,{x:lx,y:ay,w:0.05,h:aH,fill:{color:ovColors[o.id]}});sl.addShape(pres.shapes.OVAL,{x:lx+0.1,y:ay+(aH-0.09)/2,w:0.09,h:0.09,fill:{color:isSel?ovColors[o.id]:dotC}});sl.addText(o.label,{x:lx+0.23,y:ay,w:lw-0.25,h:aH,fontSize:7.5,fontFace:'Trebuchet MS',bold:isSel,color:MU,valign:'middle',margin:0});});
-      PERSONAS.forEach((p,pi)=>{const cx=GX+pi*(PW+PGAP);sl.addShape(pres.shapes.RECTANGLE,{x:cx,y:INNER_Y,w:PW,h:PH_HDR,fill:{color:p.color}});sl.addText(p.name,{x:cx,y:INNER_Y,w:PW,h:PH_HDR,fontSize:8.5,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});const sel=s.personas[p.id];PRIORITIES.window.SI = (function() {
 // ── DATA ─────────────────────────────────────────────────────────────────────
 
 const COMPETITORS = [
@@ -1543,7 +1343,6 @@ const TOTAL = STEPS.length;
 
 let step = 0;
 let S = {};
-var matrixView = {};
 
 function initState() {
   S = {};
@@ -1555,35 +1354,8 @@ function initState() {
         assess: null, notes: '',
       };
     });
-    matrixView[p.id] = true; // default to matrix view
+    matrixView[p.id] = true;
   });
-}
-
-const STORAGE_KEY = 'si_session_v1';
-
-function persist() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(S));
-  } catch(e) {}
-}
-
-function loadSaved() {
-  try {
-    var saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return false;
-    var parsed = JSON.parse(saved);
-    // Merge saved into S — only overwrite keys that exist in current schema
-    PERSONAS.forEach(function(p) {
-      if (parsed[p.id]) {
-        p.useCases.forEach(function(uc) {
-          if (parsed[p.id][uc.id]) {
-            S[p.id][uc.id] = parsed[p.id][uc.id];
-          }
-        });
-      }
-    });
-    return true;
-  } catch(e) { return false; }
 }
 
 function curS() {
@@ -1608,35 +1380,27 @@ function pRated(pi) {
 }
 
 // ── ACTIONS ──────────────────────────────────────────────────────────────────
-function goToPersona(pi) {
-  var firstStep = STEPS.findIndex(function(s){ return s.pi === pi; });
-  if (firstStep >= 0) {
-    step = firstStep;
-    // Stay in matrix view when navigating between personas
-    matrixView[PERSONAS[pi].id] = true;
-    render();
-  }
-}
-
 function navigate(dir) { step = Math.max(0,Math.min(TOTAL,step+dir)); render(); }
 function goTo(s) { step = Math.max(0,Math.min(TOTAL,s)); render(); }
-function resetAll() { if(!confirm('Reset all ratings and clear saved data?')) return; try { localStorage.removeItem(STORAGE_KEY); } catch(e) {} initState(); step=0; render(); }
+function resetAll() { if(!confirm('Reset all data?')) return; initState(); step=0; render(); }
 
-function selectTier(cId, tId) {
-  curS().comp[cId] = (curS().comp[cId]===tId) ? null : tId;
-  render();
+function selectTier(cid, tid) {
+  const s = curS();
+  s.comp[cid] = s.comp[cid]===tid ? null : tid;
+  renderGrid();
+  updateMeta();
   persist();
 }
-function selectAssess(aId) {
-  curS().assess = (curS().assess===aId) ? null : aId;
+function selectAssess(aid) {
+  const s = curS();
+  s.assess = s.assess===aid ? null : aid;
   renderAssess();
+  updateMeta();
   persist();
 }
-function saveNote(v) {
-  curS().notes = v;
-  persist();
-}
+function saveNote(v) { curS().notes = v; persist(); }
 
+// ── RENDER ───────────────────────────────────────────────────────────────────
 function render() {
   var done = step >= TOTAL;
   document.getElementById('done').style.display = done ? 'flex' : 'none';
@@ -1667,18 +1431,15 @@ function render() {
     document.getElementById('main').style.display = 'grid';
     var footerEl2 = document.getElementById('footer');
     if (!document.getElementById('crumb-track')) {
-      footerEl2.innerHTML = '<div class="crumb-track" id="crumb-track"></div>' +
-        '<div class="foot-btns">' +
-          '<button class="nbtn" id="btn-back" onclick="SI.navigate(-1)">&#8592; Back</button>' +
-          '<button class="nbtn pri" id="btn-next" onclick="SI.navigate(1)">Next &#8594;</button>' +
+      footerEl2.innerHTML = '<div class="crumb-track" id="crumb-track"></div>'+
+        '<div class="foot-btns">'+
+          '<button class="nbtn" id="btn-back" onclick="SI.navigate(-1)">&#8592; Back</button>'+
+          '<button class="nbtn pri" id="btn-next" onclick="SI.navigate(1)">Next &#8594;</button>'+
         '</div>';
     }
     footerEl2.style.cssText = '';
-    document.getElementById('footer').style.display = 'flex';
-    renderLeft();
-    renderGrid();
-    renderAssess();
-    renderFooter();
+    footerEl2.style.display = 'flex';
+    renderLeft(); renderGrid(); renderAssess(); renderFooter();
     document.getElementById('notes-inp').value = curS().notes;
   }
 }
@@ -1694,72 +1455,54 @@ function renderTopbar() {
 }
 
 function renderPH() {
-  var piui = STEPS[step], pi = piui.pi;
-  var p = PERSONAS[pi];
-  var r = pRated(pi), t = p.useCases.length;
-  document.getElementById('ph-ey').textContent = 'Persona ' + (pi+1) + ' of ' + PERSONAS.length;
-  document.getElementById('ph-nm').textContent = p.name;
-  document.getElementById('ph-jt').textContent = p.jtbd;
-  document.getElementById('ph-badge').textContent = p.badge;
-  document.getElementById('ph-prog-lbl').textContent = r + ' / ' + t + ' rated';
-  document.getElementById('ph-prog-fill').style.width = Math.round(r/t*100) + '%';
-  var isMatrix = !!matrixView[p.id];
-  var toggleEl = document.getElementById('ph-view-toggle');
-  if (toggleEl) {
-    var btn = document.createElement('div');
-    btn.dataset.pid = p.id;
-    btn.onclick = function() { SI.toggleMatrix(this.dataset.pid); };
-    btn.innerHTML = isMatrix ? '&#8801; Step-through' : '&#8862; Matrix view';
-    btn.style.cssText = 'display:flex;align-items:center;gap:.35em;cursor:pointer;font-size:.6em;font-weight:600;padding:.28em .75em;border-radius:2em;border:1.5px solid ' + (isMatrix ? 'var(--teal)' : '#E2E8F0') + ';background:' + (isMatrix ? '#CCFBF1' : '#fff') + ';color:' + (isMatrix ? 'var(--teal)' : '#64748B') + ';user-select:none;';
-    toggleEl.innerHTML = '';
-    toggleEl.appendChild(btn);
+  var piui=STEPS[step],pi=piui.pi;
+  var p=PERSONAS[pi];
+  var r=pRated(pi),t=p.useCases.length;
+  document.getElementById('ph-ey').textContent='Persona '+(pi+1)+' of '+PERSONAS.length;
+  document.getElementById('ph-nm').textContent=p.name;
+  document.getElementById('ph-jt').textContent=p.jtbd;
+  document.getElementById('ph-badge').textContent=p.badge;
+  document.getElementById('ph-prog-lbl').textContent=r+' / '+t+' rated';
+  document.getElementById('ph-prog-fill').style.width=Math.round(r/t*100)+'%';
+  var isMatrix=!!matrixView[p.id];
+  var toggleEl=document.getElementById('ph-view-toggle');
+  if(toggleEl){
+    var btn=document.createElement('div');
+    btn.dataset.pid=p.id;
+    btn.onclick=function(){SI.toggleMatrix(this.dataset.pid);};
+    btn.innerHTML=isMatrix?'&#8801; Step-through':'&#8862; Matrix view';
+    btn.style.cssText='display:flex;align-items:center;gap:.35em;cursor:pointer;font-size:.6em;font-weight:600;padding:.28em .75em;border-radius:2em;border:1.5px solid '+(isMatrix?'var(--teal)':'#E2E8F0')+';background:'+(isMatrix?'#CCFBF1':'#fff')+';color:'+(isMatrix?'var(--teal)':'#64748B')+';user-select:none;';
+    toggleEl.innerHTML='';toggleEl.appendChild(btn);
   }
-  if (isMatrix) {
-    var footerEl = document.getElementById('footer');
-    footerEl.style.display = 'flex';
-    footerEl.innerHTML = '';
-    var tabsDiv = document.createElement('div');
-    tabsDiv.style.cssText = 'flex:1;display:flex;align-items:center;gap:.4em;overflow-x:auto;';
-    PERSONAS.forEach(function(per, i) {
-      var cur = per.id === p.id;
-      var pr2 = pRated(i), pt2 = per.useCases.length;
-      var tab = document.createElement('div');
-      tab.dataset.pi = i;
-      tab.onclick = function() { SI.goToPersona(parseInt(this.dataset.pi)); };
-      tab.style.cssText = 'display:flex;align-items:center;gap:.3em;padding:.32em .75em;border-radius:.4em;border:1.5px solid ' + (cur ? 'var(--navy)' : '#E2E8F0') + ';background:' + (cur ? 'var(--navy)' : '#fff') + ';color:' + (cur ? '#fff' : '#64748B') + ';font-size:.62em;font-weight:' + (cur ? 700 : 500) + ';cursor:pointer;white-space:nowrap;flex-shrink:0;';
-      tab.textContent = per.badge;
-      if (pr2 > 0) {
-        var badge = document.createElement('span');
-        badge.textContent = pr2 + '/' + pt2;
-        badge.style.cssText = 'background:' + (cur ? 'rgba(255,255,255,.2)' : '#CCFBF1') + ';color:' + (cur ? '#fff' : 'var(--teal)') + ';padding:0 .35em;border-radius:1em;font-size:.9em;';
-        tab.appendChild(badge);
-      }
+  if(isMatrix){
+    var footerEl=document.getElementById('footer');
+    footerEl.style.display='flex';footerEl.innerHTML='';
+    var tabsDiv=document.createElement('div');
+    tabsDiv.style.cssText='flex:1;display:flex;align-items:center;gap:.4em;overflow-x:auto;';
+    PERSONAS.forEach(function(per,i){
+      var cur=per.id===p.id;
+      var pr2=pRated(i),pt2=per.useCases.length;
+      var tab=document.createElement('div');
+      tab.dataset.pi=i;
+      tab.onclick=function(){SI.goToPersona(parseInt(this.dataset.pi));};
+      tab.style.cssText='display:flex;align-items:center;gap:.3em;padding:.32em .75em;border-radius:.4em;border:1.5px solid '+(cur?'var(--navy)':'#E2E8F0')+';background:'+(cur?'var(--navy)':'#fff')+';color:'+(cur?'#fff':'#64748B')+';font-size:.62em;font-weight:'+(cur?700:500)+';cursor:pointer;white-space:nowrap;flex-shrink:0;';
+      tab.textContent=per.badge;
+      if(pr2>0){var badge=document.createElement('span');badge.textContent=pr2+'/'+pt2;badge.style.cssText='background:'+(cur?'rgba(255,255,255,.2)':'#CCFBF1')+';color:'+(cur?'#fff':'var(--teal)')+';padding:0 .35em;border-radius:1em;font-size:.9em;';tab.appendChild(badge);}
       tabsDiv.appendChild(tab);
     });
     footerEl.appendChild(tabsDiv);
-    var hint = document.createElement('div');
-    hint.style.cssText = 'flex-shrink:0;font-size:.58em;color:#64748B;padding:0 .6em;';
-    hint.innerHTML = 'Click Harvey Balls to rate &middot; Dropdown for assessment';
+    var hint=document.createElement('div');
+    hint.style.cssText='flex-shrink:0;font-size:.58em;color:#64748B;padding:0 .6em;';
+    hint.innerHTML='Click Harvey Balls to rate &middot; Dropdown for assessment';
     footerEl.appendChild(hint);
-    // Back / Next buttons (same style as step-through)
-    var btnBack = document.createElement('button');
-    btnBack.className = 'nbtn';
-    btnBack.innerHTML = '&#8592; Back';
-    btnBack.onclick = function() { SI.goToPersona(Math.max(0, PERSONAS.findIndex(function(per){ return per.id === p.id; }) - 1)); };
-    var btnNext = document.createElement('button');
-    btnNext.className = 'nbtn pri';
-    btnNext.innerHTML = 'Next &#8594;';
-    var curPi = PERSONAS.findIndex(function(per){ return per.id === p.id; });
-    btnNext.innerHTML = curPi >= PERSONAS.length - 1 ? 'Done &#8594;' : 'Next &#8594;';
-    btnNext.onclick = function() {
-      var npi = PERSONAS.findIndex(function(per){ return per.id === p.id; });
-      if (npi < PERSONAS.length - 1) { SI.goToPersona(npi + 1); }
-    };
-    var footBtns = document.createElement('div');
-    footBtns.className = 'foot-btns';
-    footBtns.appendChild(btnBack);
-    footBtns.appendChild(btnNext);
-    footerEl.appendChild(footBtns);
+    var btnB=document.createElement('button');btnB.className='nbtn';btnB.innerHTML='&#8592; Back';
+    btnB.onclick=function(){var npi=PERSONAS.findIndex(function(per){return per.id===p.id;});if(npi>0)SI.goToPersona(npi-1);};
+    var btnN=document.createElement('button');btnN.className='nbtn pri';
+    var cpi=PERSONAS.findIndex(function(per){return per.id===p.id;});
+    btnN.innerHTML=cpi>=PERSONAS.length-1?'Done &#8594;':'Next &#8594;';
+    btnN.onclick=function(){var npi=PERSONAS.findIndex(function(per){return per.id===p.id;});if(npi<PERSONAS.length-1)SI.goToPersona(npi+1);};
+    var fb=document.createElement('div');fb.className='foot-btns';fb.appendChild(btnB);fb.appendChild(btnN);
+    footerEl.appendChild(fb);
   }
 }
 
@@ -1783,7 +1526,7 @@ function renderAssess() {
   const s = curS();
   document.getElementById('assess-opts').innerHTML = ASSESSMENTS.map(a => {
     const sel = s.assess===a.id ? 'sel' : '';
-    return `<div class="assess-btn ${a.cls} ${sel}" onclick="SI.selectAssess('${a.id}')">
+    return `<div class="assess-btn ${a.cls} ${sel}" onclick="selectAssess('${a.id}')">
       <span class="ab-dot" style="background:${a.dot}"></span>
       <span>${a.icon} ${a.label}</span>
     </div>`;
@@ -1804,7 +1547,7 @@ function renderGrid() {
 
     const tiers = TIERS.map(t => {
       const isSel = sel===t.id;
-      return `<div class="tier ${t.cls}${isSel?' sel':''}" onclick="SI.selectTier('${c.id}','${t.id}')">
+      return `<div class="tier ${t.cls}${isSel?' sel':''}" onclick="selectTier('${c.id}','${t.id}')">
         ${isSel ? '✓ ' : ''}${t.label}
       </div>`;
     }).join('');
@@ -1829,7 +1572,7 @@ function renderFooter() {
     const nm=uc.name.length>17?uc.name.slice(0,16)+'…':uc.name;
     const pfx=(ui===0||s===lo)?`<span style="font-size:.85em;opacity:.6">${p.badge}:</span> `:'';
     const arr=s<hi?'<span class="carr">›</span>':'';
-    html+=`<div class="crumb ${cls}" onclick="SI.goTo(${s})">
+    html+=`<div class="crumb ${cls}" onclick="goTo(${s})">
       <span class="cdot"></span><span class="ctxt">${pfx}${nm}</span>
     </div>${arr}`;
   }
@@ -1840,130 +1583,6 @@ function renderFooter() {
 }
 
 // ── DONE ─────────────────────────────────────────────────────────────────────
-
-// ── HARVEY BALLS + MATRIX VIEW ───────────────────────────────────────────────
-
-function harveyBall(tierId) {
-  var cx = 11, cy = 11, r = 10;
-  var cols = { diff:'#059669', best:'#0D9488', mod:'#D97706', basic:'#1D4ED8', none:'#94A3B8' };
-  var fracs = { diff:1, best:0.75, mod:0.5, basic:0.25, none:0 };
-  var col = cols[tierId] || '#E2E8F0';
-  var frac = tierId ? (fracs[tierId] !== undefined ? fracs[tierId] : 0) : 0;
-  var stroke = tierId ? col : '#CBD5E1';
-  var fillPath = '';
-  if (frac === 1) {
-    fillPath = '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r-1) + '" fill="' + col + '"/>';
-  } else if (frac > 0) {
-    var angle = frac * 2 * Math.PI;
-    var ex = cx + (r-1) * Math.sin(angle);
-    var ey = cy - (r-1) * Math.cos(angle);
-    var large = frac > 0.5 ? 1 : 0;
-    fillPath = '<path d="M ' + cx + ' ' + cy + ' L ' + cx + ' ' + (cy-r+1) + ' A ' + (r-1) + ' ' + (r-1) + ' 0 ' + large + ' 1 ' + ex.toFixed(3) + ' ' + ey.toFixed(3) + ' Z" fill="' + col + '"/>';
-  }
-  return '<svg width="14" height="14" viewBox="0 0 22 22" style="display:block"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (tierId ? '#fff' : '#F8FAFC') + '" stroke="' + stroke + '" stroke-width="1.5"/>' + fillPath + '</svg>';
-}
-
-function cycleTier(tierId) {
-  var order = [null, 'diff', 'best', 'mod', 'basic', 'none'];
-  return order[(order.indexOf(tierId) + 1) % order.length];
-}
-
-function toggleMatrix(personaId) {
-  matrixView[personaId] = !matrixView[personaId];
-  render();
-}
-
-function matrixSelectTier(personaId, ucId, compId) {
-  S[personaId][ucId].comp[compId] = cycleTier(S[personaId][ucId].comp[compId]);
-  renderMatrix(personaId);
-  persist();
-}
-
-function matrixSelectAssess(personaId, ucId, val) {
-  S[personaId][ucId].assess = (S[personaId][ucId].assess === val) ? null : val;
-  var sel = document.getElementById('mx-assess-' + personaId + '-' + ucId);
-  if (sel) sel.value = S[personaId][ucId].assess || '';
-  var pi = PERSONAS.findIndex(function(p){ return p.id === personaId; });
-  var r2 = pRated(pi), t2 = PERSONAS[pi].useCases.length;
-  document.getElementById('ph-prog-lbl').textContent = r2 + ' / ' + t2 + ' rated';
-  document.getElementById('ph-prog-fill').style.width = Math.round(r2/t2*100) + '%';
-  persist();
-}
-
-function renderMatrix(personaId) {
-  var pi = PERSONAS.findIndex(function(p){ return p.id === personaId; });
-  var p = PERSONAS[pi];
-  var aColors = { mustbuild:'#059669', partner:'#1D4ED8', stop:'#E11D48' };
-  var aBgs    = { mustbuild:'#D1FAE5', partner:'#DBEAFE', stop:'#FFE4E6' };
-
-  var hdrCells = '<th style="text-align:left;padding:.5em .75em;font-size:.55em;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);position:sticky;left:0;z-index:3;min-width:10em;">Use Case</th>' +
-    '<th style="text-align:center;padding:.5em .5em;font-size:.55em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);min-width:6.5em;">Assessment</th>';
-  COMPETITORS.forEach(function(comp) {
-    var isSix = comp.id === '6s';
-    hdrCells += '<th style="text-align:center;padding:.5em .4em;font-size:.6em;font-weight:700;color:' + (isSix ? 'var(--teal)' : 'var(--navy)') + ';background:#fff;border-bottom:2px solid ' + (isSix ? 'var(--teal)' : 'var(--border)') + ';min-width:4.5em;white-space:nowrap;">' +
-      '<div>' + comp.name + '</div><div style="font-weight:400;font-size:.85em;color:var(--muted);margin-top:.1em;">' + comp.cat + '</div></th>';
-  });
-
-  var bodyRows = '';
-  p.useCases.forEach(function(uc, ui) {
-    var s = S[p.id][uc.id];
-    var rowBg = ui % 2 === 0 ? '#fff' : 'var(--bg)';
-    var assessVal = s.assess || '';
-    var aColor = assessVal ? aColors[assessVal] : 'var(--muted)';
-    var aBg    = assessVal ? aBgs[assessVal]    : 'transparent';
-    var tipAttr = uc.prompt ? ' title="' + uc.prompt.replace(/"/g, "'").slice(0,200) + '"' : '';
-
-    var compCells = '';
-    COMPETITORS.forEach(function(comp) {
-      var tier = s.comp[comp.id];
-      var isSix = comp.id === '6s';
-      var tierObj = TIERS.find(function(t){ return t.id === tier; });
-      var tipLabel = tierObj ? tierObj.label : 'Click to set';
-      compCells += '<td style="padding:.3em .35em;border-bottom:1px solid var(--border);text-align:center;border-left:' + (isSix ? '2px solid var(--tealLt,#CCFBF1)' : '1px solid var(--border)') + ';">' +
-        '<div onclick="SI.matrixSelectTier(\'' + p.id + '\',\'' + uc.id + '\',\'' + comp.id + '\')" title="' + tipLabel + '" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .1s" onmouseenter="this.style.transform=\'scale(1.2)\'" onmouseleave="this.style.transform=\'scale(1)\'">' +
-        harveyBall(tier) + '</div></td>';
-    });
-
-    bodyRows += '<tr onmouseenter="this.style.background=\'#EFF6FF\'" onmouseleave="this.style.background=\'' + rowBg.replace(/'/g, "\\'") + '\'" style="background:' + rowBg + '">' +
-      '<td style="padding:.45em .75em;font-size:.72em;font-weight:600;color:var(--navy);border-bottom:1px solid var(--border);position:sticky;left:0;background:inherit;z-index:2;">' +
-        '<span' + tipAttr + '>' + uc.name + '</span>' +
-        (uc.prompt ? ' <span' + tipAttr + ' style="font-size:.8em;color:var(--gold,#D97706);cursor:help;">ⓘ</span>' : '') +
-      '</td>' +
-      '<td style="padding:.35em .4em;border-bottom:1px solid var(--border);text-align:center;">' +
-        '<select id="mx-assess-' + p.id + '-' + uc.id + '" onchange="SI.matrixSelectAssess(\'' + p.id + '\',\'' + uc.id + '\',this.value||null)" style="font-family:inherit;font-size:.6em;font-weight:600;border:1.5px solid ' + (assessVal ? aColor : 'var(--border)') + ';border-radius:.4em;padding:.25em .5em;background:' + aBg + ';color:' + aColor + ';cursor:pointer;outline:none;min-width:6em;">' +
-          '<option value="">— TBD</option>' +
-          '<option value="mustbuild"' + (assessVal==='mustbuild'?' selected':'') + '>&#8593; Must-Build</option>' +
-          '<option value="partner"'   + (assessVal==='partner'  ?' selected':'') + '>&#8644; Partner</option>' +
-          '<option value="stop"'      + (assessVal==='stop'     ?' selected':'') + '>&#8595; Stop</option>' +
-        '</select>' +
-      '</td>' +
-      compCells +
-    '</tr>';
-  });
-
-  var legendHtml = '<div style="display:flex;align-items:center;gap:.8em;font-size:.58em;color:var(--muted);padding:.6em .8em;flex-wrap:wrap;border-top:1px solid var(--border);margin-top:.4em;">' +
-    '<span style="font-weight:600;">Scale:</span>';
-  TIERS.forEach(function(t) {
-    legendHtml += '<span style="display:flex;align-items:center;gap:.3em;">' + harveyBall(t.id) + '<span>' + t.label + '</span></span>';
-  });
-  legendHtml += '</div>';
-
-  var el = document.getElementById('matrix-main');
-  if (el) {
-    el.innerHTML = '<div style="overflow:auto;padding:.5em .8em;">' +
-      '<table style="border-collapse:collapse;width:100%;font-family:inherit;">' +
-        '<thead><tr>' + hdrCells + '</tr></thead>' +
-        '<tbody>' + bodyRows + '</tbody>' +
-      '</table>' +
-    '</div>' + legendHtml;
-  }
-
-  var r2 = pRated(pi), t2 = p.useCases.length;
-  document.getElementById('ph-prog-lbl').textContent = r2 + ' / ' + t2 + ' rated';
-  document.getElementById('ph-prog-fill').style.width = Math.round(r2/t2*100) + '%';
-}
-
-
 function renderDone() {
   document.getElementById('done-sub').textContent=`${rated()} of ${TOTAL} use cases rated across ${PERSONAS.length} personas.`;
   const tierLabel = {diff:'True differentiator',best:'Best in class',mod:'Moderate',basic:'Basic',none:'No offering'};
@@ -2180,109 +1799,57 @@ async function exportPPT() {
         drawTierScale(sl, ucS);
       });
 
-      // ── PERSONA MATRIX SLIDE (Harvey Balls via unicode)
+      // ── PERSONA SUMMARY SLIDE
       {
         const sl = pres.addSlide();
         sl.background = {color:BG};
 
-        drawTopbar(sl, p.name + '  ·  Matrix View', p.badge);
+        drawTopbar(sl, `${p.name}  ·  Summary`, p.badge);
         drawPersonaHdr(sl, p, pi, ratedN);
         sl.addShape(pres.shapes.RECTANGLE,{x:0,y:MAIN_Y,w:10,h:5.625-MAIN_Y,fill:{color:BG}});
 
-        const nUC  = p.useCases.length;
-        const hUcW = 2.3, hAssW = 1.05, hGap = 0.04;
-        const hGX  = PAD + hUcW + hGap + hAssW + hGap;
-        const hNc  = COMPETITORS.length;
-        const hCW  = (10 - hGX - PAD*0.5 - (hNc-1)*hGap) / hNc;
-        const hHdrY = INNER_Y;
-        const hHdrH = 0.34;
-        const avail  = BOTTOM - hHdrY - hHdrH - 0.04;
-        const rH     = Math.min(0.55, avail / nUC);
-
-        // Unicode Harvey Ball characters for each tier
-        const hbChar = {diff:'●', best:'◕', mod:'◑', basic:'◔', none:'○'};
-        const hbEmpty = '○';
+        const nUC = p.useCases.length;
+        const sUcW = 2.1, sAssW = 1.1, sGap = 0.04;
+        const sGX = PAD + sUcW + sGap + sAssW + sGap;
+        const sNc = COMPETITORS.length;
+        const sCW = (10 - sGX - PAD*0.5 - (sNc-1)*sGap) / sNc;
+        const hY = INNER_Y;
+        const hH = 0.32;
+        const avail = BOTTOM - hY - hH - 0.04;
+        const rH = Math.min(0.62, avail/nUC);
 
         // Column headers
-        sl.addText('USE CASE', {x:PAD, y:hHdrY, w:hUcW, h:hHdrH,
-          fontSize:6, fontFace:'Trebuchet MS', bold:true, color:MU,
-          charSpacing:0.5, valign:'middle', margin:0});
-        sl.addText('ASSESSMENT', {x:PAD+hUcW+hGap, y:hHdrY, w:hAssW, h:hHdrH,
-          fontSize:6, fontFace:'Trebuchet MS', bold:true, color:MU,
-          charSpacing:0.5, valign:'middle', margin:0});
-        COMPETITORS.forEach((comp, ci) => {
-          const cx = hGX + ci*(hCW+hGap);
-          const isSix = comp.id === '6s';
-          sl.addShape(pres.shapes.RECTANGLE, {x:cx, y:hHdrY, w:hCW, h:hHdrH,
-            fill:{color: isSix ? '0F766E' : N}});
-          sl.addText(comp.name, {x:cx, y:hHdrY, w:hCW, h:hHdrH*0.58,
-            fontSize:7, fontFace:'Trebuchet MS', bold:true, color:W,
-            align:'center', valign:'middle', margin:0});
-          sl.addText(comp.cat, {x:cx, y:hHdrY+hHdrH*0.52, w:hCW, h:hHdrH*0.48,
-            fontSize:5.5, fontFace:'Trebuchet MS', color: isSix?TLT:'AABDD6',
-            align:'center', valign:'middle', margin:0});
+        sl.addText('USE CASE',{x:PAD,y:hY,w:sUcW,h:hH,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,valign:'middle',margin:0});
+        sl.addText('ASSESSMENT',{x:PAD+sUcW+sGap,y:hY,w:sAssW,h:hH,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,valign:'middle',margin:0});
+        COMPETITORS.forEach((c,ci)=>{
+          const cx=sGX+ci*(sCW+sGap);
+          sl.addShape(pres.shapes.RECTANGLE,{x:cx,y:hY,w:sCW,h:hH,fill:{color:c.id==='6s'?'0F766E':N}});
+          sl.addText(c.name,{x:cx,y:hY,w:sCW,h:hH,fontSize:6.5,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
         });
 
         // Data rows
-        p.useCases.forEach((uc, ri) => {
-          const ry  = hHdrY + hHdrH + 0.04 + ri * rH;
-          const bg  = ri % 2 === 0 ? W : 'F8FAFC';
+        p.useCases.forEach((uc,ri)=>{
+          const ry = hY+hH+0.04+ri*rH;
+          const bg = ri%2===0?W:'F8FAFC';
           const ucS = S[p.id][uc.id];
+          sl.addShape(pres.shapes.RECTANGLE,{x:PAD,y:ry,w:10-PAD*1.2,h:rH-0.03,fill:{color:bg}});
+          sl.addText(uc.name,{x:PAD+0.05,y:ry,w:sUcW-0.1,h:rH-0.03,fontSize:7,fontFace:'Trebuchet MS',bold:true,color:SL,valign:'middle',margin:2});
 
-          // Row background
-          sl.addShape(pres.shapes.RECTANGLE, {x:PAD, y:ry, w:10-PAD*1.2, h:rH-0.025,
-            fill:{color:bg}, line:{color:'E2E8F0', pt:0.5}});
-
-          // Use case name
-          sl.addText(uc.name, {x:PAD+0.06, y:ry, w:hUcW-0.08, h:rH-0.025,
-            fontSize:7, fontFace:'Trebuchet MS', bold:true, color:SL,
-            valign:'middle', margin:2});
-
-          // Assessment pill
-          if (ucS.assess) {
-            const ax = PAD + hUcW + hGap;
-            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.05, w:hAssW-0.08, h:rH-0.12,
-              fill:{color:aBgH[ucS.assess]}});
-            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.05, w:0.045, h:rH-0.12,
-              fill:{color:aSel[ucS.assess]}});
-            sl.addText(aLbl[ucS.assess], {x:ax+0.10, y:ry+0.05, w:hAssW-0.18, h:rH-0.12,
-              fontSize:6, fontFace:'Trebuchet MS', bold:true, color:aClrH[ucS.assess],
-              valign:'middle', margin:0});
+          if(ucS.assess){
+            const ax=PAD+sUcW+sGap;
+            sl.addShape(pres.shapes.RECTANGLE,{x:ax+0.04,y:ry+0.05,w:sAssW-0.08,h:rH-0.13,fill:{color:aBgH[ucS.assess]}});
+            sl.addShape(pres.shapes.RECTANGLE,{x:ax+0.04,y:ry+0.05,w:0.055,h:rH-0.13,fill:{color:aSel[ucS.assess]}});
+            sl.addText(aLbl[ucS.assess],{x:ax+0.11,y:ry+0.05,w:sAssW-0.19,h:rH-0.13,fontSize:6.5,fontFace:'Trebuchet MS',bold:true,color:aClrH[ucS.assess],valign:'middle',margin:0});
           }
 
-          // Harvey Ball unicode characters per competitor
-          COMPETITORS.forEach((comp, ci) => {
-            const cx  = hGX + ci*(hCW+hGap);
-            const tid = ucS.comp[comp.id];
-            const ch  = tid ? (hbChar[tid] || hbEmpty) : hbEmpty;
-            const col = tid ? tSelH[tid] : 'CBD5E1';
-            // cell bg
-            sl.addShape(pres.shapes.RECTANGLE, {x:cx, y:ry, w:hCW, h:rH-0.025,
-              fill:{color:bg}, line:{color:'E2E8F0', pt:0.5}});
-            // Harvey Ball glyph
-            sl.addText(ch, {x:cx, y:ry, w:hCW, h:rH-0.025,
-              fontSize:13, fontFace:'Arial Unicode MS', color:col,
-              align:'center', valign:'middle', margin:0});
+          COMPETITORS.forEach((c,ci)=>{
+            const cx=sGX+ci*(sCW+sGap);
+            const tid=ucS.comp[c.id];
+            if(tid){
+              sl.addShape(pres.shapes.RECTANGLE,{x:cx+0.02,y:ry+0.04,w:sCW-0.04,h:rH-0.11,fill:{color:tSelH[tid]}});
+              sl.addText(tLbl[tid],{x:cx+0.02,y:ry+0.04,w:sCW-0.04,h:rH-0.11,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
+            }
           });
-        });
-
-        // Legend
-        const legY = BOTTOM + 0.04;
-        const legData = [
-          {id:'diff', ch:'●', label:'True differentiator'},
-          {id:'best', ch:'◕', label:'Best in class'},
-          {id:'mod',  ch:'◑', label:'Moderate'},
-          {id:'basic',ch:'◔', label:'Basic'},
-          {id:'none', ch:'○', label:'No offering'},
-        ];
-        let legX = PAD;
-        legData.forEach(item => {
-          sl.addText(item.ch + '  ' + item.label, {
-            x:legX, y:legY, w:1.7, h:0.18,
-            fontSize:6.5, fontFace:'Arial Unicode MS', color:tSelH[item.id] || MU,
-            valign:'middle', margin:0
-          });
-          legX += 1.75;
         });
       }
     });
@@ -2293,118 +1860,233 @@ async function exportPPT() {
   btn.innerHTML = orig;
 }
 
-// ── CLOUD SAVE / LOAD ──────────────────────────────────────────────────────
-var _ta='github_pat_11B6JWCVY',_tb='0BOVcoFWDheIG_7Vsttweo0gHP8VPYvbB4AMmF3D9l4f2pDLj0h4vID55P5ES32NAFQ7ePrPI';
+
+// ── MATRIX VIEW STATE ────────────────────────────────────────────────────────
+var matrixView = {};
+
+// ── PERSIST TO LOCALSTORAGE ──────────────────────────────────────────────────
+var STORAGE_KEY = 'si_session_v1';
+
+function persist() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(S)); } catch(e) {}
+}
+
+function loadSaved() {
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return false;
+    var parsed = JSON.parse(saved);
+    PERSONAS.forEach(function(p) {
+      if (parsed[p.id]) p.useCases.forEach(function(uc) {
+        if (parsed[p.id][uc.id]) S[p.id][uc.id] = parsed[p.id][uc.id];
+      });
+    });
+    return true;
+  } catch(e) { return false; }
+}
+
+// ── CLOUD SAVE / LOAD ────────────────────────────────────────────────────────
+var _ta='github_pat_11B6JWCVY', _tb='0BOVcoFWDheIG_7Vsttweo0gHP8VPYvbB4AMmF3D9l4f2pDLj0h4vID55P5ES32NAFQ7ePrPI';
 var GH_TOK = _ta+_tb;
 var GH_API = 'https://api.github.com/repos/telmosjason-wq/6sense/contents/session-data.json';
 
-function showCloudToast(msg,color){
-  var t=document.createElement('div');
-  t.textContent=msg;
-  t.style.cssText='position:fixed;bottom:1.4em;left:50%;transform:translateX(-50%);background:'+(color||'#0D9488')+';color:#fff;padding:.4em 1.4em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;pointer-events:none;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .6s;';
+function showCloudToast(msg, color) {
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:1.4em;left:50%;transform:translateX(-50%);background:'+(color||'#0D9488')+';color:#fff;padding:.4em 1.4em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;pointer-events:none;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .6s;';
   document.body.appendChild(t);
-  setTimeout(function(){t.style.opacity='0';},2000);
-  setTimeout(function(){t.remove();},2700);
+  setTimeout(function(){ t.style.opacity='0'; }, 2000);
+  setTimeout(function(){ t.remove(); }, 2700);
 }
 
-function cloudSave(){
-  var btn=document.getElementById('cloud-save-btn');
-  if(btn){btn.textContent='☁ Saving…';btn.disabled=true;}
-  fetch(GH_API,{headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
-  .then(function(r){return r.json();})
-  .then(function(meta){
-    var content=btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))));
-    return fetch(GH_API,{method:'PUT',
+function cloudSave() {
+  var btn = document.getElementById('cloud-save-btn');
+  if (btn) { btn.textContent='☁ Saving…'; btn.disabled=true; }
+  fetch(GH_API, {headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){ return r.json(); })
+  .then(function(meta) {
+    var content = btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))));
+    return fetch(GH_API, {method:'PUT',
       headers:{'Authorization':'token '+GH_TOK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
       body:JSON.stringify({message:'Update SI session ratings',content:content,sha:meta.sha})});
   })
-  .then(function(r){return r.json();})
-  .then(function(res){
-    if(btn){btn.textContent='☁ Save';btn.disabled=false;}
-    showCloudToast(res.content?'✓ Saved to cloud':'✗ Save failed',res.content?null:'#E11D48');
+  .then(function(r){ return r.json(); })
+  .then(function(res) {
+    if (btn) { btn.textContent='☁ Save'; btn.disabled=false; }
+    showCloudToast(res.content ? '✓ Saved to cloud' : '✗ Save failed', res.content ? null : '#E11D48');
   })
-  .catch(function(){
-    if(btn){btn.textContent='☁ Save';btn.disabled=false;}
+  .catch(function() {
+    if (btn) { btn.textContent='☁ Save'; btn.disabled=false; }
     showCloudToast('✗ Network error','#E11D48');
   });
 }
 
-function cloudLoad(){
-  var btn=document.getElementById('cloud-load-btn');
-  if(btn){btn.textContent='↓ Loading…';btn.disabled=true;}
-  fetch(GH_API+'?t='+Date.now(),{headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
-  .then(function(r){return r.json();})
-  .then(function(meta){
-    var decoded=decodeURIComponent(escape(atob(meta.content.replace(/\n/g,''))));
-    var parsed=JSON.parse(decoded);
-    if(!parsed||Object.keys(parsed).length===0){
+function cloudLoad() {
+  var btn = document.getElementById('cloud-load-btn');
+  if (btn) { btn.textContent='↓ Loading…'; btn.disabled=true; }
+  fetch(GH_API+'?t='+Date.now(), {headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){ return r.json(); })
+  .then(function(meta) {
+    var decoded = decodeURIComponent(escape(atob(meta.content.replace(/\n/g,''))));
+    var parsed  = JSON.parse(decoded);
+    if (!parsed || Object.keys(parsed).length===0) {
       showCloudToast('No saved data found','#64748B');
-      if(btn){btn.textContent='↓ Load';btn.disabled=false;}
+      if (btn) { btn.textContent='↓ Load'; btn.disabled=false; }
       return;
     }
-    PERSONAS.forEach(function(p){
-      if(parsed[p.id]) p.useCases.forEach(function(uc){
-        if(parsed[p.id][uc.id]) S[p.id][uc.id]=parsed[p.id][uc.id];
+    PERSONAS.forEach(function(p) {
+      if (parsed[p.id]) p.useCases.forEach(function(uc) {
+        if (parsed[p.id][uc.id]) S[p.id][uc.id]=parsed[p.id][uc.id];
       });
     });
-    persist();render();
-    if(btn){btn.textContent='↓ Load';btn.disabled=false;}
+    persist(); render();
+    if (btn) { btn.textContent='↓ Load'; btn.disabled=false; }
     showCloudToast('✓ Session loaded from cloud');
   })
-  .catch(function(){
-    if(btn){btn.textContent='↓ Load';btn.disabled=false;}
+  .catch(function() {
+    if (btn) { btn.textContent='↓ Load'; btn.disabled=false; }
     showCloudToast('✗ Load failed','#E11D48');
   });
 }
 
-// boot — initState only; render is called by showApp() when app-si is opened
+// ── HARVEY BALLS ─────────────────────────────────────────────────────────────
+function harveyBall(tierId) {
+  var cx=11,cy=11,r=10;
+  var cols={diff:'#059669',best:'#0D9488',mod:'#D97706',basic:'#1D4ED8',none:'#94A3B8'};
+  var fracs={diff:1,best:0.75,mod:0.5,basic:0.25,none:0};
+  var col=cols[tierId]||'#E2E8F0';
+  var frac=tierId?(fracs[tierId]!==undefined?fracs[tierId]:0):0;
+  var stroke=tierId?col:'#CBD5E1';
+  var fillPath='';
+  if(frac===1){
+    fillPath='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r-1)+'" fill="'+col+'"/>';
+  }else if(frac>0){
+    var angle=frac*2*Math.PI;
+    var ex=cx+(r-1)*Math.sin(angle);
+    var ey=cy-(r-1)*Math.cos(angle);
+    var large=frac>0.5?1:0;
+    fillPath='<path d="M '+cx+' '+cy+' L '+cx+' '+(cy-r+1)+' A '+(r-1)+' '+(r-1)+' 0 '+large+' 1 '+ex.toFixed(3)+' '+ey.toFixed(3)+' Z" fill="'+col+'"/>';
+  }
+  return '<svg width="14" height="14" viewBox="0 0 22 22" style="display:block"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(tierId?'#fff':'#F8FAFC')+'" stroke="'+stroke+'" stroke-width="1.5"/>'+fillPath+'</svg>';
+}
+
+function cycleTier(tierId) {
+  var order=[null,'diff','best','mod','basic','none'];
+  return order[(order.indexOf(tierId)+1)%order.length];
+}
+
+function toggleMatrix(personaId) {
+  matrixView[personaId]=!matrixView[personaId];
+  render();
+}
+
+function goToPersona(pi) {
+  var firstStep=STEPS.findIndex(function(s){ return s.pi===pi; });
+  if(firstStep>=0){ step=firstStep; matrixView[PERSONAS[pi].id]=true; render(); }
+}
+
+function matrixSelectTier(personaId, ucId, compId) {
+  S[personaId][ucId].comp[compId]=cycleTier(S[personaId][ucId].comp[compId]);
+  renderMatrix(personaId); persist();
+}
+
+function matrixSelectAssess(personaId, ucId, val) {
+  S[personaId][ucId].assess=(S[personaId][ucId].assess===val)?null:val;
+  var sel=document.getElementById('mx-assess-'+personaId+'-'+ucId);
+  if(sel) sel.value=S[personaId][ucId].assess||'';
+  var pi=PERSONAS.findIndex(function(p){ return p.id===personaId; });
+  var r2=pRated(pi),t2=PERSONAS[pi].useCases.length;
+  document.getElementById('ph-prog-lbl').textContent=r2+' / '+t2+' rated';
+  document.getElementById('ph-prog-fill').style.width=Math.round(r2/t2*100)+'%';
+  persist();
+}
+
+function renderMatrix(personaId) {
+  var pi=PERSONAS.findIndex(function(p){ return p.id===personaId; });
+  var p=PERSONAS[pi];
+  var aColors={mustbuild:'#059669',partner:'#1D4ED8',stop:'#E11D48'};
+  var aBgs={mustbuild:'#D1FAE5',partner:'#DBEAFE',stop:'#FFE4E6'};
+
+  var hdrCells='<th style="text-align:left;padding:.5em .75em;font-size:.55em;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);position:sticky;left:0;z-index:3;min-width:10em;">Use Case</th>'+
+    '<th style="text-align:center;padding:.5em .5em;font-size:.55em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);min-width:6.5em;">Assessment</th>';
+  COMPETITORS.forEach(function(comp){
+    var isSix=comp.id==='6s';
+    hdrCells+='<th style="text-align:center;padding:.5em .4em;font-size:.6em;font-weight:700;color:'+(isSix?'var(--teal)':'var(--navy)')+';background:#fff;border-bottom:2px solid '+(isSix?'var(--teal)':'var(--border)')+';min-width:4.5em;white-space:nowrap;">'+
+      '<div>'+comp.name+'</div><div style="font-weight:400;font-size:.85em;color:var(--muted);margin-top:.1em;">'+comp.cat+'</div></th>';
+  });
+
+  var bodyRows='';
+  p.useCases.forEach(function(uc,ui){
+    var s=S[p.id][uc.id];
+    var rowBg=ui%2===0?'#fff':'var(--bg)';
+    var assessVal=s.assess||'';
+    var aColor=assessVal?aColors[assessVal]:'var(--muted)';
+    var aBg=assessVal?aBgs[assessVal]:'transparent';
+    var tipAttr=uc.prompt?' title="'+uc.prompt.replace(/"/g,"'").slice(0,200)+'"':'';
+    var compCells='';
+    COMPETITORS.forEach(function(comp){
+      var tier=s.comp[comp.id];
+      var isSix=comp.id==='6s';
+      var tierObj=TIERS.find(function(t){ return t.id===tier; });
+      var tipLabel=tierObj?tierObj.label:'Click to set';
+      compCells+='<td style="padding:.3em .35em;border-bottom:1px solid var(--border);text-align:center;border-left:'+(isSix?'2px solid var(--tealLt,#CCFBF1)':'1px solid var(--border)')+';">'+
+        '<div onclick="SI.matrixSelectTier(\''+p.id+'\',\''+uc.id+'\',\''+comp.id+'\')" title="'+tipLabel+'" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .1s" onmouseenter="this.style.transform=\'scale(1.2)\'" onmouseleave="this.style.transform=\'scale(1)\'">'+
+        harveyBall(tier)+'</div></td>';
+    });
+    bodyRows+='<tr onmouseenter="this.style.background=\'#EFF6FF\'" onmouseleave="this.style.background=\''+rowBg.replace(/'/g,"\\'")+'\'" style="background:'+rowBg+'">'+
+      '<td style="padding:.45em .75em;font-size:.72em;font-weight:600;color:var(--navy);border-bottom:1px solid var(--border);position:sticky;left:0;background:inherit;z-index:2;">'+
+        '<span'+tipAttr+'>'+uc.name+'</span>'+
+        (uc.prompt?' <span'+tipAttr+' style="font-size:.8em;color:var(--gold,#D97706);cursor:help;">ⓘ</span>':'')+
+      '</td>'+
+      '<td style="padding:.35em .4em;border-bottom:1px solid var(--border);text-align:center;">'+
+        '<select id="mx-assess-'+p.id+'-'+uc.id+'" onchange="SI.matrixSelectAssess(\''+p.id+'\',\''+uc.id+'\',this.value||null)" style="font-family:inherit;font-size:.6em;font-weight:600;border:1.5px solid '+(assessVal?aColor:'var(--border)')+';border-radius:.4em;padding:.25em .5em;background:'+aBg+';color:'+aColor+';cursor:pointer;outline:none;min-width:6em;">'+
+          '<option value="">— TBD</option>'+
+          '<option value="mustbuild"'+(assessVal==='mustbuild'?' selected':'')+'>↑ Must-Build</option>'+
+          '<option value="partner"'+(assessVal==='partner'?' selected':'')+'>⇄ Partner</option>'+
+          '<option value="stop"'+(assessVal==='stop'?' selected':'')+'>↓ Stop</option>'+
+        '</select>'+
+      '</td>'+compCells+'</tr>';
+  });
+
+  var legendHtml='<div style="display:flex;align-items:center;gap:.8em;font-size:.58em;color:var(--muted);padding:.6em .8em;flex-wrap:wrap;border-top:1px solid var(--border);">'+
+    '<span style="font-weight:600;">Scale:</span>';
+  TIERS.forEach(function(t){
+    legendHtml+='<span style="display:flex;align-items:center;gap:.3em;">'+harveyBall(t.id)+'<span>'+t.label+'</span></span>';
+  });
+  legendHtml+='</div>';
+
+  var el=document.getElementById('matrix-main');
+  if(el){
+    el.innerHTML='<div style="overflow:auto;padding:.5em .8em;">'+
+      '<table style="border-collapse:collapse;width:100%;font-family:inherit;">'+
+        '<thead><tr>'+hdrCells+'</tr></thead>'+
+        '<tbody>'+bodyRows+'</tbody>'+
+      '</table></div>'+legendHtml;
+  }
+  var r2=pRated(pi),t2=p.useCases.length;
+  var lbl=document.getElementById('ph-prog-lbl');
+  var fill=document.getElementById('ph-prog-fill');
+  if(lbl) lbl.textContent=r2+' / '+t2+' rated';
+  if(fill) fill.style.width=Math.round(r2/t2*100)+'%';
+}
+
+// boot — render called by showApp
 initState();
-loadSaved();
 
-
-  // Public API
-  return {
-    renderTopbar: typeof renderTopbar !== "undefined" ? renderTopbar : undefined,
-    STEPS: typeof STEPS !== "undefined" ? STEPS : undefined,
-    exportPPT: typeof exportPPT !== "undefined" ? exportPPT : undefined,
-    selectTier: typeof selectTier !== "undefined" ? selectTier : undefined,
-    ASSESSMENTS: typeof ASSESSMENTS !== "undefined" ? ASSESSMENTS : undefined,
-    render: typeof render !== "undefined" ? render : undefined,
-    PERSONAS: typeof PERSONAS !== "undefined" ? PERSONAS : undefined,
-    curS: typeof curS !== "undefined" ? curS : undefined,
-    renderLeft: typeof renderLeft !== "undefined" ? renderLeft : undefined,
-    resetAll: typeof resetAll !== "undefined" ? resetAll : undefined,
-    pRated: typeof pRated !== "undefined" ? pRated : undefined,
-    step: typeof step !== "undefined" ? step : undefined,
-    goTo: typeof goTo !== "undefined" ? goTo : undefined,
-    TOTAL: typeof TOTAL !== "undefined" ? TOTAL : undefined,
-    rated: typeof rated !== "undefined" ? rated : undefined,
-    renderDone: typeof renderDone !== "undefined" ? renderDone : undefined,
-    tClr: typeof tClr !== "undefined" ? tClr : undefined,
-    tBg: typeof tBg !== "undefined" ? tBg : undefined,
-    TIERS: typeof TIERS !== "undefined" ? TIERS : undefined,
-    aClr: typeof aClr !== "undefined" ? aClr : undefined,
-    renderFooter: typeof renderFooter !== "undefined" ? renderFooter : undefined,
-    renderGrid: typeof renderGrid !== "undefined" ? renderGrid : undefined,
-    renderAssess: typeof renderAssess !== "undefined" ? renderAssess : undefined,
-    updateTopbar: typeof updateTopbar !== "undefined" ? updateTopbar : undefined,
-    saveNote: typeof saveNote !== "undefined" ? saveNote : undefined,
-    selectAssess: typeof selectAssess !== "undefined" ? selectAssess : undefined,
-    navigate: typeof navigate !== "undefined" ? navigate : undefined,
-    S: typeof S !== "undefined" ? S : undefined,
-    COMPETITORS: typeof COMPETITORS !== "undefined" ? COMPETITORS : undefined,
-    renderPH: typeof renderPH !== "undefined" ? renderPH : undefined,
-    aBg: typeof aBg !== "undefined" ? aBg : undefined,
-    initState: typeof initState !== "undefined" ? initState : undefined,
-    toggleMatrix: typeof toggleMatrix !== "undefined" ? toggleMatrix : undefined,
-    matrixSelectTier: typeof matrixSelectTier !== "undefined" ? matrixSelectTier : undefined,
-    matrixSelectAssess: typeof matrixSelectAssess !== "undefined" ? matrixSelectAssess : undefined,
-    goToPersona: typeof goToPersona !== "undefined" ? goToPersona : undefined,
-    renderMatrix: typeof renderMatrix !== "undefined" ? renderMatrix : undefined,
-    cloudSave: typeof cloudSave !== "undefined" ? cloudSave : undefined,
-    cloudLoad: typeof cloudLoad !== "undefined" ? cloudLoad : undefined,
-    loadSaved: typeof loadSaved !== "undefined" ? loadSaved : undefined
-  };
+return {
+  initState:initState, render:render, renderPH:renderPH, renderLeft:renderLeft,
+  renderGrid:renderGrid, renderAssess:renderAssess, renderFooter:renderFooter,
+  renderTopbar:renderTopbar, updateTopbar:updateTopbar, renderDone:renderDone,
+  renderMatrix:renderMatrix, exportPPT:exportPPT,
+  selectTier:selectTier, selectAssess:selectAssess, saveNote:saveNote,
+  navigate:navigate, goTo:goTo, goToPersona:goToPersona, resetAll:resetAll,
+  toggleMatrix:toggleMatrix, matrixSelectTier:matrixSelectTier,
+  matrixSelectAssess:matrixSelectAssess,
+  persist:persist, loadSaved:loadSaved, cloudSave:cloudSave, cloudLoad:cloudLoad,
+  PERSONAS:PERSONAS, COMPETITORS:COMPETITORS, TIERS:TIERS, ASSESSMENTS:ASSESSMENTS,
+  STEPS:STEPS, TOTAL:TOTAL, S:S, curS:curS, rated:rated, pRated:pRated,
+  tBg:tBg, tClr:tClr, aBg:aBg, aClr:aClr
+};
 })();
 </script>
 
