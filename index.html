@@ -1173,16 +1173,8 @@ function showApp(id) {
   if (id === 'app-si' && !window._si_init) {
     window._si_init = true;
     SI.initState();
-    var hadSaved = SI.loadSaved ? SI.loadSaved() : false;
+    if (SI.loadSaved) SI.loadSaved();
     SI.render();
-    if (hadSaved) {
-      var t = document.createElement('div');
-      t.textContent = '✓ Previous session restored';
-      t.style.cssText = 'position:fixed;bottom:1.2em;left:50%;transform:translateX(-50%);background:#0D9488;color:#fff;padding:.4em 1.2em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;opacity:1;transition:opacity 1s;pointer-events:none;font-family:inherit;';
-      document.body.appendChild(t);
-      setTimeout(function(){ t.style.opacity='0'; }, 2200);
-      setTimeout(function(){ t.remove(); }, 3300);
-    }
   }
   if (id === 'app-int' && !window._int_init) {
     window._int_init = true;
