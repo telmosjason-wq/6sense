@@ -1389,6 +1389,7 @@ function selectTier(cid, tid) {
   s.comp[cid] = s.comp[cid]===tid ? null : tid;
   renderGrid();
   updateMeta();
+
   persist();
 }
 function selectAssess(aid) {
@@ -1396,6 +1397,7 @@ function selectAssess(aid) {
   s.assess = s.assess===aid ? null : aid;
   renderAssess();
   updateMeta();
+
   persist();
 }
 function saveNote(v) { curS().notes = v; persist(); }
@@ -1405,40 +1407,33 @@ function render() {
   var done = step >= TOTAL;
   document.getElementById('done').style.display = done ? 'flex' : 'none';
   if (done) { renderDone(); updateTopbar(); return; }
-  var pi = STEPS[step].pi;
-  var p = PERSONAS[pi];
+  var pi = STEPS[step].pi, p = PERSONAS[pi];
   renderTopbar();
   renderPH();
   if (matrixView[p.id]) {
     document.getElementById('main').style.display = 'none';
-    var footerEl = document.getElementById('footer');
-    footerEl.style.display = 'flex';
-    footerEl.style.padding = '.3em .6em';
-    footerEl.style.background = '#fff';
-    footerEl.style.borderTop = '1px solid #E2E8F0';
-    var mxEl = document.getElementById('matrix-main');
-    if (!mxEl) {
-      mxEl = document.createElement('div');
-      mxEl.id = 'matrix-main';
-      document.getElementById('slide').insertBefore(mxEl, footerEl);
+    var fe = document.getElementById('footer');
+    fe.style.cssText = 'display:flex;padding:.3em .6em;background:#fff;border-top:1px solid #E2E8F0;';
+    var mx = document.getElementById('matrix-main');
+    if (!mx) {
+      mx = document.createElement('div'); mx.id = 'matrix-main';
+      document.getElementById('slide').insertBefore(mx, fe);
     }
-    mxEl.style.cssText = 'overflow:auto;min-height:0;background:#F1F5F9;';
-    mxEl.style.display = 'block';
+    mx.style.cssText = 'overflow:auto;min-height:0;background:#F1F5F9;display:block;';
     renderMatrix(p.id);
   } else {
-    var mxEl2 = document.getElementById('matrix-main');
-    if (mxEl2) mxEl2.style.display = 'none';
+    var mx2 = document.getElementById('matrix-main');
+    if (mx2) mx2.style.display = 'none';
     document.getElementById('main').style.display = 'grid';
-    var footerEl2 = document.getElementById('footer');
+    var fe2 = document.getElementById('footer');
     if (!document.getElementById('crumb-track')) {
-      footerEl2.innerHTML = '<div class="crumb-track" id="crumb-track"></div>'+
+      fe2.innerHTML = '<div class="crumb-track" id="crumb-track"></div>'+
         '<div class="foot-btns">'+
           '<button class="nbtn" id="btn-back" onclick="SI.navigate(-1)">&#8592; Back</button>'+
           '<button class="nbtn pri" id="btn-next" onclick="SI.navigate(1)">Next &#8594;</button>'+
         '</div>';
     }
-    footerEl2.style.cssText = '';
-    footerEl2.style.display = 'flex';
+    fe2.style.cssText = 'display:flex;';
     renderLeft(); renderGrid(); renderAssess(); renderFooter();
     document.getElementById('notes-inp').value = curS().notes;
   }
@@ -1455,54 +1450,58 @@ function renderTopbar() {
 }
 
 function renderPH() {
-  var piui=STEPS[step],pi=piui.pi;
-  var p=PERSONAS[pi];
-  var r=pRated(pi),t=p.useCases.length;
-  document.getElementById('ph-ey').textContent='Persona '+(pi+1)+' of '+PERSONAS.length;
-  document.getElementById('ph-nm').textContent=p.name;
-  document.getElementById('ph-jt').textContent=p.jtbd;
-  document.getElementById('ph-badge').textContent=p.badge;
-  document.getElementById('ph-prog-lbl').textContent=r+' / '+t+' rated';
-  document.getElementById('ph-prog-fill').style.width=Math.round(r/t*100)+'%';
-  var isMatrix=!!matrixView[p.id];
-  var toggleEl=document.getElementById('ph-view-toggle');
-  if(toggleEl){
-    var btn=document.createElement('div');
-    btn.dataset.pid=p.id;
-    btn.onclick=function(){SI.toggleMatrix(this.dataset.pid);};
-    btn.innerHTML=isMatrix?'&#8801; Step-through':'&#8862; Matrix view';
-    btn.style.cssText='display:flex;align-items:center;gap:.35em;cursor:pointer;font-size:.6em;font-weight:600;padding:.28em .75em;border-radius:2em;border:1.5px solid '+(isMatrix?'var(--teal)':'#E2E8F0')+';background:'+(isMatrix?'#CCFBF1':'#fff')+';color:'+(isMatrix?'var(--teal)':'#64748B')+';user-select:none;';
-    toggleEl.innerHTML='';toggleEl.appendChild(btn);
+  var pi = STEPS[step].pi, p = PERSONAS[pi];
+  var r = pRated(pi), t = p.useCases.length;
+  document.getElementById('ph-ey').textContent   = 'Persona '+(pi+1)+' of '+PERSONAS.length;
+  document.getElementById('ph-nm').textContent   = p.name;
+  document.getElementById('ph-jt').textContent   = p.jtbd;
+  document.getElementById('ph-badge').textContent = p.badge;
+  document.getElementById('ph-prog-lbl').textContent = r+' / '+t+' rated';
+  document.getElementById('ph-prog-fill').style.width = Math.round(r/t*100)+'%';
+  var isMatrix = !!matrixView[p.id];
+  var tel = document.getElementById('ph-view-toggle');
+  if (tel) {
+    var btn = document.createElement('div');
+    btn.dataset.pid = p.id;
+    btn.onclick = function(){ SI.toggleMatrix(this.dataset.pid); };
+    btn.innerHTML = isMatrix ? '&#8801; Step-through' : '&#8862; Matrix view';
+    btn.style.cssText = 'display:flex;align-items:center;gap:.35em;cursor:pointer;font-size:.6em;font-weight:600;padding:.28em .75em;border-radius:2em;border:1.5px solid '+(isMatrix?'var(--teal)':'#E2E8F0')+';background:'+(isMatrix?'#CCFBF1':'#fff')+';color:'+(isMatrix?'var(--teal)':'#64748B')+';user-select:none;';
+    tel.innerHTML = ''; tel.appendChild(btn);
   }
-  if(isMatrix){
-    var footerEl=document.getElementById('footer');
-    footerEl.style.display='flex';footerEl.innerHTML='';
-    var tabsDiv=document.createElement('div');
-    tabsDiv.style.cssText='flex:1;display:flex;align-items:center;gap:.4em;overflow-x:auto;';
-    PERSONAS.forEach(function(per,i){
-      var cur=per.id===p.id;
-      var pr2=pRated(i),pt2=per.useCases.length;
-      var tab=document.createElement('div');
-      tab.dataset.pi=i;
-      tab.onclick=function(){SI.goToPersona(parseInt(this.dataset.pi));};
-      tab.style.cssText='display:flex;align-items:center;gap:.3em;padding:.32em .75em;border-radius:.4em;border:1.5px solid '+(cur?'var(--navy)':'#E2E8F0')+';background:'+(cur?'var(--navy)':'#fff')+';color:'+(cur?'#fff':'#64748B')+';font-size:.62em;font-weight:'+(cur?700:500)+';cursor:pointer;white-space:nowrap;flex-shrink:0;';
-      tab.textContent=per.badge;
-      if(pr2>0){var badge=document.createElement('span');badge.textContent=pr2+'/'+pt2;badge.style.cssText='background:'+(cur?'rgba(255,255,255,.2)':'#CCFBF1')+';color:'+(cur?'#fff':'var(--teal)')+';padding:0 .35em;border-radius:1em;font-size:.9em;';tab.appendChild(badge);}
-      tabsDiv.appendChild(tab);
+  if (isMatrix) {
+    var fe = document.getElementById('footer');
+    fe.style.display = 'flex'; fe.innerHTML = '';
+    var tabs = document.createElement('div');
+    tabs.style.cssText = 'flex:1;display:flex;align-items:center;gap:.4em;overflow-x:auto;';
+    PERSONAS.forEach(function(per, i) {
+      var cur = per.id === p.id;
+      var pr2 = pRated(i), pt2 = per.useCases.length;
+      var tab = document.createElement('div');
+      tab.dataset.pi = i;
+      tab.onclick = function(){ SI.goToPersona(parseInt(this.dataset.pi)); };
+      tab.style.cssText = 'display:flex;align-items:center;gap:.3em;padding:.32em .75em;border-radius:.4em;border:1.5px solid '+(cur?'var(--navy)':'#E2E8F0')+';background:'+(cur?'var(--navy)':'#fff')+';color:'+(cur?'#fff':'#64748B')+';font-size:.62em;font-weight:'+(cur?700:500)+';cursor:pointer;white-space:nowrap;flex-shrink:0;';
+      tab.textContent = per.badge;
+      if (pr2 > 0) {
+        var bg = document.createElement('span');
+        bg.textContent = pr2+'/'+pt2;
+        bg.style.cssText = 'background:'+(cur?'rgba(255,255,255,.2)':'#CCFBF1')+';color:'+(cur?'#fff':'var(--teal)')+';padding:0 .35em;border-radius:1em;font-size:.9em;';
+        tab.appendChild(bg);
+      }
+      tabs.appendChild(tab);
     });
-    footerEl.appendChild(tabsDiv);
-    var hint=document.createElement('div');
-    hint.style.cssText='flex-shrink:0;font-size:.58em;color:#64748B;padding:0 .6em;';
-    hint.innerHTML='Click Harvey Balls to rate &middot; Dropdown for assessment';
-    footerEl.appendChild(hint);
-    var btnB=document.createElement('button');btnB.className='nbtn';btnB.innerHTML='&#8592; Back';
-    btnB.onclick=function(){var npi=PERSONAS.findIndex(function(per){return per.id===p.id;});if(npi>0)SI.goToPersona(npi-1);};
-    var btnN=document.createElement('button');btnN.className='nbtn pri';
-    var cpi=PERSONAS.findIndex(function(per){return per.id===p.id;});
-    btnN.innerHTML=cpi>=PERSONAS.length-1?'Done &#8594;':'Next &#8594;';
-    btnN.onclick=function(){var npi=PERSONAS.findIndex(function(per){return per.id===p.id;});if(npi<PERSONAS.length-1)SI.goToPersona(npi+1);};
-    var fb=document.createElement('div');fb.className='foot-btns';fb.appendChild(btnB);fb.appendChild(btnN);
-    footerEl.appendChild(fb);
+    fe.appendChild(tabs);
+    var hint = document.createElement('div');
+    hint.style.cssText = 'flex-shrink:0;font-size:.58em;color:#64748B;padding:0 .6em;';
+    hint.innerHTML = 'Click Harvey Balls &middot; Dropdown for assessment';
+    fe.appendChild(hint);
+    var bb = document.createElement('button'); bb.className='nbtn'; bb.innerHTML='&#8592; Back';
+    bb.onclick = function(){ var npi=PERSONAS.findIndex(function(x){return x.id===p.id;}); if(npi>0) SI.goToPersona(npi-1); };
+    var nb = document.createElement('button'); nb.className='nbtn pri';
+    var cpi = PERSONAS.findIndex(function(x){return x.id===p.id;});
+    nb.innerHTML = cpi>=PERSONAS.length-1?'Done &#8594;':'Next &#8594;';
+    nb.onclick = function(){ var npi=PERSONAS.findIndex(function(x){return x.id===p.id;}); if(npi<PERSONAS.length-1) SI.goToPersona(npi+1); };
+    var fb = document.createElement('div'); fb.className='foot-btns';
+    fb.appendChild(bb); fb.appendChild(nb); fe.appendChild(fb);
   }
 }
 
@@ -1799,91 +1798,57 @@ async function exportPPT() {
         drawTierScale(sl, ucS);
       });
 
-      // ── PERSONA MATRIX SLIDE (Harvey Balls via unicode)
+      // ── PERSONA SUMMARY SLIDE
       {
         const sl = pres.addSlide();
         sl.background = {color:BG};
-        drawTopbar(sl, `${p.name}  ·  Matrix View`, p.badge);
+
+        drawTopbar(sl, `${p.name}  ·  Summary`, p.badge);
         drawPersonaHdr(sl, p, pi, ratedN);
         sl.addShape(pres.shapes.RECTANGLE,{x:0,y:MAIN_Y,w:10,h:5.625-MAIN_Y,fill:{color:BG}});
 
-        const hbChar = {diff:'●', best:'◕', mod:'◑', basic:'◔', none:'○'};
-        const nUC    = p.useCases.length;
-        const hUcW   = 2.3, hAssW = 1.05, hGap = 0.04;
-        const hGX    = PAD + hUcW + hGap + hAssW + hGap;
-        const hNc    = COMPETITORS.length;
-        const hCW    = (10 - hGX - PAD*0.5 - (hNc-1)*hGap) / hNc;
-        const hHdrY  = INNER_Y;
-        const hHdrH  = 0.34;
-        const avail  = BOTTOM - hHdrY - hHdrH - 0.04;
-        const rH     = Math.min(0.55, avail / nUC);
+        const nUC = p.useCases.length;
+        const sUcW = 2.1, sAssW = 1.1, sGap = 0.04;
+        const sGX = PAD + sUcW + sGap + sAssW + sGap;
+        const sNc = COMPETITORS.length;
+        const sCW = (10 - sGX - PAD*0.5 - (sNc-1)*sGap) / sNc;
+        const hY = INNER_Y;
+        const hH = 0.32;
+        const avail = BOTTOM - hY - hH - 0.04;
+        const rH = Math.min(0.62, avail/nUC);
 
         // Column headers
-        sl.addText('USE CASE', {x:PAD, y:hHdrY, w:hUcW, h:hHdrH,
-          fontSize:6, fontFace:'Trebuchet MS', bold:true, color:MU, charSpacing:0.5, valign:'middle', margin:0});
-        sl.addText('ASSESSMENT', {x:PAD+hUcW+hGap, y:hHdrY, w:hAssW, h:hHdrH,
-          fontSize:6, fontFace:'Trebuchet MS', bold:true, color:MU, charSpacing:0.5, valign:'middle', margin:0});
-        COMPETITORS.forEach((comp, ci) => {
-          const cx = hGX + ci*(hCW+hGap);
-          const isSix = comp.id === '6s';
-          sl.addShape(pres.shapes.RECTANGLE, {x:cx, y:hHdrY, w:hCW, h:hHdrH,
-            fill:{color: isSix ? '0F766E' : N}});
-          sl.addText(comp.name, {x:cx, y:hHdrY, w:hCW, h:hHdrH*0.58,
-            fontSize:7, fontFace:'Trebuchet MS', bold:true, color:W, align:'center', valign:'middle', margin:0});
-          sl.addText(comp.cat, {x:cx, y:hHdrY+hHdrH*0.52, w:hCW, h:hHdrH*0.48,
-            fontSize:5.5, fontFace:'Trebuchet MS', color:isSix?TLT:'AABDD6', align:'center', valign:'middle', margin:0});
+        sl.addText('USE CASE',{x:PAD,y:hY,w:sUcW,h:hH,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,valign:'middle',margin:0});
+        sl.addText('ASSESSMENT',{x:PAD+sUcW+sGap,y:hY,w:sAssW,h:hH,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,valign:'middle',margin:0});
+        COMPETITORS.forEach((c,ci)=>{
+          const cx=sGX+ci*(sCW+sGap);
+          sl.addShape(pres.shapes.RECTANGLE,{x:cx,y:hY,w:sCW,h:hH,fill:{color:c.id==='6s'?'0F766E':N}});
+          sl.addText(c.name,{x:cx,y:hY,w:sCW,h:hH,fontSize:6.5,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
         });
 
         // Data rows
-        p.useCases.forEach((uc, ri) => {
-          const ry  = hHdrY + hHdrH + 0.04 + ri * rH;
-          const bg  = ri % 2 === 0 ? W : 'F8FAFC';
+        p.useCases.forEach((uc,ri)=>{
+          const ry = hY+hH+0.04+ri*rH;
+          const bg = ri%2===0?W:'F8FAFC';
           const ucS = S[p.id][uc.id];
+          sl.addShape(pres.shapes.RECTANGLE,{x:PAD,y:ry,w:10-PAD*1.2,h:rH-0.03,fill:{color:bg}});
+          sl.addText(uc.name,{x:PAD+0.05,y:ry,w:sUcW-0.1,h:rH-0.03,fontSize:7,fontFace:'Trebuchet MS',bold:true,color:SL,valign:'middle',margin:2});
 
-          sl.addShape(pres.shapes.RECTANGLE, {x:PAD, y:ry, w:10-PAD*1.2, h:rH-0.025,
-            fill:{color:bg}, line:{color:'E2E8F0', pt:0.5}});
-          sl.addText(uc.name, {x:PAD+0.06, y:ry, w:hUcW-0.08, h:rH-0.025,
-            fontSize:7, fontFace:'Trebuchet MS', bold:true, color:SL, valign:'middle', margin:2});
-
-          // Assessment pill
-          if (ucS.assess) {
-            const ax = PAD + hUcW + hGap;
-            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.05, w:hAssW-0.08, h:rH-0.12,
-              fill:{color:aBgH[ucS.assess]}});
-            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.05, w:0.045, h:rH-0.12,
-              fill:{color:aSel[ucS.assess]}});
-            sl.addText(aLbl[ucS.assess], {x:ax+0.10, y:ry+0.05, w:hAssW-0.18, h:rH-0.12,
-              fontSize:6, fontFace:'Trebuchet MS', bold:true, color:aClrH[ucS.assess], valign:'middle', margin:0});
+          if(ucS.assess){
+            const ax=PAD+sUcW+sGap;
+            sl.addShape(pres.shapes.RECTANGLE,{x:ax+0.04,y:ry+0.05,w:sAssW-0.08,h:rH-0.13,fill:{color:aBgH[ucS.assess]}});
+            sl.addShape(pres.shapes.RECTANGLE,{x:ax+0.04,y:ry+0.05,w:0.055,h:rH-0.13,fill:{color:aSel[ucS.assess]}});
+            sl.addText(aLbl[ucS.assess],{x:ax+0.11,y:ry+0.05,w:sAssW-0.19,h:rH-0.13,fontSize:6.5,fontFace:'Trebuchet MS',bold:true,color:aClrH[ucS.assess],valign:'middle',margin:0});
           }
 
-          // Harvey Ball unicode glyphs per competitor
-          COMPETITORS.forEach((comp, ci) => {
-            const cx  = hGX + ci*(hCW+hGap);
-            const tid = ucS.comp[comp.id];
-            const ch  = tid ? (hbChar[tid] || '○') : '○';
-            const col = tid ? tSelH[tid] : 'CBD5E1';
-            sl.addShape(pres.shapes.RECTANGLE, {x:cx, y:ry, w:hCW, h:rH-0.025,
-              fill:{color:bg}, line:{color:'E2E8F0', pt:0.5}});
-            sl.addText(ch, {x:cx, y:ry, w:hCW, h:rH-0.025,
-              fontSize:13, fontFace:'Arial Unicode MS', color:col,
-              align:'center', valign:'middle', margin:0});
+          COMPETITORS.forEach((c,ci)=>{
+            const cx=sGX+ci*(sCW+sGap);
+            const tid=ucS.comp[c.id];
+            if(tid){
+              sl.addShape(pres.shapes.RECTANGLE,{x:cx+0.02,y:ry+0.04,w:sCW-0.04,h:rH-0.11,fill:{color:tSelH[tid]}});
+              sl.addText(tLbl[tid],{x:cx+0.02,y:ry+0.04,w:sCW-0.04,h:rH-0.11,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
+            }
           });
-        });
-
-        // Legend
-        const legY = BOTTOM + 0.04;
-        const legItems = [
-          {id:'diff',ch:'●',label:'True differentiator'},
-          {id:'best',ch:'◕',label:'Best in class'},
-          {id:'mod', ch:'◑',label:'Moderate'},
-          {id:'basic',ch:'◔',label:'Basic'},
-          {id:'none',ch:'○',label:'No offering'},
-        ];
-        let legX = PAD;
-        legItems.forEach(item => {
-          sl.addText(item.ch+'  '+item.label, {x:legX, y:legY, w:1.72, h:0.18,
-            fontSize:6.5, fontFace:'Arial Unicode MS', color:tSelH[item.id]||MU, valign:'middle', margin:0});
-          legX += 1.76;
         });
       }
     });
@@ -1894,197 +1859,286 @@ async function exportPPT() {
   btn.innerHTML = orig;
 }
 
+// boot
+initState();
 
-// ── MATRIX VIEW STATE ────────────────────────────────────────────────────────
 var matrixView = {};
 
-// ── PERSIST TO LOCALSTORAGE ──────────────────────────────────────────────────
-var STORAGE_KEY = 'si_session_v1';
+function toggleMatrix(pid) { matrixView[pid]=!matrixView[pid]; render(); }
 
-function persist() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(S)); } catch(e) {}
+function goToPersona(pi) {
+  var fs = STEPS.findIndex(function(s){return s.pi===pi;});
+  if (fs>=0) { step=fs; matrixView[PERSONAS[pi].id]=true; render(); }
 }
 
-function loadSaved() {
-  try {
-    var saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return false;
-    var parsed = JSON.parse(saved);
-    PERSONAS.forEach(function(p) {
-      if (parsed[p.id]) p.useCases.forEach(function(uc) {
-        if (parsed[p.id][uc.id]) S[p.id][uc.id] = parsed[p.id][uc.id];
-      });
+function matrixSelectTier(pid, ucId, cid) {
+  var order=[null,'diff','best','mod','basic','none'];
+  var cur = S[pid][ucId].comp[cid];
+  S[pid][ucId].comp[cid] = order[(order.indexOf(cur)+1)%order.length];
+  renderMatrix(pid); persist();
+}
+
+function matrixSelectAssess(pid, ucId, val) {
+  S[pid][ucId].assess = (S[pid][ucId].assess===val)?null:val;
+  var sel=document.getElementById('mx-assess-'+pid+'-'+ucId);
+  if(sel) sel.value=S[pid][ucId].assess||'';
+  var pi=PERSONAS.findIndex(function(p){return p.id===pid;});
+  var r2=pRated(pi),t2=PERSONAS[pi].useCases.length;
+  var lbl=document.getElementById('ph-prog-lbl');
+  var bar=document.getElementById('ph-prog-fill');
+  if(lbl) lbl.textContent=r2+' / '+t2+' rated';
+  if(bar) bar.style.width=Math.round(r2/t2*100)+'%';
+  persist();
+}
+
+function harveyBall(tid) {
+  var cx=11,cy=11,r=10;
+  var cols={diff:'#059669',best:'#0D9488',mod:'#D97706',basic:'#1D4ED8',none:'#94A3B8'};
+  var fracs={diff:1,best:.75,mod:.5,basic:.25,none:0};
+  var col=cols[tid]||'#E2E8F0', stroke=tid?col:'#CBD5E1';
+  var frac=tid?(fracs[tid]!==undefined?fracs[tid]:0):0, fp='';
+  if(frac===1){fp='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r-1)+'" fill="'+col+'"/>';}
+  else if(frac>0){var a=frac*2*Math.PI,ex=cx+(r-1)*Math.sin(a),ey=cy-(r-1)*Math.cos(a),lg=frac>.5?1:0;
+    fp='<path d="M '+cx+' '+cy+' L '+cx+' '+(cy-r+1)+' A '+(r-1)+' '+(r-1)+' 0 '+lg+' 1 '+ex.toFixed(2)+' '+ey.toFixed(2)+' Z" fill="'+col+'"/>';}
+  return '<svg width="14" height="14" viewBox="0 0 22 22" style="display:block">'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(tid?'#fff':'#F8FAFC')+'" stroke="'+stroke+'" stroke-width="1.5"/>'+fp+'</svg>';
+}
+
+function renderMatrix(pid) {
+  var pi = PERSONAS.findIndex(function(p){ return p.id===pid; }), p = PERSONAS[pi];
+  var aclr = {mustbuild:'#059669',partner:'#1D4ED8',stop:'#E11D48'};
+  var abg  = {mustbuild:'#D1FAE5',partner:'#DBEAFE',stop:'#FFE4E6'};
+  var el = document.getElementById('matrix-main');
+  if (!el) return;
+  el.innerHTML = '';
+
+  // Scroll wrapper
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'overflow:auto;padding:.5em .8em;';
+  el.appendChild(wrap);
+
+  // Table
+  var table = document.createElement('table');
+  table.style.cssText = 'border-collapse:collapse;width:100%;font-family:inherit;';
+  wrap.appendChild(table);
+
+  // Header row
+  var thead = document.createElement('thead');
+  var hrow  = document.createElement('tr');
+  table.appendChild(thead); thead.appendChild(hrow);
+
+  // Use Case header
+  var th0 = document.createElement('th');
+  th0.style.cssText = 'text-align:left;padding:.5em .75em;font-size:.55em;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);position:sticky;left:0;z-index:3;min-width:10em;';
+  th0.textContent = 'Use Case'; hrow.appendChild(th0);
+
+  // Assessment header
+  var th1 = document.createElement('th');
+  th1.style.cssText = 'text-align:center;padding:.5em;font-size:.55em;font-weight:600;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);min-width:6.5em;';
+  th1.textContent = 'Assessment'; hrow.appendChild(th1);
+
+  // Competitor headers
+  COMPETITORS.forEach(function(comp) {
+    var th = document.createElement('th');
+    var sx = comp.id==='6s';
+    th.style.cssText = 'text-align:center;padding:.5em .4em;font-size:.6em;font-weight:700;color:'+(sx?'var(--teal)':'var(--navy)')+';background:#fff;border-bottom:2px solid '+(sx?'var(--teal)':'var(--border)')+';min-width:4.5em;white-space:nowrap;';
+    th.innerHTML = '<div>'+comp.name+'</div><div style="font-weight:400;font-size:.85em;color:var(--muted);">'+comp.cat+'</div>';
+    hrow.appendChild(th);
+  });
+
+  // Body rows
+  var tbody = document.createElement('tbody');
+  table.appendChild(tbody);
+  p.useCases.forEach(function(uc, ui) {
+    var s   = S[p.id][uc.id];
+    var bg  = ui%2===0 ? '#fff' : 'var(--bg)';
+    var av  = s.assess||'';
+    var ac2 = av ? aclr[av] : 'var(--muted)';
+    var ab2 = av ? abg[av]  : 'transparent';
+    var tr  = document.createElement('tr');
+    tr.style.background = bg;
+    tr.onmouseenter = function(){ this.style.background='#EFF6FF'; };
+    tr.onmouseleave = function(){ this.style.background=bg; };
+    tbody.appendChild(tr);
+
+    // Use case name cell
+    var td0 = document.createElement('td');
+    td0.style.cssText = 'padding:.45em .75em;font-size:.72em;font-weight:600;color:var(--navy);border-bottom:1px solid var(--border);position:sticky;left:0;background:inherit;z-index:2;';
+    var nm = document.createElement('span');
+    nm.textContent = uc.name;
+    if (uc.prompt) nm.title = uc.prompt.slice(0,200);
+    td0.appendChild(nm);
+    if (uc.prompt) {
+      var ti = document.createElement('span');
+      ti.innerHTML = ' &#9432;';
+      ti.title = uc.prompt.slice(0,200);
+      ti.style.cssText = 'font-size:.8em;color:var(--gold,#D97706);cursor:help;';
+      td0.appendChild(ti);
+    }
+    tr.appendChild(td0);
+
+    // Assessment dropdown cell
+    var td1 = document.createElement('td');
+    td1.style.cssText = 'padding:.35em .4em;border-bottom:1px solid var(--border);text-align:center;';
+    var sel = document.createElement('select');
+    sel.id = 'mx-assess-'+p.id+'-'+uc.id;
+    sel.style.cssText = 'font-family:inherit;font-size:.6em;font-weight:600;border:1.5px solid '+(av?ac2:'var(--border)')+';border-radius:.4em;padding:.25em .5em;background:'+ab2+';color:'+ac2+';cursor:pointer;outline:none;min-width:6em;';
+    [['','— TBD'],['mustbuild','↑ Must-Build'],['partner','⇄ Partner'],['stop','↓ Stop']].forEach(function(o){
+      var opt = document.createElement('option');
+      opt.value = o[0]; opt.textContent = o[1];
+      if (av===o[0]) opt.selected = true;
+      sel.appendChild(opt);
     });
+    (function(locPid, locUcId){ sel.onchange = function(){ SI.matrixSelectAssess(locPid, locUcId, this.value||null); }; })(p.id, uc.id);
+    td1.appendChild(sel); tr.appendChild(td1);
+
+    // Harvey Ball cells
+    COMPETITORS.forEach(function(comp) {
+      var td  = document.createElement('td');
+      var sx  = comp.id==='6s';
+      td.style.cssText = 'padding:.3em .35em;border-bottom:1px solid var(--border);text-align:center;border-left:'+(sx?'2px solid var(--tealLt,#CCFBF1)':'1px solid var(--border)')+';';
+      var div = document.createElement('div');
+      div.style.cssText = 'cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .1s;';
+      div.onmouseenter = function(){ this.style.transform='scale(1.2)'; };
+      div.onmouseleave = function(){ this.style.transform='scale(1)'; };
+      var tier = s.comp[comp.id];
+      var tobj = TIERS.find(function(x){ return x.id===tier; });
+      div.title = tobj ? tobj.label : 'Click to set';
+      div.innerHTML = harveyBall(tier);
+      (function(locPid,locUcId,locCid){ div.onclick = function(){ SI.matrixSelectTier(locPid,locUcId,locCid); }; })(p.id,uc.id,comp.id);
+      td.appendChild(div); tr.appendChild(td);
+    });
+  });
+
+  // Legend
+  var leg = document.createElement('div');
+  leg.style.cssText = 'display:flex;align-items:center;gap:.8em;font-size:.58em;color:var(--muted);padding:.6em .8em;flex-wrap:wrap;border-top:1px solid var(--border);';
+  var lbl = document.createElement('span'); lbl.style.fontWeight='600'; lbl.textContent='Scale:';
+  leg.appendChild(lbl);
+  TIERS.forEach(function(t) {
+    var sp = document.createElement('span');
+    sp.style.cssText = 'display:flex;align-items:center;gap:.3em;';
+    sp.innerHTML = harveyBall(t.id)+'<span>'+t.label+'</span>';
+    leg.appendChild(sp);
+  });
+  el.appendChild(leg);
+
+  var r2=pRated(pi),t2=p.useCases.length;
+  var pll=document.getElementById('ph-prog-lbl'),pf=document.getElementById('ph-prog-fill');
+  if(pll) pll.textContent=r2+' / '+t2+' rated';
+  if(pf)  pf.style.width=Math.round(r2/t2*100)+'%';
+}
+
+var STORAGE_KEY='si_session_v1';
+function persist(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(S));}catch(e){}}
+function loadSaved(){
+  try{
+    var sv=localStorage.getItem(STORAGE_KEY);
+    if(!sv) return false;
+    var p=JSON.parse(sv);
+    PERSONAS.forEach(function(pe){if(p[pe.id])pe.useCases.forEach(function(uc){if(p[pe.id][uc.id])S[pe.id][uc.id]=p[pe.id][uc.id];});});
     return true;
-  } catch(e) { return false; }
+  }catch(e){return false;}
 }
 
-// ── CLOUD SAVE / LOAD ────────────────────────────────────────────────────────
-var _ta='github_pat_11B6JWCVY', _tb='0BOVcoFWDheIG_7Vsttweo0gHP8VPYvbB4AMmF3D9l4f2pDLj0h4vID55P5ES32NAFQ7ePrPI';
-var GH_TOK = _ta+_tb;
-var GH_API = 'https://api.github.com/repos/telmosjason-wq/6sense/contents/session-data.json';
-
-function showCloudToast(msg, color) {
-  var t = document.createElement('div');
-  t.textContent = msg;
-  t.style.cssText = 'position:fixed;bottom:1.4em;left:50%;transform:translateX(-50%);background:'+(color||'#0D9488')+';color:#fff;padding:.4em 1.4em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;pointer-events:none;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .6s;';
-  document.body.appendChild(t);
-  setTimeout(function(){ t.style.opacity='0'; }, 2000);
-  setTimeout(function(){ t.remove(); }, 2700);
-}
-
-function listSaveFiles(callback) {
-  fetch('https://api.github.com/repos/'+GH_REPO+'/contents/?t='+Date.now(), {
-    headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(files) {
-    if (!Array.isArray(files)) { callback([]); return; }
-    var slots = files.filter(function(f){
-      return f.name==='session-data.json' || /^session-data-.+\.json$/.test(f.name);
-    }).map(function(f){
-      var label = f.name==='session-data.json' ? 'Default' :
-        f.name.replace('session-data-','').replace('.json','');
-      return {name:f.name, label:label};
-    });
-    callback(slots);
-  })
-  .catch(function(){ callback([]); });
-}
-
+var _ta='github_pat_11B6JWCVY',_tb='0BOVcoFWDheIG_7Vsttweo0gHP8VPYvbB4AMmF3D9l4f2pDLj0h4vID55P5ES32NAFQ7ePrPI';
+var GH_TOK=_ta+_tb, GH_REPO='telmosjason-wq/6sense';
+function showCloudToast(msg,col){var t=document.createElement('div');t.textContent=msg;t.style.cssText='position:fixed;bottom:1.4em;left:50%;transform:translateX(-50%);background:'+(col||'#0D9488')+';color:#fff;padding:.4em 1.4em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;pointer-events:none;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .6s;';document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';},2000);setTimeout(function(){t.remove();},2700);}
+function listSaveFiles(cb){fetch('https://api.github.com/repos/'+GH_REPO+'/contents/?t='+Date.now(),{headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json();}).then(function(files){if(!Array.isArray(files)){cb([]);return;}var s=files.filter(function(f){return f.name==='session-data.json'||/^session-data-.+\.json$/.test(f.name);}).map(function(f){return{name:f.name,label:f.name==='session-data.json'?'Default':f.name.replace('session-data-','').replace('.json','')};});cb(s);}).catch(function(){cb([]);});}
 function showSaveModal() {
   var old = document.getElementById('cloud-modal');
   if (old) old.remove();
   var modal = document.createElement('div');
   modal.id = 'cloud-modal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-family:inherit;';
-  modal.innerHTML =
-    '<div style="background:#fff;border-radius:12px;padding:24px;width:380px;box-shadow:0 24px 60px rgba(0,0,0,.25);">'+
-      '<div style="font-size:16px;font-weight:700;color:#0F172A;margin-bottom:6px;">Save Session</div>'+
-      '<div style="font-size:12px;color:#64748B;margin-bottom:14px;">Name this save slot, or leave blank for a timestamp.</div>'+
-      '<input id="cloud-slot-name" placeholder="e.g. Pre-session baseline, After Anurag, Final\u2026" '+
-        'style="width:100%;border:1.5px solid #E2E8F0;border-radius:8px;padding:9px 12px;font-size:13px;'+
-        'font-family:inherit;box-sizing:border-box;outline:none;margin-bottom:16px;" '+
-        'onfocus="this.style.borderColor=\'#0D9488\'" onblur="this.style.borderColor=\'#E2E8F0\'">'+
-      '<div style="display:flex;gap:10px;justify-content:flex-end;">'+
-        '<button onclick="document.getElementById(\'cloud-modal\').remove()" '+
-          'style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 18px;'+
-          'font-size:13px;cursor:pointer;font-family:inherit;color:#64748B;">Cancel</button>'+
-        '<button onclick="SI.doCloudSave()" '+
-          'style="background:#0D9488;border:none;border-radius:8px;padding:8px 18px;'+
-          'font-size:13px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;">Save</button>'+
-      '</div>'+
-    '</div>';
-  document.body.appendChild(modal);
-  setTimeout(function(){ var i=document.getElementById('cloud-slot-name'); if(i) i.focus(); }, 50);
-  document.getElementById('cloud-slot-name').addEventListener('keydown', function(e){
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:12px;padding:24px;width:380px;box-shadow:0 24px 60px rgba(0,0,0,.25);';
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:16px;font-weight:700;color:#0F172A;margin-bottom:6px;';
+  title.textContent = 'Save Session';
+  var sub = document.createElement('div');
+  sub.style.cssText = 'font-size:12px;color:#64748B;margin-bottom:14px;';
+  sub.textContent = 'Name this save slot, or leave blank for a timestamp.';
+  var inp = document.createElement('input');
+  inp.id = 'cloud-slot-name';
+  inp.placeholder = 'e.g. Pre-session, After Anurag, Final…';
+  inp.style.cssText = 'width:100%;border:1.5px solid #E2E8F0;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;box-sizing:border-box;outline:none;margin-bottom:16px;';
+  inp.onfocus = function(){ this.style.borderColor='#0D9488'; };
+  inp.onblur  = function(){ this.style.borderColor='#E2E8F0'; };
+  var btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;';
+  var bCancel = document.createElement('button');
+  bCancel.textContent = 'Cancel';
+  bCancel.style.cssText = 'background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 18px;font-size:13px;cursor:pointer;font-family:inherit;color:#64748B;';
+  bCancel.onclick = function(){ var m=document.getElementById('cloud-modal'); if(m) m.remove(); };
+  var bSave = document.createElement('button');
+  bSave.textContent = 'Save';
+  bSave.style.cssText = 'background:#0D9488;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;';
+  bSave.onclick = function(){ SI.doCloudSave(); };
+  btns.appendChild(bCancel); btns.appendChild(bSave);
+  box.appendChild(title); box.appendChild(sub); box.appendChild(inp); box.appendChild(btns);
+  modal.appendChild(box); document.body.appendChild(modal);
+  setTimeout(function(){ inp.focus(); }, 50);
+  inp.addEventListener('keydown', function(e){
     if (e.key==='Enter') SI.doCloudSave();
-    if (e.key==='Escape') { var m=document.getElementById('cloud-modal'); if(m) m.remove(); }
+    if (e.key==='Escape'){ var m=document.getElementById('cloud-modal'); if(m) m.remove(); }
   });
 }
 
-function doCloudSave() {
-  var inp = document.getElementById('cloud-slot-name');
-  var rawName = inp ? inp.value.trim() : '';
-  var modal = document.getElementById('cloud-modal');
-  if (modal) modal.remove();
-
-  var ts = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  var slotName = rawName || ts;
-  var safeName = slotName.replace(/[^a-zA-Z0-9 _]/g,'').trim().replace(/\s+/g,'-').toLowerCase();
-  var fileName = (!safeName || safeName==='') ? 'session-data.json' : 'session-data-'+safeName+'.json';
-  var apiUrl   = 'https://api.github.com/repos/'+GH_REPO+'/contents/'+fileName;
-  var btn = document.getElementById('cloud-save-btn');
-  if (btn) { btn.textContent='\u2601 Saving\u2026'; btn.disabled=true; }
-
-  fetch(apiUrl+'?t='+Date.now(), {headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
-  .then(function(r){ return r.status===404 ? null : r.json(); })
-  .then(function(existing) {
-    var content = btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))));
-    var body = {message:'Save slot: '+slotName, content:content};
-    if (existing && existing.sha) body.sha = existing.sha;
-    return fetch(apiUrl,{method:'PUT',
-      headers:{'Authorization':'token '+GH_TOK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-      body:JSON.stringify(body)});
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(res){
-    if (btn) { btn.textContent='\u2601 Save'; btn.disabled=false; }
-    showCloudToast(res.content ? '\u2713 Saved as "'+slotName+'"' : '\u2717 Save failed', res.content?null:'#E11D48');
-  })
-  .catch(function(){
-    if (btn) { btn.textContent='\u2601 Save'; btn.disabled=false; }
-    showCloudToast('\u2717 Network error','#E11D48');
-  });
-}
-
-function cloudSave() { showSaveModal(); }
-
+function doCloudSave(){var inp=document.getElementById('cloud-slot-name'),raw=inp?inp.value.trim():'';var mo=document.getElementById('cloud-modal');if(mo)mo.remove();var ts=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});var nm=raw||ts,sf=nm.replace(/[^a-zA-Z0-9 _]/g,'').trim().replace(/\s+/g,'-').toLowerCase();var fn=(!sf)?'session-data.json':'session-data-'+sf+'.json',api='https://api.github.com/repos/'+GH_REPO+'/contents/'+fn;var btn=document.getElementById('cloud-save-btn');if(btn){btn.textContent='☁ Saving…';btn.disabled=true;}fetch(api+'?t='+Date.now(),{headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.status===404?null:r.json();}).then(function(ex){var content=btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2)))),body={message:'Save: '+nm,content:content};if(ex&&ex.sha)body.sha=ex.sha;return fetch(api,{method:'PUT',headers:{'Authorization':'token '+GH_TOK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(body)});}).then(function(r){return r.json();}).then(function(res){if(btn){btn.textContent='☁ Save';btn.disabled=false;}showCloudToast(res.content?'✓ Saved as "'+nm+'"':'✗ Save failed',res.content?null:'#E11D48');}).catch(function(){if(btn){btn.textContent='☁ Save';btn.disabled=false;}showCloudToast('✗ Network error','#E11D48');});}
+function cloudSave(){showSaveModal();}
 function showLoadModal() {
   var btn = document.getElementById('cloud-load-btn');
-  if (btn) { btn.textContent='\u2193 Loading\u2026'; btn.disabled=true; }
-  listSaveFiles(function(slots){
-    if (btn) { btn.textContent='\u2193 Load'; btn.disabled=false; }
-    if (!slots.length) { showCloudToast('No saved slots found','#64748B'); return; }
+  if (btn){ btn.textContent='↓ Loading…'; btn.disabled=true; }
+  listSaveFiles(function(slots) {
+    if (btn){ btn.textContent='↓ Load'; btn.disabled=false; }
+    if (!slots.length){ showCloudToast('No saved slots found','#64748B'); return; }
     var old = document.getElementById('cloud-modal');
     if (old) old.remove();
     var modal = document.createElement('div');
     modal.id = 'cloud-modal';
     modal.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-family:inherit;';
-    var rows = slots.map(function(s){
-      return '<div onclick="SI.doCloudLoad(\''+s.name+'\')" '+
-        'style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;'+
-        'border-radius:8px;cursor:pointer;border:1px solid #E2E8F0;margin-bottom:8px;background:#fff;" '+
-        'onmouseenter="this.style.background=\'#F0FDF9\';this.style.borderColor=\'#0D9488\'" '+
-        'onmouseleave="this.style.background=\'#fff\';this.style.borderColor=\'#E2E8F0\'">'+
-        '<div>'+
-          '<div style="font-size:13px;font-weight:600;color:#0F172A;">'+s.label+'</div>'+
-          '<div style="font-size:11px;color:#94A3B8;margin-top:1px;">'+s.name+'</div>'+
-        '</div>'+
-        '<span style="font-size:16px;color:#0D9488;">\u2192</span>'+
-      '</div>';
-    }).join('');
-    modal.innerHTML =
-      '<div style="background:#fff;border-radius:12px;padding:24px;width:420px;max-height:70vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);">'+
-        '<div style="font-size:16px;font-weight:700;color:#0F172A;margin-bottom:6px;">Load Session</div>'+
-        '<div style="font-size:12px;color:#64748B;margin-bottom:14px;">Choose a saved slot to restore.</div>'+
-        rows+
-        '<div style="display:flex;justify-content:flex-end;margin-top:8px;">'+
-          '<button onclick="document.getElementById(\'cloud-modal\').remove()" '+
-            'style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 18px;'+
-            'font-size:13px;cursor:pointer;font-family:inherit;color:#64748B;">Cancel</button>'+
-        '</div>'+
-      '</div>';
-    document.body.appendChild(modal);
+    var box = document.createElement('div');
+    box.style.cssText = 'background:#fff;border-radius:12px;padding:24px;width:420px;max-height:70vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);';
+    var title = document.createElement('div');
+    title.style.cssText = 'font-size:16px;font-weight:700;color:#0F172A;margin-bottom:6px;';
+    title.textContent = 'Load Session';
+    var sub = document.createElement('div');
+    sub.style.cssText = 'font-size:12px;color:#64748B;margin-bottom:14px;';
+    sub.textContent = 'Choose a saved slot to restore.';
+    box.appendChild(title); box.appendChild(sub);
+    slots.forEach(function(s) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;cursor:pointer;border:1px solid #E2E8F0;margin-bottom:8px;background:#fff;';
+      row.onmouseenter = function(){ this.style.background='#F0FDF9'; this.style.borderColor='#0D9488'; };
+      row.onmouseleave = function(){ this.style.background='#fff'; this.style.borderColor='#E2E8F0'; };
+      (function(fn){ row.onclick = function(){ SI.doCloudLoad(fn); }; })(s.name);
+      var info = document.createElement('div');
+      var nm = document.createElement('div');
+      nm.style.cssText = 'font-size:13px;font-weight:600;color:#0F172A;';
+      nm.textContent = s.label;
+      var fn2 = document.createElement('div');
+      fn2.style.cssText = 'font-size:11px;color:#94A3B8;margin-top:1px;';
+      fn2.textContent = s.name;
+      info.appendChild(nm); info.appendChild(fn2);
+      var arr = document.createElement('span');
+      arr.style.cssText = 'font-size:16px;color:#0D9488;';
+      arr.innerHTML = '→';
+      row.appendChild(info); row.appendChild(arr);
+      box.appendChild(row);
+    });
+    var bCancel = document.createElement('button');
+    bCancel.textContent = 'Cancel';
+    bCancel.style.cssText = 'display:block;margin-left:auto;margin-top:8px;background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 18px;font-size:13px;cursor:pointer;font-family:inherit;color:#64748B;';
+    bCancel.onclick = function(){ var m=document.getElementById('cloud-modal'); if(m) m.remove(); };
+    box.appendChild(bCancel);
+    modal.appendChild(box); document.body.appendChild(modal);
   });
 }
 
-function doCloudLoad(fileName) {
-  var modal = document.getElementById('cloud-modal');
-  if (modal) modal.remove();
-  var apiUrl = 'https://api.github.com/repos/'+GH_REPO+'/contents/'+fileName+'?t='+Date.now();
-  fetch(apiUrl, {headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
-  .then(function(r){ return r.json(); })
-  .then(function(meta){
-    var decoded = decodeURIComponent(escape(atob(meta.content.replace(/\n/g,''))));
-    var parsed  = JSON.parse(decoded);
-    if (!parsed || !Object.keys(parsed).length) { showCloudToast('Slot is empty','#64748B'); return; }
-    PERSONAS.forEach(function(p){
-      if (parsed[p.id]) p.useCases.forEach(function(uc){
-        if (parsed[p.id][uc.id]) S[p.id][uc.id]=parsed[p.id][uc.id];
-      });
-    });
-    persist(); render();
-    var label = fileName==='session-data.json'?'Default':fileName.replace('session-data-','').replace('.json','');
-    showCloudToast('\u2713 Loaded "'+label+'"');
-  })
-  .catch(function(){ showCloudToast('\u2717 Load failed','#E11D48'); });
-}
+function doCloudLoad(fn){var mo=document.getElementById('cloud-modal');if(mo)mo.remove();fetch('https://api.github.com/repos/'+GH_REPO+'/contents/'+fn+'?t='+Date.now(),{headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json();}).then(function(meta){var d=decodeURIComponent(escape(atob(meta.content.replace(/\n/g,'')))),p=JSON.parse(d);if(!p||!Object.keys(p).length){showCloudToast('Slot is empty','#64748B');return;}PERSONAS.forEach(function(pe){if(p[pe.id])pe.useCases.forEach(function(uc){if(p[pe.id][uc.id])S[pe.id][uc.id]=p[pe.id][uc.id];});});persist();render();var lb=fn==='session-data.json'?'Default':fn.replace('session-data-','').replace('.json','');showCloudToast('✓ Loaded "'+lb+'"');}).catch(function(){showCloudToast('✗ Load failed','#E11D48');});}
+function cloudLoad(){showLoadModal();}
 
-function cloudLoad() { showLoadModal(); }
-
-// boot — render called by showApp
-initState();
 
 return {
   initState:initState, render:render, renderPH:renderPH, renderLeft:renderLeft,
@@ -2094,7 +2148,7 @@ return {
   selectTier:selectTier, selectAssess:selectAssess, saveNote:saveNote,
   navigate:navigate, goTo:goTo, goToPersona:goToPersona, resetAll:resetAll,
   toggleMatrix:toggleMatrix, matrixSelectTier:matrixSelectTier,
-  matrixSelectAssess:matrixSelectAssess,
+  matrixSelectAssess:matrixSelectAssess, harveyBall:harveyBall,
   persist:persist, loadSaved:loadSaved,
   cloudSave:cloudSave, cloudLoad:cloudLoad,
   doCloudSave:doCloudSave, doCloudLoad:doCloudLoad,
