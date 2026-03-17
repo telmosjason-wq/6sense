@@ -1205,6 +1205,7 @@ function addHomeButtons() {
 }
 window.addEventListener('load', addHomeButtons);
 window.SI = (function() {
+var matrixView = {};
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
 
@@ -1880,8 +1881,6 @@ async function exportPPT() {
 
 // boot
 initState();
-
-var matrixView = {};
 
 function toggleMatrix(pid) { matrixView[pid]=!matrixView[pid]; render(); }
 
