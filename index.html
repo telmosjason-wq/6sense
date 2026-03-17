@@ -1800,7 +1800,7 @@ function harveyBall(tierId) {
     var large = frac > 0.5 ? 1 : 0;
     fillPath = '<path d="M ' + cx + ' ' + cy + ' L ' + cx + ' ' + (cy-r+1) + ' A ' + (r-1) + ' ' + (r-1) + ' 0 ' + large + ' 1 ' + ex.toFixed(3) + ' ' + ey.toFixed(3) + ' Z" fill="' + col + '"/>';
   }
-  return '<svg width="22" height="22" viewBox="0 0 22 22" style="display:block"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (tierId ? '#fff' : '#F8FAFC') + '" stroke="' + stroke + '" stroke-width="1.5"/>' + fillPath + '</svg>';
+  return '<svg width="14" height="14" viewBox="0 0 22 22" style="display:block"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (tierId ? '#fff' : '#F8FAFC') + '" stroke="' + stroke + '" stroke-width="1.5"/>' + fillPath + '</svg>';
 }
 
 function cycleTier(tierId) {
