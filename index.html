@@ -1625,7 +1625,7 @@ function goToPersona(pi) {
 
 function navigate(dir) { step = Math.max(0,Math.min(TOTAL,step+dir)); render(); }
 function goTo(s) { step = Math.max(0,Math.min(TOTAL,s)); render(); }
-function resetAll() { if(!confirm('Reset all data?')) return; initState(); step=0; render(); }
+function resetAll() { if(!confirm('Reset all ratings and clear saved data?')) return; try { localStorage.removeItem(STORAGE_KEY); } catch(e) {} initState(); step=0; render(); }
 
 function selectTier(cId, tId) {
   curS().comp[cId] = (curS().comp[cId]===tId) ? null : tId;
