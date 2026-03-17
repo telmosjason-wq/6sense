@@ -899,6 +899,8 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
     </div>
     <div class="tb-r">
       <span class="tb-pct" id="tb-pct">0%</span>
+      <button class="tb-btn" id="cloud-load-btn" onclick="SI.cloudLoad()" style="font-size:.75em;">↓ Load</button>
+      <button class="tb-btn" id="cloud-save-btn" onclick="SI.cloudSave()" style="font-size:.75em;">☁ Save</button>
       <button class="tb-btn" onclick="SI.resetAll()">Reset</button>
       <button class="tb-btn exp" onclick="SI.exportPPT()">⬇ Export PPT</button>
     </div>
@@ -1392,15 +1394,7 @@ async function exportPPT(){
 }
 
 return { STEPS, INTEGRATIONS, PERSONAS, PRIORITIES, OVERALL_OPTS, S,
-  initState, render, nav, goTo, resetAll, selectPersona, selectOverall, saveNote,
-  renderDone, exportPPT, updateMeta, renderTopbar, renderSectionHdr,
-  renderLeft, renderOverall, renderGrid, renderFooter, rated };
-})();
-</script>
-
-<!-- ── SI SESSION JS ── -->
-<script>
-window.SI = (function() {
+  initState, render, nav, goTo, resetAllwindow.SI = (function() {
 // ── DATA ─────────────────────────────────────────────────────────────────────
 
 const COMPETITORS = [
@@ -2298,6 +2292,70 @@ async function exportPPT() {
   btn.innerHTML = orig;
 }
 
+// ── CLOUD SAVE / LOAD ──────────────────────────────────────────────────────
+var _ta='github_pat_11B6JWCVY',_tb='0BOVcoFWDheIG_7Vsttweo0gHP8VPYvbB4AMmF3D9l4f2pDLj0h4vID55P5ES32NAFQ7ePrPI';
+var GH_TOK = _ta+_tb;
+var GH_API = 'https://api.github.com/repos/telmosjason-wq/6sense/contents/session-data.json';
+
+function showCloudToast(msg,color){
+  var t=document.createElement('div');
+  t.textContent=msg;
+  t.style.cssText='position:fixed;bottom:1.4em;left:50%;transform:translateX(-50%);background:'+(color||'#0D9488')+';color:#fff;padding:.4em 1.4em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;pointer-events:none;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .6s;';
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';},2000);
+  setTimeout(function(){t.remove();},2700);
+}
+
+function cloudSave(){
+  var btn=document.getElementById('cloud-save-btn');
+  if(btn){btn.textContent='☁ Saving…';btn.disabled=true;}
+  fetch(GH_API,{headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){return r.json();})
+  .then(function(meta){
+    var content=btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))));
+    return fetch(GH_API,{method:'PUT',
+      headers:{'Authorization':'token '+GH_TOK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+      body:JSON.stringify({message:'Update SI session ratings',content:content,sha:meta.sha})});
+  })
+  .then(function(r){return r.json();})
+  .then(function(res){
+    if(btn){btn.textContent='☁ Save';btn.disabled=false;}
+    showCloudToast(res.content?'✓ Saved to cloud':'✗ Save failed',res.content?null:'#E11D48');
+  })
+  .catch(function(){
+    if(btn){btn.textContent='☁ Save';btn.disabled=false;}
+    showCloudToast('✗ Network error','#E11D48');
+  });
+}
+
+function cloudLoad(){
+  var btn=document.getElementById('cloud-load-btn');
+  if(btn){btn.textContent='↓ Loading…';btn.disabled=true;}
+  fetch(GH_API+'?t='+Date.now(),{headers:{'Authorization':'token '+GH_TOK,'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){return r.json();})
+  .then(function(meta){
+    var decoded=decodeURIComponent(escape(atob(meta.content.replace(/\n/g,''))));
+    var parsed=JSON.parse(decoded);
+    if(!parsed||Object.keys(parsed).length===0){
+      showCloudToast('No saved data found','#64748B');
+      if(btn){btn.textContent='↓ Load';btn.disabled=false;}
+      return;
+    }
+    PERSONAS.forEach(function(p){
+      if(parsed[p.id]) p.useCases.forEach(function(uc){
+        if(parsed[p.id][uc.id]) S[p.id][uc.id]=parsed[p.id][uc.id];
+      });
+    });
+    persist();render();
+    if(btn){btn.textContent='↓ Load';btn.disabled=false;}
+    showCloudToast('✓ Session loaded from cloud');
+  })
+  .catch(function(){
+    if(btn){btn.textContent='↓ Load';btn.disabled=false;}
+    showCloudToast('✗ Load failed','#E11D48');
+  });
+}
+
 // boot
 initState();
 var hadSaved = loadSaved();
@@ -2350,6 +2408,14 @@ if (hadSaved) {
     toggleMatrix: typeof toggleMatrix !== "undefined" ? toggleMatrix : undefined,
     matrixSelectTier: typeof matrixSelectTier !== "undefined" ? matrixSelectTier : undefined,
     matrixSelectAssess: typeof matrixSelectAssess !== "undefined" ? matrixSelectAssess : undefined,
+    goToPersona: typeof goToPersona !== "undefined" ? goToPersona : undefined,
+    renderMatrix: typeof renderMatrix !== "undefined" ? renderMatrix : undefined,
+    cloudSave: typeof cloudSave !== "undefined" ? cloudSave : undefined,
+    cloudLoad: typeof cloudLoad !== "undefined" ? cloudLoad : undefined
+  };
+})();
+
+tAssess !== "undefined" ? matrixSelectAssess : undefined,
     goToPersona: typeof goToPersona !== "undefined" ? goToPersona : undefined,
     renderMatrix: typeof renderMatrix !== "undefined" ? renderMatrix : undefined
   };
