@@ -1623,45 +1623,30 @@ function render() {
   renderTopbar();
   renderPH();
   if (matrixView[p.id]) {
+    // Hide step-through main, keep slide grid intact
     document.getElementById('main').style.display = 'none';
-    // Switch slide to flex-column so footer stays visible below table
-    var slideEl = document.getElementById('slide');
-    slideEl.style.display = 'flex';
-    slideEl.style.flexDirection = 'column';
-    slideEl.style.height = 'auto';
-    slideEl.style.minHeight = '100%';
-    slideEl.style.aspectRatio = 'unset';
-    slideEl.style.overflow = 'visible';
-    // Show footer (persona tabs)
+    // Ensure footer shows persona tabs
     var footerEl = document.getElementById('footer');
     footerEl.style.display = 'flex';
-    footerEl.style.flexShrink = '0';
-    footerEl.style.padding = '.4em .8em';
-    footerEl.style.borderTop = '1px solid #E2E8F0';
+    footerEl.style.padding = '.3em .6em';
     footerEl.style.background = '#fff';
-    // Create/update matrix container
+    footerEl.style.borderTop = '1px solid #E2E8F0';
+    // Create matrix-main in grid row 3 (same slot as .main)
     var mxEl = document.getElementById('matrix-main');
     if (!mxEl) {
       mxEl = document.createElement('div');
       mxEl.id = 'matrix-main';
-      slideEl.insertBefore(mxEl, footerEl);
+      // Insert before footer so it lands in the 1fr grid row
+      document.getElementById('slide').insertBefore(mxEl, footerEl);
     }
-    mxEl.style.cssText = 'flex:1;overflow:auto;min-height:0;';
+    mxEl.style.cssText = 'overflow:auto;min-height:0;background:#F1F5F9;';
     mxEl.style.display = 'block';
     renderMatrix(p.id);
   } else {
     var mxEl2 = document.getElementById('matrix-main');
     if (mxEl2) mxEl2.style.display = 'none';
-    // Restore slide to original grid layout
-    var slideEl2 = document.getElementById('slide');
-    slideEl2.style.display = '';
-    slideEl2.style.flexDirection = '';
-    slideEl2.style.height = '';
-    slideEl2.style.minHeight = '';
-    slideEl2.style.aspectRatio = '';
-    slideEl2.style.overflow = '';
     document.getElementById('main').style.display = 'grid';
-    // Restore footer original HTML (matrix view overwrites it with persona tabs)
+    // Restore footer HTML if matrix view replaced it
     var footerEl2 = document.getElementById('footer');
     if (!document.getElementById('crumb-track')) {
       footerEl2.innerHTML = '<div class="crumb-track" id="crumb-track"></div>' +
@@ -2156,57 +2141,157 @@ async function exportPPT() {
         drawTierScale(sl, ucS);
       });
 
-      // ── PERSONA SUMMARY SLIDE
+      // ── PERSONA MATRIX SLIDE (Harvey Balls)
       {
         const sl = pres.addSlide();
         sl.background = {color:BG};
 
-        drawTopbar(sl, `${p.name}  ·  Summary`, p.badge);
+        drawTopbar(sl, p.name + '  ·  Matrix View', p.badge);
         drawPersonaHdr(sl, p, pi, ratedN);
         sl.addShape(pres.shapes.RECTANGLE,{x:0,y:MAIN_Y,w:10,h:5.625-MAIN_Y,fill:{color:BG}});
 
         const nUC = p.useCases.length;
-        const sUcW = 2.1, sAssW = 1.1, sGap = 0.04;
-        const sGX = PAD + sUcW + sGap + sAssW + sGap;
-        const sNc = COMPETITORS.length;
-        const sCW = (10 - sGX - PAD*0.5 - (sNc-1)*sGap) / sNc;
-        const hY = INNER_Y;
-        const hH = 0.32;
-        const avail = BOTTOM - hY - hH - 0.04;
-        const rH = Math.min(0.62, avail/nUC);
+        const hUcW = 2.3, hAssW = 1.05, hGap = 0.04;
+        const hGX  = PAD + hUcW + hGap + hAssW + hGap;
+        const hNc  = COMPETITORS.length;
+        const hCW  = (10 - hGX - PAD*0.5 - (hNc-1)*hGap) / hNc;
+        const hHdrY = INNER_Y;
+        const hHdrH = 0.34;
+        const avail  = BOTTOM - hHdrY - hHdrH - 0.04;
+        const rH     = Math.min(0.55, avail / nUC);
+        const ballR  = Math.min(rH * 0.32, 0.14); // radius of harvey ball circle
 
-        // Column headers
-        sl.addText('USE CASE',{x:PAD,y:hY,w:sUcW,h:hH,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,valign:'middle',margin:0});
-        sl.addText('ASSESSMENT',{x:PAD+sUcW+sGap,y:hY,w:sAssW,h:hH,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:MU,charSpacing:0.5,valign:'middle',margin:0});
-        COMPETITORS.forEach((c,ci)=>{
-          const cx=sGX+ci*(sCW+sGap);
-          sl.addShape(pres.shapes.RECTANGLE,{x:cx,y:hY,w:sCW,h:hH,fill:{color:c.id==='6s'?'0F766E':N}});
-          sl.addText(c.name,{x:cx,y:hY,w:sCW,h:hH,fontSize:6.5,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
+        // Harvey ball pie wedge helper — returns points array for freeform
+        // cx,cy = center in inches; r = radius; frac = filled fraction (0-1)
+        function hbPoints(cx, cy, r, frac) {
+          if (frac <= 0) return null;
+          if (frac >= 1) return 'full';
+          const steps = 32;
+          const pts = [{x:cx, y:cy}];
+          // start at 12 o'clock, sweep clockwise
+          for (let i = 0; i <= Math.round(steps * frac); i++) {
+            const angle = (i / steps) * 2 * Math.PI - Math.PI/2;
+            pts.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
+          }
+          pts.push({x:cx, y:cy});
+          return pts;
+        }
+
+        // Column headers: USE CASE + ASSESSMENT + competitors
+        sl.addText('USE CASE', {x:PAD, y:hHdrY, w:hUcW, h:hHdrH,
+          fontSize:6, fontFace:'Trebuchet MS', bold:true, color:MU,
+          charSpacing:0.5, valign:'middle', margin:0});
+        sl.addText('ASSESSMENT', {x:PAD+hUcW+hGap, y:hHdrY, w:hAssW, h:hHdrH,
+          fontSize:6, fontFace:'Trebuchet MS', bold:true, color:MU,
+          charSpacing:0.5, valign:'middle', margin:0});
+        COMPETITORS.forEach((comp, ci) => {
+          const cx = hGX + ci*(hCW+hGap);
+          const isSix = comp.id === '6s';
+          sl.addShape(pres.shapes.RECTANGLE, {x:cx, y:hHdrY, w:hCW, h:hHdrH,
+            fill:{color: isSix ? '0F766E' : N},
+            line:{color: isSix ? '0F766E' : N}});
+          sl.addText(comp.name, {x:cx, y:hHdrY, w:hCW, h:hHdrH*0.58,
+            fontSize:7, fontFace:'Trebuchet MS', bold:true, color:W,
+            align:'center', valign:'middle', margin:0});
+          sl.addText(comp.cat, {x:cx, y:hHdrY+hHdrH*0.52, w:hCW, h:hHdrH*0.48,
+            fontSize:5.5, fontFace:'Trebuchet MS', color: isSix?TLT:'AABDD6',
+            align:'center', valign:'middle', margin:0});
         });
 
         // Data rows
-        p.useCases.forEach((uc,ri)=>{
-          const ry = hY+hH+0.04+ri*rH;
-          const bg = ri%2===0?W:'F8FAFC';
+        p.useCases.forEach((uc, ri) => {
+          const ry  = hHdrY + hHdrH + 0.04 + ri * rH;
+          const bg  = ri % 2 === 0 ? W : 'F8FAFC';
           const ucS = S[p.id][uc.id];
-          sl.addShape(pres.shapes.RECTANGLE,{x:PAD,y:ry,w:10-PAD*1.2,h:rH-0.03,fill:{color:bg}});
-          sl.addText(uc.name,{x:PAD+0.05,y:ry,w:sUcW-0.1,h:rH-0.03,fontSize:7,fontFace:'Trebuchet MS',bold:true,color:SL,valign:'middle',margin:2});
+          const cy  = ry + rH/2;  // vertical center of row
 
-          if(ucS.assess){
-            const ax=PAD+sUcW+sGap;
-            sl.addShape(pres.shapes.RECTANGLE,{x:ax+0.04,y:ry+0.05,w:sAssW-0.08,h:rH-0.13,fill:{color:aBgH[ucS.assess]}});
-            sl.addShape(pres.shapes.RECTANGLE,{x:ax+0.04,y:ry+0.05,w:0.055,h:rH-0.13,fill:{color:aSel[ucS.assess]}});
-            sl.addText(aLbl[ucS.assess],{x:ax+0.11,y:ry+0.05,w:sAssW-0.19,h:rH-0.13,fontSize:6.5,fontFace:'Trebuchet MS',bold:true,color:aClrH[ucS.assess],valign:'middle',margin:0});
+          // Row background
+          sl.addShape(pres.shapes.RECTANGLE, {x:PAD, y:ry, w:10-PAD*1.2, h:rH-0.025,
+            fill:{color:bg}, line:{color:'E2E8F0', pt:0.5}});
+
+          // Use case name
+          sl.addText(uc.name, {x:PAD+0.06, y:ry, w:hUcW-0.08, h:rH-0.025,
+            fontSize:7, fontFace:'Trebuchet MS', bold:true, color:SL,
+            valign:'middle', margin:2});
+
+          // Assessment pill
+          if (ucS.assess) {
+            const ax = PAD + hUcW + hGap;
+            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.06, w:hAssW-0.08, h:rH-0.14,
+              fill:{color:aBgH[ucS.assess]}, line:{color:aSel[ucS.assess], pt:0.75}});
+            sl.addShape(pres.shapes.RECTANGLE, {x:ax+0.04, y:ry+0.06, w:0.045, h:rH-0.14,
+              fill:{color:aSel[ucS.assess]}});
+            sl.addText(aLbl[ucS.assess], {x:ax+0.10, y:ry+0.06, w:hAssW-0.18, h:rH-0.14,
+              fontSize:6, fontFace:'Trebuchet MS', bold:true, color:aClrH[ucS.assess],
+              valign:'middle', margin:0});
           }
 
-          COMPETITORS.forEach((c,ci)=>{
-            const cx=sGX+ci*(sCW+sGap);
-            const tid=ucS.comp[c.id];
-            if(tid){
-              sl.addShape(pres.shapes.RECTANGLE,{x:cx+0.02,y:ry+0.04,w:sCW-0.04,h:rH-0.11,fill:{color:tSelH[tid]}});
-              sl.addText(tLbl[tid],{x:cx+0.02,y:ry+0.04,w:sCW-0.04,h:rH-0.11,fontSize:6,fontFace:'Trebuchet MS',bold:true,color:W,align:'center',valign:'middle',margin:0});
+          // Harvey Balls per competitor
+          COMPETITORS.forEach((comp, ci) => {
+            const bx  = hGX + ci*(hCW+hGap) + hCW/2;  // center x of cell
+            const tid = ucS.comp[comp.id];
+            const fracs = {diff:1, best:0.75, mod:0.5, basic:0.25, none:0};
+            const frac  = tid ? (fracs[tid] || 0) : 0;
+            const col   = tid ? tSelH[tid] : 'CBD5E1';
+
+            // Outer circle (border)
+            sl.addShape(pres.shapes.OVAL, {
+              x: bx - ballR, y: cy - ballR, w: ballR*2, h: ballR*2,
+              fill: {color: tid ? W : 'F8FAFC'},
+              line: {color: col, pt: 1.2}
+            });
+
+            // Filled wedge via freeform
+            if (frac > 0) {
+              const pts = hbPoints(bx, cy, ballR * 0.88, frac);
+              if (pts === 'full') {
+                // Full fill — just another oval on top
+                sl.addShape(pres.shapes.OVAL, {
+                  x: bx - ballR*0.88, y: cy - ballR*0.88,
+                  w: ballR*1.76, h: ballR*1.76,
+                  fill: {color: col}, line: {color: col, pt: 0}
+                });
+              } else if (pts) {
+                sl.addShape(pres.shapes.FREEFORM, {
+                  points: pts,
+                  fill: {color: col},
+                  line: {color: col, pt: 0}
+                });
+              }
             }
           });
+        });
+
+        // Legend row at bottom
+        const legY = BOTTOM + 0.03;
+        const legItems = [
+          {id:'diff', label:'True differentiator'},
+          {id:'best', label:'Best in class'},
+          {id:'mod',  label:'Moderate'},
+          {id:'basic',label:'Basic'},
+          {id:'none', label:'No offering'},
+        ];
+        let legX = PAD;
+        legItems.forEach(item => {
+          const frac = {diff:1,best:0.75,mod:0.5,basic:0.25,none:0}[item.id];
+          const col  = tSelH[item.id];
+          const br   = 0.065;
+          const lcy  = legY + br;
+          sl.addShape(pres.shapes.OVAL, {x:legX, y:legY, w:br*2, h:br*2,
+            fill:{color:frac>0?W:'F8FAFC'}, line:{color:col, pt:1}});
+          if (frac > 0) {
+            const pts = hbPoints(legX+br, lcy, br*0.85, frac);
+            if (pts === 'full') {
+              sl.addShape(pres.shapes.OVAL, {x:legX+br*0.15, y:legY+br*0.15,
+                w:br*1.7, h:br*1.7, fill:{color:col}, line:{color:col,pt:0}});
+            } else if (pts) {
+              sl.addShape(pres.shapes.FREEFORM, {points:pts,
+                fill:{color:col}, line:{color:col,pt:0}});
+            }
+          }
+          sl.addText(item.label, {x:legX+br*2+0.04, y:legY, w:1.3, h:br*2,
+            fontSize:5.5, fontFace:'Trebuchet MS', color:MU, valign:'middle', margin:0});
+          legX += br*2 + 0.04 + 1.35;
         });
       }
     });
