@@ -3806,25 +3806,25 @@ function render() {
     // Header
     parts.push('<div class="pp-col-hdr">');
     parts.push('<span class="pp-col-nm">' + escH(col.name) + '</span>');
-    parts.push('<button class="pp-del-btn" onclick="PP.deleteCol('' + cid + '')" title="Remove">✕</button>');
+    parts.push('<button class="pp-del-btn" onclick="PP.deleteCol(\'' + cid + '\')" title="Remove">✕</button>');
     parts.push('</div>');
 
     // Push cell
     parts.push('<div class="pp-cell push-cell">');
-    parts.push('<textarea oninput="PP.saveCell('' + cid + '','push',this.value)" placeholder="What 6sense pushes to this system…">');
+    parts.push('<textarea oninput="PP.saveCell(\'' + cid + '\',\'push\',this.value)" placeholder="What 6sense pushes to this system…">');
     parts.push(escH(col.push));
     parts.push('</textarea></div>');
 
     // Pull cell
     parts.push('<div class="pp-cell pull-cell">');
-    parts.push('<textarea oninput="PP.saveCell('' + cid + '','pull',this.value)" placeholder="What 6sense pulls from this system…">');
+    parts.push('<textarea oninput="PP.saveCell(\'' + cid + '\',\'pull\',this.value)" placeholder="What 6sense pulls from this system…">');
     parts.push(escH(col.pull));
     parts.push('</textarea></div>');
 
     // Status badge
     var sc = col.status || 'not-started';
     var lbl = STATUS_LABELS[sc];
-    parts.push('<div class="pp-status ' + sc + '" onclick="PP.cycleStatus('' + cid + '')">');
+    parts.push('<div class="pp-status ' + sc + '" onclick="PP.cycleStatus(\'' + cid + '\')">');
     parts.push(lbl);
     parts.push('</div>');
 
