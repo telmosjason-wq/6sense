@@ -365,6 +365,11 @@ html, body { width:100%; height:100%; overflow:hidden; font-family:'DM Sans',san
 #app-si .chips { display:flex; flex-wrap:wrap; gap:3px; }
 #app-si .chip { padding:.18em .5em; border-radius:2em; font-size:.9em; font-weight:500; }
 
+
+/* ─ Matrix view ─ */
+#app-si .mx-table { border-collapse:collapse; width:100%; }
+#app-si .mx-table th { background:#fff; position:sticky; top:0; z-index:2; }
+#app-si .mx-uc-sticky { position:sticky; left:0; z-index:2; background:inherit; }
 </style>
 
 <!-- ── INTEGRATION SESSION CSS ── -->
@@ -906,6 +911,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
       <div class="ph-jt" id="ph-jt"></div>
     </div>
     <div class="ph-r">
+      <div id="ph-view-toggle" style="flex-shrink:0;"></div>
       <div class="ph-badge" id="ph-badge"></div>
       <div class="ph-prog">
         <div class="ph-prog-lbl" id="ph-prog-lbl">0 / 0 rated</div>
@@ -1542,6 +1548,7 @@ const TOTAL = STEPS.length;
 
 let step = 0;
 let S = {};
+var matrixView = {};
 
 function initState() {
   S = {};
@@ -1578,6 +1585,11 @@ function pRated(pi) {
 }
 
 // ── ACTIONS ──────────────────────────────────────────────────────────────────
+function goToPersona(pi) {
+  var firstStep = STEPS.findIndex(function(s){ return s.pi === pi; });
+  if (firstStep >= 0) { step = firstStep; render(); }
+}
+
 function navigate(dir) { step = Math.max(0,Math.min(TOTAL,step+dir)); render(); }
 function goTo(s) { step = Math.max(0,Math.min(TOTAL,s)); render(); }
 function resetAll() { if(!confirm('Reset all data?')) return; initState(); step=0; render(); }
@@ -1598,16 +1610,36 @@ function saveNote(v) { curS().notes = v; }
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
 function render() {
-  const done = step >= TOTAL;
+  var done = step >= TOTAL;
   document.getElementById('done').style.display = done ? 'flex' : 'none';
   if (done) { renderDone(); updateTopbar(); return; }
+  var pi = STEPS[step].pi;
+  var p = PERSONAS[pi];
   renderTopbar();
   renderPH();
-  renderLeft();
-  renderGrid();
-  renderAssess();
-  renderFooter();
-  document.getElementById('notes-inp').value = curS().notes;
+  if (matrixView[p.id]) {
+    document.getElementById('main').style.display = 'none';
+    document.getElementById('footer').style.display = 'none';
+    var mxEl = document.getElementById('matrix-main');
+    if (!mxEl) {
+      mxEl = document.createElement('div');
+      mxEl.id = 'matrix-main';
+      mxEl.style.cssText = 'flex:1;overflow:hidden;min-height:0;';
+      document.getElementById('slide').insertBefore(mxEl, document.getElementById('footer'));
+    }
+    mxEl.style.display = 'block';
+    renderMatrix(p.id);
+  } else {
+    var mxEl2 = document.getElementById('matrix-main');
+    if (mxEl2) mxEl2.style.display = 'none';
+    document.getElementById('main').style.display = 'grid';
+    document.getElementById('footer').style.display = 'flex';
+    renderLeft();
+    renderGrid();
+    renderAssess();
+    renderFooter();
+    document.getElementById('notes-inp').value = curS().notes;
+  }
 }
 
 function updateTopbar() {
@@ -1621,15 +1653,54 @@ function renderTopbar() {
 }
 
 function renderPH() {
-  const {pi,ui} = STEPS[step];
-  const p = PERSONAS[pi];
-  const r = pRated(pi), t = p.useCases.length;
-  document.getElementById('ph-ey').textContent = `Persona ${pi+1} of ${PERSONAS.length}`;
+  var piui = STEPS[step], pi = piui.pi;
+  var p = PERSONAS[pi];
+  var r = pRated(pi), t = p.useCases.length;
+  document.getElementById('ph-ey').textContent = 'Persona ' + (pi+1) + ' of ' + PERSONAS.length;
   document.getElementById('ph-nm').textContent = p.name;
   document.getElementById('ph-jt').textContent = p.jtbd;
   document.getElementById('ph-badge').textContent = p.badge;
-  document.getElementById('ph-prog-lbl').textContent = `${r} / ${t} rated`;
-  document.getElementById('ph-prog-fill').style.width = Math.round(r/t*100)+'%';
+  document.getElementById('ph-prog-lbl').textContent = r + ' / ' + t + ' rated';
+  document.getElementById('ph-prog-fill').style.width = Math.round(r/t*100) + '%';
+  var isMatrix = !!matrixView[p.id];
+  var toggleEl = document.getElementById('ph-view-toggle');
+  if (toggleEl) {
+    var btn = document.createElement('div');
+    btn.dataset.pid = p.id;
+    btn.onclick = function() { SI.toggleMatrix(this.dataset.pid); };
+    btn.innerHTML = isMatrix ? '&#8801; Step-through' : '&#8862; Matrix view';
+    btn.style.cssText = 'display:flex;align-items:center;gap:.35em;cursor:pointer;font-size:.6em;font-weight:600;padding:.28em .75em;border-radius:2em;border:1.5px solid ' + (isMatrix ? 'var(--teal)' : '#E2E8F0') + ';background:' + (isMatrix ? '#CCFBF1' : '#fff') + ';color:' + (isMatrix ? 'var(--teal)' : '#64748B') + ';user-select:none;';
+    toggleEl.innerHTML = '';
+    toggleEl.appendChild(btn);
+  }
+  if (isMatrix) {
+    var footerEl = document.getElementById('footer');
+    footerEl.style.display = 'flex';
+    footerEl.innerHTML = '';
+    var tabsDiv = document.createElement('div');
+    tabsDiv.style.cssText = 'flex:1;display:flex;align-items:center;gap:.4em;overflow-x:auto;';
+    PERSONAS.forEach(function(per, i) {
+      var cur = per.id === p.id;
+      var pr2 = pRated(i), pt2 = per.useCases.length;
+      var tab = document.createElement('div');
+      tab.dataset.pi = i;
+      tab.onclick = function() { SI.goToPersona(parseInt(this.dataset.pi)); };
+      tab.style.cssText = 'display:flex;align-items:center;gap:.3em;padding:.32em .75em;border-radius:.4em;border:1.5px solid ' + (cur ? 'var(--navy)' : '#E2E8F0') + ';background:' + (cur ? 'var(--navy)' : '#fff') + ';color:' + (cur ? '#fff' : '#64748B') + ';font-size:.62em;font-weight:' + (cur ? 700 : 500) + ';cursor:pointer;white-space:nowrap;flex-shrink:0;';
+      tab.textContent = per.badge;
+      if (pr2 > 0) {
+        var badge = document.createElement('span');
+        badge.textContent = pr2 + '/' + pt2;
+        badge.style.cssText = 'background:' + (cur ? 'rgba(255,255,255,.2)' : '#CCFBF1') + ';color:' + (cur ? '#fff' : 'var(--teal)') + ';padding:0 .35em;border-radius:1em;font-size:.9em;';
+        tab.appendChild(badge);
+      }
+      tabsDiv.appendChild(tab);
+    });
+    footerEl.appendChild(tabsDiv);
+    var hint = document.createElement('div');
+    hint.style.cssText = 'flex-shrink:0;font-size:.58em;color:#64748B;padding-left:.8em;';
+    hint.innerHTML = 'Click Harvey Balls to rate &middot; Dropdown for assessment';
+    footerEl.appendChild(hint);
+  }
 }
 
 function renderLeft() {
@@ -1709,6 +1780,128 @@ function renderFooter() {
 }
 
 // ── DONE ─────────────────────────────────────────────────────────────────────
+
+// ── HARVEY BALLS + MATRIX VIEW ───────────────────────────────────────────────
+
+function harveyBall(tierId) {
+  var cx = 11, cy = 11, r = 10;
+  var cols = { diff:'#059669', best:'#0D9488', mod:'#D97706', basic:'#1D4ED8', none:'#94A3B8' };
+  var fracs = { diff:1, best:0.75, mod:0.5, basic:0.25, none:0 };
+  var col = cols[tierId] || '#E2E8F0';
+  var frac = tierId ? (fracs[tierId] !== undefined ? fracs[tierId] : 0) : 0;
+  var stroke = tierId ? col : '#CBD5E1';
+  var fillPath = '';
+  if (frac === 1) {
+    fillPath = '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r-1) + '" fill="' + col + '"/>';
+  } else if (frac > 0) {
+    var angle = frac * 2 * Math.PI;
+    var ex = cx + (r-1) * Math.sin(angle);
+    var ey = cy - (r-1) * Math.cos(angle);
+    var large = frac > 0.5 ? 1 : 0;
+    fillPath = '<path d="M ' + cx + ' ' + cy + ' L ' + cx + ' ' + (cy-r+1) + ' A ' + (r-1) + ' ' + (r-1) + ' 0 ' + large + ' 1 ' + ex.toFixed(3) + ' ' + ey.toFixed(3) + ' Z" fill="' + col + '"/>';
+  }
+  return '<svg width="22" height="22" viewBox="0 0 22 22" style="display:block"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (tierId ? '#fff' : '#F8FAFC') + '" stroke="' + stroke + '" stroke-width="1.5"/>' + fillPath + '</svg>';
+}
+
+function cycleTier(tierId) {
+  var order = [null, 'diff', 'best', 'mod', 'basic', 'none'];
+  return order[(order.indexOf(tierId) + 1) % order.length];
+}
+
+function toggleMatrix(personaId) {
+  matrixView[personaId] = !matrixView[personaId];
+  render();
+}
+
+function matrixSelectTier(personaId, ucId, compId) {
+  S[personaId][ucId].comp[compId] = cycleTier(S[personaId][ucId].comp[compId]);
+  renderMatrix(personaId);
+}
+
+function matrixSelectAssess(personaId, ucId, val) {
+  S[personaId][ucId].assess = (S[personaId][ucId].assess === val) ? null : val;
+  var sel = document.getElementById('mx-assess-' + personaId + '-' + ucId);
+  if (sel) sel.value = S[personaId][ucId].assess || '';
+  var pi = PERSONAS.findIndex(function(p){ return p.id === personaId; });
+  var r2 = pRated(pi), t2 = PERSONAS[pi].useCases.length;
+  document.getElementById('ph-prog-lbl').textContent = r2 + ' / ' + t2 + ' rated';
+  document.getElementById('ph-prog-fill').style.width = Math.round(r2/t2*100) + '%';
+}
+
+function renderMatrix(personaId) {
+  var pi = PERSONAS.findIndex(function(p){ return p.id === personaId; });
+  var p = PERSONAS[pi];
+  var aColors = { mustbuild:'#059669', partner:'#1D4ED8', stop:'#E11D48' };
+  var aBgs    = { mustbuild:'#D1FAE5', partner:'#DBEAFE', stop:'#FFE4E6' };
+
+  var hdrCells = '<th style="text-align:left;padding:.5em .75em;font-size:.55em;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);position:sticky;left:0;z-index:3;min-width:10em;">Use Case</th>' +
+    '<th style="text-align:center;padding:.5em .5em;font-size:.55em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:#fff;border-bottom:2px solid var(--border);min-width:6.5em;">Assessment</th>';
+  COMPETITORS.forEach(function(comp) {
+    var isSix = comp.id === '6s';
+    hdrCells += '<th style="text-align:center;padding:.5em .4em;font-size:.6em;font-weight:700;color:' + (isSix ? 'var(--teal)' : 'var(--navy)') + ';background:#fff;border-bottom:2px solid ' + (isSix ? 'var(--teal)' : 'var(--border)') + ';min-width:4.5em;white-space:nowrap;">' +
+      '<div>' + comp.name + '</div><div style="font-weight:400;font-size:.85em;color:var(--muted);margin-top:.1em;">' + comp.cat + '</div></th>';
+  });
+
+  var bodyRows = '';
+  p.useCases.forEach(function(uc, ui) {
+    var s = S[p.id][uc.id];
+    var rowBg = ui % 2 === 0 ? '#fff' : 'var(--bg)';
+    var assessVal = s.assess || '';
+    var aColor = assessVal ? aColors[assessVal] : 'var(--muted)';
+    var aBg    = assessVal ? aBgs[assessVal]    : 'transparent';
+    var tipAttr = uc.prompt ? ' title="' + uc.prompt.replace(/"/g, "'").slice(0,200) + '"' : '';
+
+    var compCells = '';
+    COMPETITORS.forEach(function(comp) {
+      var tier = s.comp[comp.id];
+      var isSix = comp.id === '6s';
+      var tierObj = TIERS.find(function(t){ return t.id === tier; });
+      var tipLabel = tierObj ? tierObj.label : 'Click to set';
+      compCells += '<td style="padding:.3em .35em;border-bottom:1px solid var(--border);text-align:center;border-left:' + (isSix ? '2px solid var(--tealLt,#CCFBF1)' : '1px solid var(--border)') + ';">' +
+        '<div onclick="SI.matrixSelectTier(\'' + p.id + '\',\'' + uc.id + '\',\'' + comp.id + '\')" title="' + tipLabel + '" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .1s" onmouseenter="this.style.transform=\'scale(1.2)\'" onmouseleave="this.style.transform=\'scale(1)\'">' +
+        harveyBall(tier) + '</div></td>';
+    });
+
+    bodyRows += '<tr onmouseenter="this.style.background=\'#EFF6FF\'" onmouseleave="this.style.background=\'' + rowBg.replace(/'/g, "\\'") + '\'" style="background:' + rowBg + '">' +
+      '<td style="padding:.45em .75em;font-size:.72em;font-weight:600;color:var(--navy);border-bottom:1px solid var(--border);position:sticky;left:0;background:inherit;z-index:2;">' +
+        '<span' + tipAttr + '>' + uc.name + '</span>' +
+        (uc.prompt ? ' <span' + tipAttr + ' style="font-size:.8em;color:var(--gold,#D97706);cursor:help;">ⓘ</span>' : '') +
+      '</td>' +
+      '<td style="padding:.35em .4em;border-bottom:1px solid var(--border);text-align:center;">' +
+        '<select id="mx-assess-' + p.id + '-' + uc.id + '" onchange="SI.matrixSelectAssess(\'' + p.id + '\',\'' + uc.id + '\',this.value||null)" style="font-family:inherit;font-size:.6em;font-weight:600;border:1.5px solid ' + (assessVal ? aColor : 'var(--border)') + ';border-radius:.4em;padding:.25em .5em;background:' + aBg + ';color:' + aColor + ';cursor:pointer;outline:none;min-width:6em;">' +
+          '<option value="">— TBD</option>' +
+          '<option value="mustbuild"' + (assessVal==='mustbuild'?' selected':'') + '>&#8593; Must-Build</option>' +
+          '<option value="partner"'   + (assessVal==='partner'  ?' selected':'') + '>&#8644; Partner</option>' +
+          '<option value="stop"'      + (assessVal==='stop'     ?' selected':'') + '>&#8595; Stop</option>' +
+        '</select>' +
+      '</td>' +
+      compCells +
+    '</tr>';
+  });
+
+  var legendHtml = '<div style="display:flex;align-items:center;gap:.8em;font-size:.58em;color:var(--muted);padding:.6em .8em;flex-wrap:wrap;border-top:1px solid var(--border);margin-top:.4em;">' +
+    '<span style="font-weight:600;">Scale:</span>';
+  TIERS.forEach(function(t) {
+    legendHtml += '<span style="display:flex;align-items:center;gap:.3em;">' + harveyBall(t.id) + '<span>' + t.label + '</span></span>';
+  });
+  legendHtml += '</div>';
+
+  var el = document.getElementById('matrix-main');
+  if (el) {
+    el.innerHTML = '<div style="overflow:auto;height:calc(100% - 2em);padding:.5em .8em;">' +
+      '<table style="border-collapse:collapse;width:100%;font-family:inherit;">' +
+        '<thead><tr>' + hdrCells + '</tr></thead>' +
+        '<tbody>' + bodyRows + '</tbody>' +
+      '</table>' +
+    '</div>' + legendHtml;
+  }
+
+  var r2 = pRated(pi), t2 = p.useCases.length;
+  document.getElementById('ph-prog-lbl').textContent = r2 + ' / ' + t2 + ' rated';
+  document.getElementById('ph-prog-fill').style.width = Math.round(r2/t2*100) + '%';
+}
+
+
 function renderDone() {
   document.getElementById('done-sub').textContent=`${rated()} of ${TOTAL} use cases rated across ${PERSONAS.length} personas.`;
   const tierLabel = {diff:'True differentiator',best:'Best in class',mod:'Moderate',basic:'Basic',none:'No offering'};
@@ -2024,9 +2217,15 @@ render();
     COMPETITORS: typeof COMPETITORS !== "undefined" ? COMPETITORS : undefined,
     renderPH: typeof renderPH !== "undefined" ? renderPH : undefined,
     aBg: typeof aBg !== "undefined" ? aBg : undefined,
-    initState: typeof initState !== "undefined" ? initState : undefined
+    initState: typeof initState !== "undefined" ? initState : undefined,
+    toggleMatrix: typeof toggleMatrix !== "undefined" ? toggleMatrix : undefined,
+    matrixSelectTier: typeof matrixSelectTier !== "undefined" ? matrixSelectTier : undefined,
+    matrixSelectAssess: typeof matrixSelectAssess !== "undefined" ? matrixSelectAssess : undefined,
+    goToPersona: typeof goToPersona !== "undefined" ? goToPersona : undefined,
+    renderMatrix: typeof renderMatrix !== "undefined" ? renderMatrix : undefined
   };
 })();
+
 </script>
 
 <!-- ── INTEGRATION SESSION JS ── -->
