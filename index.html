@@ -1720,9 +1720,28 @@ function renderPH() {
     });
     footerEl.appendChild(tabsDiv);
     var hint = document.createElement('div');
-    hint.style.cssText = 'flex-shrink:0;font-size:.58em;color:#64748B;padding-left:.8em;';
+    hint.style.cssText = 'flex-shrink:0;font-size:.58em;color:#64748B;padding:0 .6em;';
     hint.innerHTML = 'Click Harvey Balls to rate &middot; Dropdown for assessment';
     footerEl.appendChild(hint);
+    // Back / Next buttons (same style as step-through)
+    var btnBack = document.createElement('button');
+    btnBack.className = 'nbtn';
+    btnBack.innerHTML = '&#8592; Back';
+    btnBack.onclick = function() { SI.goToPersona(Math.max(0, PERSONAS.findIndex(function(per){ return per.id === p.id; }) - 1)); };
+    var btnNext = document.createElement('button');
+    btnNext.className = 'nbtn pri';
+    btnNext.innerHTML = 'Next &#8594;';
+    var curPi = PERSONAS.findIndex(function(per){ return per.id === p.id; });
+    btnNext.innerHTML = curPi >= PERSONAS.length - 1 ? 'Done &#8594;' : 'Next &#8594;';
+    btnNext.onclick = function() {
+      var npi = PERSONAS.findIndex(function(per){ return per.id === p.id; });
+      if (npi < PERSONAS.length - 1) { SI.goToPersona(npi + 1); }
+    };
+    var footBtns = document.createElement('div');
+    footBtns.className = 'foot-btns';
+    footBtns.appendChild(btnBack);
+    footBtns.appendChild(btnNext);
+    footerEl.appendChild(footBtns);
   }
 }
 
