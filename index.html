@@ -3782,42 +3782,30 @@ var STATUSES = ['funded', 'evaluating', 'not-started'];
 var STATUS_LABELS = { funded:'✓ Funded', evaluating:'⟳ Evaluating', 'not-started':'— Not Started' };
 
 var DEFAULT_COLS = [
-  {
-    id:'sfdc', name:'Salesforce / CRM',
+  { id:'sfdc', name:'Salesforce / CRM',
     push:'Account scores & buying stage\nContact intelligence\nBuying group signals\nSegment membership',
     pull:'Account hierarchy & firmographics\nOpportunity data\nContact records & ownership\nActivity history',
-    status:'funded'
-  },
-  {
-    id:'mkto', name:'Marketo / MAP',
+    status:'funded' },
+  { id:'mkto', name:'Marketo / MAP',
     push:'Predictive segments & audiences\nBuying stage transitions\nAccount engagement scores\nAI-qualified leads',
     pull:'Email engagement data\nForm fills & conversions\nProgram membership\nLead scoring fields',
-    status:'funded'
-  },
-  {
-    id:'gong', name:'Gong',
+    status:'funded' },
+  { id:'gong', name:'Gong',
     push:'Account context & buying stage\nCompetitor intelligence flags\nChampion / detractor signals',
     pull:'Call transcript insights\nDeal risk signals\nTalk track effectiveness\nCompetitor mentions',
-    status:'evaluating'
-  },
-  {
-    id:'clari', name:'Clari',
+    status:'evaluating' },
+  { id:'clari', name:'Clari',
     push:'Buying stage & account scores\nSignal-driven risk flags\nIn-market timing data',
     pull:'Pipeline forecast data\nRep activity signals\nDeal health scores',
-    status:'evaluating'
-  },
-  {
-    id:'sls', name:'Salesloft / SEP',
+    status:'evaluating' },
+  { id:'sls', name:'Salesloft / SEP',
     push:'Prioritized account lists\nBuying group contacts\nPersonalization signals & keywords',
     pull:'Sequence enrollment & status\nEmail & call engagement\nCadence performance data',
-    status:'funded'
-  },
-  {
-    id:'gs', name:'Gainsight / CS',
+    status:'funded' },
+  { id:'gs', name:'Gainsight / CS',
     push:'Expansion signals & whitespace\nChampion job change alerts\nCompetitor research signals',
     pull:'Health scores & usage data\nRenewal risk flags\nCSM activity & engagement',
-    status:'not-started'
-  },
+    status:'not-started' },
 ];
 
 var state = { cols: [] };
@@ -3843,67 +3831,72 @@ function resetAll() {
   render();
 }
 
-function render() {
-  var wrap = document.getElementById('pp-matrix-wrap');
-  if (!wrap) return;
-
-  var html = '';
-
-  // Row labels (fixed left column)
-  html += '<div style="display:flex;flex-direction:column;gap:.4em;width:5.8em;flex-shrink:0;">';
-  html += '<div style="height:2.2em;flex-shrink:0"></div>';
-  html += '<div style="display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.62em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#5EEAD4;flex:1;">PUSH</div>';
-  html += '<div style="display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.62em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#FBBF24;flex:1;">PULL</div>';
-  html += '<div style="height:2em;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.56em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.3)">FY27</div>';
-  html += '</div>';
-
-  // Scrollable columns area
-  html += '<div style="flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;display:flex;flex-direction:row;gap:.4em;">';
-
-  state.cols.forEach(function(col) {
-    var sid = CSS.escape ? CSS.escape(col.id) : col.id;
-    html += '<div class="pp-col" style="width:13em;flex-shrink:0;display:flex;flex-direction:column;gap:.4em;height:100%;">';
-
-    // Header
-    html += '<div class="pp-col-hdr" style="height:2.2em;background:#111E33;border:1px solid rgba(255,255,255,.1);border-radius:.5em;display:flex;align-items:center;justify-content:space-between;padding:0 .7em;flex-shrink:0;">';
-    html += '<span class="pp-col-nm" style="font-size:.73em;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">' + escH(col.name) + '</span>';
-    html += '<button class="pp-del-btn" onclick="PP.deleteCol('' + col.id + '')" title="Remove" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.9em;flex-shrink:0;padding:0 .15em;transition:color .12s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(255,255,255,.3)'">✕</button>';
-    html += '</div>';
-
-    // Push cell
-    html += '<div class="pp-cell push-cell" style="flex:1;min-height:0;background:#111E33;border:1px solid rgba(255,255,255,.1);border-top:2px solid rgba(94,234,212,.3);border-radius:.45em;overflow:hidden;">';
-    html += '<textarea placeholder="What 6sense pushes to this system…" oninput="PP.saveCell('' + col.id + '','push',this.value)" style="width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:'DM Sans',sans-serif;font-size:.68em;color:rgba(255,255,255,.9);padding:.6em .7em;line-height:1.55;box-sizing:border-box;">' + escH(col.push) + '</textarea>';
-    html += '</div>';
-
-    // Pull cell
-    html += '<div class="pp-cell pull-cell" style="flex:1;min-height:0;background:#111E33;border:1px solid rgba(255,255,255,.1);border-top:2px solid rgba(251,191,36,.25);border-radius:.45em;overflow:hidden;">';
-    html += '<textarea placeholder="What 6sense pulls from this system…" oninput="PP.saveCell('' + col.id + '','pull',this.value)" style="width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:'DM Sans',sans-serif;font-size:.68em;color:rgba(255,255,255,.9);padding:.6em .7em;line-height:1.55;box-sizing:border-box;">' + escH(col.pull) + '</textarea>';
-    html += '</div>';
-
-    // Status
-    var sc = col.status || 'not-started';
-    var statusStyle = statusCSS(sc);
-    html += '<div class="pp-status-cell ' + sc + '" onclick="PP.cycleStatus('' + col.id + '')" style="' + statusStyle + 'height:2em;border-radius:.4em;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.63em;font-weight:700;letter-spacing:.04em;border:1px solid transparent;flex-shrink:0;user-select:none;">';
-    html += STATUS_LABELS[sc];
-    html += '</div>';
-
-    html += '</div>'; // end col
-  });
-
-  // Add column button
-  html += '<div style="width:13em;flex-shrink:0;display:flex;flex-direction:column;gap:.4em;height:100%;">';
-  html += '<button onclick="PP.openModal()" style="height:2.2em;background:transparent;border:1.5px dashed rgba(255,255,255,.18);border-radius:.5em;color:rgba(255,255,255,.35);font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;cursor:pointer;transition:all .13s;white-space:nowrap;" onmouseover="this.style.borderColor='#5EEAD4';this.style.color='#5EEAD4';this.style.background='rgba(94,234,212,.08)'" onmouseout="this.style.borderColor='rgba(255,255,255,.18)';this.style.color='rgba(255,255,255,.35)';this.style.background='transparent'">+ Add System</button>';
-  html += '</div>';
-
-  html += '</div>'; // end scrollable columns
-
-  wrap.innerHTML = html;
+function escH(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function statusCSS(sc) {
-  if (sc === 'funded')      return 'background:rgba(5,150,105,.18);border-color:rgba(5,150,105,.4)!important;color:#34D399;';
-  if (sc === 'evaluating')  return 'background:rgba(217,119,6,.18);border-color:rgba(217,119,6,.4)!important;color:#FCD34D;';
-  return 'background:rgba(51,65,85,.25);border-color:rgba(51,65,85,.45)!important;color:rgba(255,255,255,.28);';
+  if (sc === 'funded')     return 'background:rgba(5,150,105,.18);border-color:rgba(5,150,105,.5);color:#34D399;';
+  if (sc === 'evaluating') return 'background:rgba(217,119,6,.18);border-color:rgba(217,119,6,.5);color:#FCD34D;';
+  return 'background:rgba(51,65,85,.25);border-color:rgba(51,65,85,.5);color:rgba(255,255,255,.28);';
+}
+
+function render() {
+  var wrap = document.getElementById('pp-matrix-wrap');
+  if (!wrap) { console.error('PP: pp-matrix-wrap not found'); return; }
+
+  var parts = [];
+
+  // ── Row label sidebar ──
+  parts.push('<div style="display:flex;flex-direction:column;gap:.4em;width:5.8em;flex-shrink:0;">');
+  parts.push('<div style="height:2.2em;flex-shrink:0;"></div>');
+  parts.push('<div style="flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.6em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#5EEAD4;">PUSH</div>');
+  parts.push('<div style="flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.6em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#FBBF24;">PULL</div>');
+  parts.push('<div style="height:2em;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.55em;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.25);">FY27</div>');
+  parts.push('</div>');
+
+  // ── Scrollable columns ──
+  parts.push('<div style="flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;display:flex;flex-direction:row;gap:.4em;">');
+
+  state.cols.forEach(function(col) {
+    var cid = col.id;
+    parts.push('<div style="width:13em;flex-shrink:0;display:flex;flex-direction:column;gap:.4em;height:100%;">');
+
+    // Header
+    parts.push('<div style="height:2.2em;background:#111E33;border:1px solid rgba(255,255,255,.12);border-radius:.5em;display:flex;align-items:center;justify-content:space-between;padding:0 .65em;flex-shrink:0;">');
+    parts.push('<span style="font-size:.72em;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">' + escH(col.name) + '</span>');
+    parts.push('<button onclick="PP.deleteCol(\'' + cid + '\')" title="Remove" style="background:none;border:none;color:rgba(255,255,255,.25);cursor:pointer;font-size:.85em;padding:0 .1em;line-height:1;" onmouseover="this.style.color=\'#f87171\'" onmouseout="this.style.color=\'rgba(255,255,255,.25)\'">✕</button>');
+    parts.push('</div>');
+
+    // Push cell
+    parts.push('<div style="flex:1;min-height:0;background:#111E33;border:1px solid rgba(255,255,255,.1);border-top:2px solid rgba(94,234,212,.35);border-radius:.45em;overflow:hidden;">');
+    parts.push('<textarea oninput="PP.saveCell(\'' + cid + '\',\'push\',this.value)" placeholder="What 6sense pushes to this system…" style="width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:\'DM Sans\',sans-serif;font-size:.68em;color:rgba(255,255,255,.88);padding:.6em .7em;line-height:1.55;box-sizing:border-box;">');
+    parts.push(escH(col.push));
+    parts.push('</textarea></div>');
+
+    // Pull cell
+    parts.push('<div style="flex:1;min-height:0;background:#111E33;border:1px solid rgba(255,255,255,.1);border-top:2px solid rgba(251,191,36,.3);border-radius:.45em;overflow:hidden;">');
+    parts.push('<textarea oninput="PP.saveCell(\'' + cid + '\',\'pull\',this.value)" placeholder="What 6sense pulls from this system…" style="width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:\'DM Sans\',sans-serif;font-size:.68em;color:rgba(255,255,255,.88);padding:.6em .7em;line-height:1.55;box-sizing:border-box;">');
+    parts.push(escH(col.pull));
+    parts.push('</textarea></div>');
+
+    // Status badge
+    var sc = col.status || 'not-started';
+    parts.push('<div onclick="PP.cycleStatus(\'' + cid + '\')" style="' + statusCSS(sc) + 'height:2em;border-radius:.4em;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.62em;font-weight:700;letter-spacing:.03em;border:1px solid transparent;flex-shrink:0;user-select:none;">');
+    parts.push(STATUS_LABELS[sc]);
+    parts.push('</div>');
+
+    parts.push('</div>'); // end col
+  });
+
+  // Add column button
+  parts.push('<div style="width:13em;flex-shrink:0;display:flex;flex-direction:column;gap:.4em;height:100%;">');
+  parts.push('<button onclick="PP.openModal()" style="height:2.2em;background:transparent;border:1.5px dashed rgba(255,255,255,.18);border-radius:.5em;color:rgba(255,255,255,.35);font-family:\'DM Sans\',sans-serif;font-size:.7em;font-weight:500;cursor:pointer;white-space:nowrap;" onmouseover="this.style.borderColor=\'#5EEAD4\';this.style.color=\'#5EEAD4\';this.style.background=\'rgba(94,234,212,.08)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.18)\';this.style.color=\'rgba(255,255,255,.35)\';this.style.background=\'transparent\'">+ Add System</button>');
+  parts.push('</div>');
+
+  parts.push('</div>'); // end scrollable
+
+  wrap.innerHTML = parts.join('');
 }
 
 function saveCell(colId, field, val) {
@@ -3930,7 +3923,7 @@ function openModal() {
   var overlay = document.getElementById('pp-modal');
   var inp = document.getElementById('pp-modal-inp');
   if (overlay) overlay.classList.add('open');
-  if (inp) { inp.value = ''; inp.focus(); }
+  if (inp) { inp.value = ''; setTimeout(function(){ inp.focus(); }, 50); }
 }
 
 function closeModal() {
@@ -3949,71 +3942,34 @@ function confirmAdd() {
   render();
 }
 
-function escH(str) {
-  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
 function exportPPT() {
   if (typeof PptxGenJS === 'undefined') { alert('PptxGenJS not loaded'); return; }
   var pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_WIDE';
-
   state.cols.forEach(function(col) {
     var slide = pptx.addSlide();
     slide.background = { color: '0B1628' };
-
-    // Title
-    slide.addText(col.name, {
-      x:0.4, y:0.2, w:12, h:0.5,
-      fontSize:22, bold:true, color:'FFFFFF',
-      fontFace:'DM Serif Display'
-    });
-
-    // Status badge
+    slide.addText(col.name, { x:0.4, y:0.2, w:9, h:0.5, fontSize:22, bold:true, color:'FFFFFF', fontFace:'DM Serif Display' });
     var sc = col.status || 'not-started';
-    var badgeColor = sc==='funded' ? '059669' : sc==='evaluating' ? 'D97706' : '334155';
-    var badgeText = STATUS_LABELS[sc].replace(/[✓⟳—]\s/,'');
-    slide.addText(badgeText, {
-      x:10.5, y:0.25, w:2.5, h:0.4,
-      fontSize:10, bold:true, color:'FFFFFF',
-      fill:{ color:badgeColor }, align:'center',
-      rectRadius:0.05
-    });
-
-    // Push section
-    slide.addText('PUSH  →  6sense sends out', {
-      x:0.4, y:0.9, w:5.8, h:0.3,
-      fontSize:9, bold:true, color:'5EEAD4'
-    });
-    slide.addText(col.push || '', {
-      x:0.4, y:1.25, w:5.8, h:4.8,
-      fontSize:11, color:'E2F8F4', valign:'top', wrap:true, lineSpacingMultiple:1.4
-    });
-
-    // Pull section
-    slide.addText('PULL  →  6sense receives', {
-      x:6.8, y:0.9, w:5.8, h:0.3,
-      fontSize:9, bold:true, color:'FBBF24'
-    });
-    slide.addText(col.pull || '', {
-      x:6.8, y:1.25, w:5.8, h:4.8,
-      fontSize:11, color:'FEF3C7', valign:'top', wrap:true, lineSpacingMultiple:1.4
-    });
+    var bc = sc==='funded' ? '059669' : sc==='evaluating' ? 'D97706' : '334155';
+    slide.addText(STATUS_LABELS[sc].replace(/[✓⟳—]\s/,''), { x:10.5, y:0.25, w:2.5, h:0.4, fontSize:10, bold:true, color:'FFFFFF', fill:{ color:bc }, align:'center', rectRadius:0.05 });
+    slide.addText('PUSH  →  6sense sends out', { x:0.4, y:0.9, w:5.8, h:0.3, fontSize:9, bold:true, color:'5EEAD4' });
+    slide.addText(col.push || '', { x:0.4, y:1.25, w:5.8, h:4.8, fontSize:11, color:'E2F8F4', valign:'top', wrap:true, lineSpacingMultiple:1.4 });
+    slide.addText('PULL  →  6sense receives', { x:6.8, y:0.9, w:5.8, h:0.3, fontSize:9, bold:true, color:'FBBF24' });
+    slide.addText(col.pull || '', { x:6.8, y:1.25, w:5.8, h:4.8, fontSize:11, color:'FEF3C7', valign:'top', wrap:true, lineSpacingMultiple:1.4 });
   });
-
   pptx.writeFile({ fileName:'PushPull_Matrix_FY27.pptx' });
 }
 
-// Handle Enter in modal
 document.addEventListener('keydown', function(e) {
   var overlay = document.getElementById('pp-modal');
   if (overlay && overlay.classList.contains('open')) {
-    if (e.key === 'Enter') confirmAdd();
+    if (e.key === 'Enter') { e.preventDefault(); confirmAdd(); }
     if (e.key === 'Escape') closeModal();
   }
 });
 
-return { initState, render, saveCell, cycleStatus, deleteCol, openModal, closeModal, confirmAdd, resetAll, exportPPT };
+return { initState:initState, render:render, saveCell:saveCell, cycleStatus:cycleStatus, deleteCol:deleteCol, openModal:openModal, closeModal:closeModal, confirmAdd:confirmAdd, resetAll:resetAll, exportPPT:exportPPT };
 
 })();
 
