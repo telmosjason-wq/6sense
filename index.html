@@ -1642,6 +1642,52 @@ function saveNote(v) {
   persist();
 }
 
+function render() {
+  var done = step >= TOTAL;
+  document.getElementById('done').style.display = done ? 'flex' : 'none';
+  if (done) { renderDone(); updateTopbar(); return; }
+  var pi = STEPS[step].pi;
+  var p = PERSONAS[pi];
+  renderTopbar();
+  renderPH();
+  if (matrixView[p.id]) {
+    document.getElementById('main').style.display = 'none';
+    var footerEl = document.getElementById('footer');
+    footerEl.style.display = 'flex';
+    footerEl.style.padding = '.3em .6em';
+    footerEl.style.background = '#fff';
+    footerEl.style.borderTop = '1px solid #E2E8F0';
+    var mxEl = document.getElementById('matrix-main');
+    if (!mxEl) {
+      mxEl = document.createElement('div');
+      mxEl.id = 'matrix-main';
+      document.getElementById('slide').insertBefore(mxEl, footerEl);
+    }
+    mxEl.style.cssText = 'overflow:auto;min-height:0;background:#F1F5F9;';
+    mxEl.style.display = 'block';
+    renderMatrix(p.id);
+  } else {
+    var mxEl2 = document.getElementById('matrix-main');
+    if (mxEl2) mxEl2.style.display = 'none';
+    document.getElementById('main').style.display = 'grid';
+    var footerEl2 = document.getElementById('footer');
+    if (!document.getElementById('crumb-track')) {
+      footerEl2.innerHTML = '<div class="crumb-track" id="crumb-track"></div>' +
+        '<div class="foot-btns">' +
+          '<button class="nbtn" id="btn-back" onclick="SI.navigate(-1)">&#8592; Back</button>' +
+          '<button class="nbtn pri" id="btn-next" onclick="SI.navigate(1)">Next &#8594;</button>' +
+        '</div>';
+    }
+    footerEl2.style.cssText = '';
+    document.getElementById('footer').style.display = 'flex';
+    renderLeft();
+    renderGrid();
+    renderAssess();
+    renderFooter();
+    document.getElementById('notes-inp').value = curS().notes;
+  }
+}
+
 function updateTopbar() {
   document.getElementById('tb-pct').textContent = Math.round(rated()/TOTAL*100)+'%';
 }
