@@ -1587,7 +1587,12 @@ function pRated(pi) {
 // ── ACTIONS ──────────────────────────────────────────────────────────────────
 function goToPersona(pi) {
   var firstStep = STEPS.findIndex(function(s){ return s.pi === pi; });
-  if (firstStep >= 0) { step = firstStep; render(); }
+  if (firstStep >= 0) {
+    step = firstStep;
+    // Stay in matrix view when navigating between personas
+    matrixView[PERSONAS[pi].id] = true;
+    render();
+  }
 }
 
 function navigate(dir) { step = Math.max(0,Math.min(TOTAL,step+dir)); render(); }
