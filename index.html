@@ -1619,19 +1619,42 @@ function render() {
   renderPH();
   if (matrixView[p.id]) {
     document.getElementById('main').style.display = 'none';
-    document.getElementById('footer').style.display = 'none';
+    // Switch slide to flex-column so footer stays visible below table
+    var slideEl = document.getElementById('slide');
+    slideEl.style.display = 'flex';
+    slideEl.style.flexDirection = 'column';
+    slideEl.style.height = 'auto';
+    slideEl.style.minHeight = '100%';
+    slideEl.style.aspectRatio = 'unset';
+    slideEl.style.overflow = 'visible';
+    // Show footer (persona tabs)
+    var footerEl = document.getElementById('footer');
+    footerEl.style.display = 'flex';
+    footerEl.style.flexShrink = '0';
+    footerEl.style.padding = '.4em .8em';
+    footerEl.style.borderTop = '1px solid #E2E8F0';
+    footerEl.style.background = '#fff';
+    // Create/update matrix container
     var mxEl = document.getElementById('matrix-main');
     if (!mxEl) {
       mxEl = document.createElement('div');
       mxEl.id = 'matrix-main';
-      mxEl.style.cssText = 'flex:1;overflow:hidden;min-height:0;';
-      document.getElementById('slide').insertBefore(mxEl, document.getElementById('footer'));
+      slideEl.insertBefore(mxEl, footerEl);
     }
+    mxEl.style.cssText = 'flex:1;overflow:auto;min-height:0;';
     mxEl.style.display = 'block';
     renderMatrix(p.id);
   } else {
     var mxEl2 = document.getElementById('matrix-main');
     if (mxEl2) mxEl2.style.display = 'none';
+    // Restore slide to original grid layout
+    var slideEl2 = document.getElementById('slide');
+    slideEl2.style.display = '';
+    slideEl2.style.flexDirection = '';
+    slideEl2.style.height = '';
+    slideEl2.style.minHeight = '';
+    slideEl2.style.aspectRatio = '';
+    slideEl2.style.overflow = '';
     document.getElementById('main').style.display = 'grid';
     document.getElementById('footer').style.display = 'flex';
     renderLeft();
@@ -1888,7 +1911,7 @@ function renderMatrix(personaId) {
 
   var el = document.getElementById('matrix-main');
   if (el) {
-    el.innerHTML = '<div style="overflow:auto;height:calc(100% - 2em);padding:.5em .8em;">' +
+    el.innerHTML = '<div style="overflow:auto;padding:.5em .8em;">' +
       '<table style="border-collapse:collapse;width:100%;font-family:inherit;">' +
         '<thead><tr>' + hdrCells + '</tr></thead>' +
         '<tbody>' + bodyRows + '</tbody>' +
