@@ -775,12 +775,13 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 /* ── MATRIX AREA ── */
 #app-int2 .pp-matrix-wrap {
   flex: 1;
+  min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   padding: 1.2% 1.8%;
-  gap: .6em;
+  gap: .4em;
 }
 #app-int2 .pp-grid {
   display: grid;
@@ -1258,8 +1259,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 
 <!-- ══ PUSH / PULL MATRIX SESSION ══ -->
 <div id="app-int2" class="app-screen" style="display:none">
-  <div class="frame">
-  <div style="position:relative;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden">
+  <div style="width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative">
 
     <!-- Topbar -->
     <div class="pp-topbar">
@@ -1300,7 +1300,6 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
       </div>
     </div>
 
-  </div>
   </div>
 </div>
 
@@ -3848,18 +3847,18 @@ function render() {
   var wrap = document.getElementById('pp-matrix-wrap');
   if (!wrap) return;
 
-  var html = '<div style="display:flex;flex-direction:row;height:100%;gap:.4em;">';
+  var html = '';
 
-  // Row labels
-  html += '<div style="display:flex;flex-direction:column;gap:.4em;width:5.8em;flex-shrink:0;padding-top:0;">';
-  html += '<div style="height:2.2em;flex-shrink:0"></div>'; // header spacer
-  html += '<div class="pp-row-lbl push" style="display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.62em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#5EEAD4;flex:1">PUSH</div>';
-  html += '<div class="pp-row-lbl pull" style="display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.62em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#FBBF24;flex:1">PULL</div>';
+  // Row labels (fixed left column)
+  html += '<div style="display:flex;flex-direction:column;gap:.4em;width:5.8em;flex-shrink:0;">';
+  html += '<div style="height:2.2em;flex-shrink:0"></div>';
+  html += '<div style="display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.62em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#5EEAD4;flex:1;">PUSH</div>';
+  html += '<div style="display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.62em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#FBBF24;flex:1;">PULL</div>';
   html += '<div style="height:2em;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding-right:.7em;font-size:.56em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.3)">FY27</div>';
   html += '</div>';
 
   // Scrollable columns area
-  html += '<div style="flex:1;overflow-x:auto;overflow-y:hidden;display:flex;flex-direction:row;gap:.4em;min-width:0;">';
+  html += '<div style="flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;display:flex;flex-direction:row;gap:.4em;">';
 
   state.cols.forEach(function(col) {
     var sid = CSS.escape ? CSS.escape(col.id) : col.id;
@@ -3896,8 +3895,7 @@ function render() {
   html += '<button onclick="PP.openModal()" style="height:2.2em;background:transparent;border:1.5px dashed rgba(255,255,255,.18);border-radius:.5em;color:rgba(255,255,255,.35);font-family:'DM Sans',sans-serif;font-size:.7em;font-weight:500;cursor:pointer;transition:all .13s;white-space:nowrap;" onmouseover="this.style.borderColor='#5EEAD4';this.style.color='#5EEAD4';this.style.background='rgba(94,234,212,.08)'" onmouseout="this.style.borderColor='rgba(255,255,255,.18)';this.style.color='rgba(255,255,255,.35)';this.style.background='transparent'">+ Add System</button>';
   html += '</div>';
 
-  html += '</div>'; // end scrollable
-  html += '</div>'; // end outer row
+  html += '</div>'; // end scrollable columns
 
   wrap.innerHTML = html;
 }
