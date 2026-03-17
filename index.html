@@ -1564,6 +1564,33 @@ function initState() {
   });
 }
 
+const STORAGE_KEY = 'si_session_v1';
+
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(S));
+  } catch(e) {}
+}
+
+function loadSaved() {
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return false;
+    var parsed = JSON.parse(saved);
+    // Merge saved into S — only overwrite keys that exist in current schema
+    PERSONAS.forEach(function(p) {
+      if (parsed[p.id]) {
+        p.useCases.forEach(function(uc) {
+          if (parsed[p.id][uc.id]) {
+            S[p.id][uc.id] = parsed[p.id][uc.id];
+          }
+        });
+      }
+    });
+    return true;
+  } catch(e) { return false; }
+}
+
 function curS() {
   const {pi,ui} = STEPS[step];
   return S[PERSONAS[pi].id][PERSONAS[pi].useCases[ui].id];
@@ -1600,70 +1627,19 @@ function navigate(dir) { step = Math.max(0,Math.min(TOTAL,step+dir)); render(); 
 function goTo(s) { step = Math.max(0,Math.min(TOTAL,s)); render(); }
 function resetAll() { if(!confirm('Reset all data?')) return; initState(); step=0; render(); }
 
-function selectTier(cid, tid) {
-  const s = curS();
-  s.comp[cid] = s.comp[cid]===tid ? null : tid;
-  renderGrid();
-  updateMeta();
+function selectTier(cId, tId) {
+  curS().comp[cId] = (curS().comp[cId]===tId) ? null : tId;
+  render();
+  persist();
 }
-function selectAssess(aid) {
-  const s = curS();
-  s.assess = s.assess===aid ? null : aid;
+function selectAssess(aId) {
+  curS().assess = (curS().assess===aId) ? null : aId;
   renderAssess();
-  updateMeta();
+  persist();
 }
-function saveNote(v) { curS().notes = v; }
-
-// ── RENDER ───────────────────────────────────────────────────────────────────
-function render() {
-  var done = step >= TOTAL;
-  document.getElementById('done').style.display = done ? 'flex' : 'none';
-  if (done) { renderDone(); updateTopbar(); return; }
-  var pi = STEPS[step].pi;
-  var p = PERSONAS[pi];
-  renderTopbar();
-  renderPH();
-  if (matrixView[p.id]) {
-    // Hide step-through main, keep slide grid intact
-    document.getElementById('main').style.display = 'none';
-    // Ensure footer shows persona tabs
-    var footerEl = document.getElementById('footer');
-    footerEl.style.display = 'flex';
-    footerEl.style.padding = '.3em .6em';
-    footerEl.style.background = '#fff';
-    footerEl.style.borderTop = '1px solid #E2E8F0';
-    // Create matrix-main in grid row 3 (same slot as .main)
-    var mxEl = document.getElementById('matrix-main');
-    if (!mxEl) {
-      mxEl = document.createElement('div');
-      mxEl.id = 'matrix-main';
-      // Insert before footer so it lands in the 1fr grid row
-      document.getElementById('slide').insertBefore(mxEl, footerEl);
-    }
-    mxEl.style.cssText = 'overflow:auto;min-height:0;background:#F1F5F9;';
-    mxEl.style.display = 'block';
-    renderMatrix(p.id);
-  } else {
-    var mxEl2 = document.getElementById('matrix-main');
-    if (mxEl2) mxEl2.style.display = 'none';
-    document.getElementById('main').style.display = 'grid';
-    // Restore footer HTML if matrix view replaced it
-    var footerEl2 = document.getElementById('footer');
-    if (!document.getElementById('crumb-track')) {
-      footerEl2.innerHTML = '<div class="crumb-track" id="crumb-track"></div>' +
-        '<div class="foot-btns">' +
-          '<button class="nbtn" id="btn-back" onclick="SI.navigate(-1)">&#8592; Back</button>' +
-          '<button class="nbtn pri" id="btn-next" onclick="SI.navigate(1)">Next &#8594;</button>' +
-        '</div>';
-    }
-    footerEl2.style.cssText = '';
-    document.getElementById('footer').style.display = 'flex';
-    renderLeft();
-    renderGrid();
-    renderAssess();
-    renderFooter();
-    document.getElementById('notes-inp').value = curS().notes;
-  }
+function saveNote(v) {
+  curS().notes = v;
+  persist();
 }
 
 function updateTopbar() {
@@ -1859,6 +1835,7 @@ function toggleMatrix(personaId) {
 function matrixSelectTier(personaId, ucId, compId) {
   S[personaId][ucId].comp[compId] = cycleTier(S[personaId][ucId].comp[compId]);
   renderMatrix(personaId);
+  persist();
 }
 
 function matrixSelectAssess(personaId, ucId, val) {
@@ -1869,6 +1846,7 @@ function matrixSelectAssess(personaId, ucId, val) {
   var r2 = pRated(pi), t2 = PERSONAS[pi].useCases.length;
   document.getElementById('ph-prog-lbl').textContent = r2 + ' / ' + t2 + ' rated';
   document.getElementById('ph-prog-fill').style.width = Math.round(r2/t2*100) + '%';
+  persist();
 }
 
 function renderMatrix(personaId) {
@@ -2324,7 +2302,17 @@ async function exportPPT() {
 
 // boot
 initState();
+var hadSaved = loadSaved();
 render();
+if (hadSaved) {
+  // small toast to confirm data was restored
+  var toast = document.createElement('div');
+  toast.textContent = '✓ Previous session restored';
+  toast.style.cssText = 'position:fixed;bottom:1.2em;left:50%;transform:translateX(-50%);background:#0D9488;color:#fff;padding:.4em 1.2em;border-radius:2em;font-size:13px;font-weight:600;z-index:9999;opacity:1;transition:opacity 1s;pointer-events:none;font-family:inherit;';
+  document.body.appendChild(toast);
+  setTimeout(function(){ toast.style.opacity='0'; }, 2200);
+  setTimeout(function(){ toast.remove(); }, 3300);
+}
 
 
   // Public API
