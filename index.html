@@ -779,6 +779,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
   min-height:0;
   display:flex;
   flex-direction:row;
+  align-items:stretch;
   padding:1.2% 1.8%;
   gap:.5em;
   overflow-x:auto;
@@ -792,10 +793,12 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
   gap:.5em;
   width:5em;
   flex-shrink:0;
+  align-self:stretch;
 }
 #app-int2 .pp-lbl-spacer { height:2.6em;flex-shrink:0 }
 #app-int2 .pp-lbl {
   flex:1;
+  min-height:0;
   display:flex;
   align-items:center;
   justify-content:flex-end;
@@ -826,6 +829,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 #app-int2 .pp-cols-scroll {
   flex:1;
   min-width:0;
+  align-self:stretch;
   display:flex;
   flex-direction:row;
   gap:.5em;
@@ -840,7 +844,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
   display:flex;
   flex-direction:column;
   gap:.5em;
-  height:100%;
+  align-self:stretch;
 }
 
 /* Column header */
@@ -929,7 +933,7 @@ html, body {width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-se
 /* Add col button */
 #app-int2 .pp-add-col {
   width:14em;flex-shrink:0;
-  display:flex;flex-direction:column;height:100%;
+  display:flex;flex-direction:column;align-self:flex-start;
 }
 #app-int2 .pp-add-btn {
   height:2.6em;background:transparent;
