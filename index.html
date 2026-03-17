@@ -1417,37 +1417,24 @@ function render() {
   var done = step >= TOTAL;
   document.getElementById('done').style.display = done ? 'flex' : 'none';
   if (done) { renderDone(); updateTopbar(); return; }
-  var pi = STEPS[step].pi, p = PERSONAS[pi];
+  var pi = STEPS[step].pi;
+  var p  = PERSONAS[pi];
   renderTopbar();
   renderPH();
-  if (matrixView[p.id]) {
-    document.getElementById('main').style.display = 'none';
-    var fe = document.getElementById('footer');
-    fe.style.cssText = 'display:flex;padding:.3em .6em;background:#fff;border-top:1px solid #E2E8F0;';
-    var mx = document.getElementById('matrix-main');
-    if (!mx) {
-      mx = document.createElement('div'); mx.id = 'matrix-main';
-      document.getElementById('slide').insertBefore(mx, fe);
-    }
-    mx.style.cssText = 'overflow:auto;min-height:0;background:#F1F5F9;display:block;';
-    renderMatrix(p.id);
-  } else {
-    var mx2 = document.getElementById('matrix-main');
-    if (mx2) mx2.style.display = 'none';
-    document.getElementById('main').style.display = 'grid';
-    var fe2 = document.getElementById('footer');
-    if (!document.getElementById('crumb-track')) {
-      fe2.innerHTML = '<div class="crumb-track" id="crumb-track"></div>'+
-        '<div class="foot-btns">'+
-          '<button class="nbtn" id="btn-back" onclick="SI.navigate(-1)">&#8592; Back</button>'+
-          '<button class="nbtn pri" id="btn-next" onclick="SI.navigate(1)">Next &#8594;</button>'+
-        '</div>';
-    }
-    fe2.style.cssText = 'display:flex;';
-    renderLeft(); renderGrid(); renderAssess(); renderFooter();
-    document.getElementById('notes-inp').value = curS().notes;
+  // Always matrix view — step-through removed
+  document.getElementById('main').style.display = 'none';
+  var fe = document.getElementById('footer');
+  fe.style.cssText = 'display:flex;padding:.3em .6em;background:#fff;border-top:1px solid #E2E8F0;';
+  var mx = document.getElementById('matrix-main');
+  if (!mx) {
+    mx = document.createElement('div');
+    mx.id = 'matrix-main';
+    document.getElementById('slide').insertBefore(mx, fe);
   }
+  mx.style.cssText = 'overflow:auto;min-height:0;background:#F1F5F9;display:block;';
+  renderMatrix(p.id);
 }
+
 
 function updateTopbar() {
   document.getElementById('tb-pct').textContent = Math.round(rated()/TOTAL*100)+'%';
@@ -1460,60 +1447,69 @@ function renderTopbar() {
 }
 
 function renderPH() {
-  var pi = STEPS[step].pi, p = PERSONAS[pi];
-  var r = pRated(pi), t = p.useCases.length;
-  document.getElementById('ph-ey').textContent   = 'Persona '+(pi+1)+' of '+PERSONAS.length;
-  document.getElementById('ph-nm').textContent   = p.name;
-  document.getElementById('ph-jt').textContent   = p.jtbd;
+  var pi = STEPS[step].pi;
+  var p  = PERSONAS[pi];
+  var r  = pRated(pi), t = p.useCases.length;
+  document.getElementById('ph-ey').textContent  = 'Persona ' + (pi+1) + ' of ' + PERSONAS.length;
+  document.getElementById('ph-nm').textContent  = p.name;
+  document.getElementById('ph-jt').textContent  = p.jtbd;
   document.getElementById('ph-badge').textContent = p.badge;
-  document.getElementById('ph-prog-lbl').textContent = r+' / '+t+' rated';
-  document.getElementById('ph-prog-fill').style.width = Math.round(r/t*100)+'%';
-  var isMatrix = !!matrixView[p.id];
-  var tel = document.getElementById('ph-view-toggle');
-  if (tel) {
-    var btn = document.createElement('div');
-    btn.dataset.pid = p.id;
-    btn.onclick = function(){ SI.toggleMatrix(this.dataset.pid); };
-    btn.innerHTML = isMatrix ? '&#8801; Step-through' : '&#8862; Matrix view';
-    btn.style.cssText = 'display:flex;align-items:center;gap:.35em;cursor:pointer;font-size:.6em;font-weight:600;padding:.28em .75em;border-radius:2em;border:1.5px solid '+(isMatrix?'var(--teal)':'#E2E8F0')+';background:'+(isMatrix?'#CCFBF1':'#fff')+';color:'+(isMatrix?'var(--teal)':'#64748B')+';user-select:none;';
-    tel.innerHTML = ''; tel.appendChild(btn);
-  }
-  if (isMatrix) {
-    var fe = document.getElementById('footer');
-    fe.style.display = 'flex'; fe.innerHTML = '';
-    var tabs = document.createElement('div');
-    tabs.style.cssText = 'flex:1;display:flex;align-items:center;gap:.4em;overflow-x:auto;';
-    PERSONAS.forEach(function(per, i) {
-      var cur = per.id === p.id;
-      var pr2 = pRated(i), pt2 = per.useCases.length;
-      var tab = document.createElement('div');
-      tab.dataset.pi = i;
-      tab.onclick = function(){ SI.goToPersona(parseInt(this.dataset.pi)); };
-      tab.style.cssText = 'display:flex;align-items:center;gap:.3em;padding:.32em .75em;border-radius:.4em;border:1.5px solid '+(cur?'var(--navy)':'#E2E8F0')+';background:'+(cur?'var(--navy)':'#fff')+';color:'+(cur?'#fff':'#64748B')+';font-size:.62em;font-weight:'+(cur?700:500)+';cursor:pointer;white-space:nowrap;flex-shrink:0;';
-      tab.textContent = per.badge;
-      if (pr2 > 0) {
-        var bg = document.createElement('span');
-        bg.textContent = pr2+'/'+pt2;
-        bg.style.cssText = 'background:'+(cur?'rgba(255,255,255,.2)':'#CCFBF1')+';color:'+(cur?'#fff':'var(--teal)')+';padding:0 .35em;border-radius:1em;font-size:.9em;';
-        tab.appendChild(bg);
-      }
-      tabs.appendChild(tab);
-    });
-    fe.appendChild(tabs);
-    var hint = document.createElement('div');
-    hint.style.cssText = 'flex-shrink:0;font-size:.58em;color:#64748B;padding:0 .6em;';
-    hint.innerHTML = 'Click Harvey Balls &middot; Dropdown for assessment';
-    fe.appendChild(hint);
-    var bb = document.createElement('button'); bb.className='nbtn'; bb.innerHTML='&#8592; Back';
-    bb.onclick = function(){ var npi=PERSONAS.findIndex(function(x){return x.id===p.id;}); if(npi>0) SI.goToPersona(npi-1); };
-    var nb = document.createElement('button'); nb.className='nbtn pri';
-    var cpi = PERSONAS.findIndex(function(x){return x.id===p.id;});
-    nb.innerHTML = cpi>=PERSONAS.length-1?'Done &#8594;':'Next &#8594;';
-    nb.onclick = function(){ var npi=PERSONAS.findIndex(function(x){return x.id===p.id;}); if(npi<PERSONAS.length-1) SI.goToPersona(npi+1); };
-    var fb = document.createElement('div'); fb.className='foot-btns';
-    fb.appendChild(bb); fb.appendChild(nb); fe.appendChild(fb);
-  }
+  document.getElementById('ph-prog-lbl').textContent = r + ' / ' + t + ' rated';
+  document.getElementById('ph-prog-fill').style.width = Math.round(r/t*100) + '%';
+
+  // Persona tabs + Back/Next in footer
+  var fe = document.getElementById('footer');
+  if (!fe) return;
+  fe.style.display = 'flex';
+  fe.innerHTML = '';
+  var tabsDiv = document.createElement('div');
+  tabsDiv.style.cssText = 'flex:1;display:flex;align-items:center;gap:.4em;overflow-x:auto;';
+  PERSONAS.forEach(function(per, i) {
+    var cur = per.id === p.id;
+    var pr2 = pRated(i), pt2 = per.useCases.length;
+    var tab = document.createElement('div');
+    tab.dataset.pi = i;
+    tab.onclick = function() { SI.goToPersona(parseInt(this.dataset.pi)); };
+    tab.style.cssText = 'display:flex;align-items:center;gap:.3em;padding:.32em .75em;border-radius:.4em;' +
+      'border:1.5px solid ' + (cur?'var(--navy)':'#E2E8F0') + ';' +
+      'background:' + (cur?'var(--navy)':'#fff') + ';' +
+      'color:' + (cur?'#fff':'#64748B') + ';' +
+      'font-size:.62em;font-weight:' + (cur?700:500) + ';cursor:pointer;white-space:nowrap;flex-shrink:0;';
+    tab.textContent = per.badge;
+    if (pr2 > 0) {
+      var badge = document.createElement('span');
+      badge.textContent = pr2 + '/' + pt2;
+      badge.style.cssText = 'background:' + (cur?'rgba(255,255,255,.2)':'#CCFBF1') + ';' +
+        'color:' + (cur?'#fff':'var(--teal)') + ';padding:0 .35em;border-radius:1em;font-size:.9em;';
+      tab.appendChild(badge);
+    }
+    tabsDiv.appendChild(tab);
+  });
+  fe.appendChild(tabsDiv);
+
+  var hint = document.createElement('div');
+  hint.style.cssText = 'flex-shrink:0;font-size:.58em;color:#64748B;padding:0 .6em;';
+  hint.innerHTML = 'Click Harvey Balls to rate &middot; Dropdown for assessment';
+  fe.appendChild(hint);
+
+  var btnB = document.createElement('button'); btnB.className = 'nbtn';
+  btnB.innerHTML = '&#8592; Back';
+  btnB.onclick = function() {
+    var npi = PERSONAS.findIndex(function(per){ return per.id===p.id; });
+    if (npi > 0) SI.goToPersona(npi-1);
+  };
+  var btnN = document.createElement('button'); btnN.className = 'nbtn pri';
+  var cpi = PERSONAS.findIndex(function(per){ return per.id===p.id; });
+  btnN.innerHTML = cpi >= PERSONAS.length-1 ? 'Done &#8594;' : 'Next &#8594;';
+  btnN.onclick = function() {
+    var npi = PERSONAS.findIndex(function(per){ return per.id===p.id; });
+    if (npi < PERSONAS.length-1) SI.goToPersona(npi+1);
+  };
+  var fb = document.createElement('div'); fb.className = 'foot-btns';
+  fb.appendChild(btnB); fb.appendChild(btnN);
+  fe.appendChild(fb);
 }
+
 
 function renderLeft() {
   const {pi,ui} = STEPS[step];
