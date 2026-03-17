@@ -1656,6 +1656,16 @@ function render() {
     slideEl2.style.aspectRatio = '';
     slideEl2.style.overflow = '';
     document.getElementById('main').style.display = 'grid';
+    // Restore footer original HTML (matrix view overwrites it with persona tabs)
+    var footerEl2 = document.getElementById('footer');
+    if (!document.getElementById('crumb-track')) {
+      footerEl2.innerHTML = '<div class="crumb-track" id="crumb-track"></div>' +
+        '<div class="foot-btns">' +
+          '<button class="nbtn" id="btn-back" onclick="SI.navigate(-1)">&#8592; Back</button>' +
+          '<button class="nbtn pri" id="btn-next" onclick="SI.navigate(1)">Next &#8594;</button>' +
+        '</div>';
+    }
+    footerEl2.style.cssText = '';
     document.getElementById('footer').style.display = 'flex';
     renderLeft();
     renderGrid();
